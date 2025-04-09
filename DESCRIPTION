@@ -1,0 +1,37 @@
+Package: irf
+Type: Package
+Title: Impulse response
+Version: 1.0
+Date: 2025-04-03
+Author: c(
+    person(
+        "Sigert", 
+        "Ariens", 
+        email = "sigert.ariens@kuleuven.be",
+        comment = c(ORCID = 0000-0002-7423-0090)
+    ),
+    person(
+        "Niels", 
+        "Vanhasbroeck", 
+        email = "niels.vanhasbroeck@gmail.com",
+        comment = c(ORCID = 0000-0002-1235-8902)
+    ))
+Maintainer: Niels Vanhasbroeck <niels.vanhasbroeck@gmail.com>
+Description: Contains functions allowing users to derive and visualize impulse responses based on autoregressive models.
+License: GPL v3
+Encoding: UTF-8
+Imports: 
+    ggplot2,
+    gtools,
+    latex2exp
+RoxygenNote: 7.3.2
+Collate:
+    'utility.R'
+    'IRF_generator.R'
+    'plot.R'
+Suggests: 
+    fs,
+    testthat (>= 3.0.0)
+Remotes:
+    ndpvh/predped
+Config/testthat/edition: 3
