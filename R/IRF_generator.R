@@ -1,6 +1,6 @@
 #' Generate impulse response
 #' 
-#' For the impulses provided to \code{Xvals} and \code{Epsvals}, we distinguish 
+#' For the impulses provided to \code{x} and \code{residuals}, we distinguish 
 #' between two types, namely singular and cumulative impulses. For the singular 
 #' impulses, we recommend providing vectors of the form \code{c(1, 0, 0,...)} as
 #' input to one or both of the arguments. For cumulative impulses, you can 
@@ -8,59 +8,50 @@
 #' 
 #' @param intercept Numeric denoting the intercept to use for the impulse response 
 #' function.
-#' @param ARparams Numeric vector denoting the autoregressive parameters to be
+#' @param ar_params Numeric vector denoting the autoregressive parameters to be
 #' used for the impulse response function. Parameters need to be given in order
 #' of increased lag (i.e., first element for t - 1, second element for t - 2,...)
-#' @param Xparams Numeric vector denoting the values of the slopes for the 
+#' @param x_params Numeric vector denoting the values of the slopes for the 
 #' exogenous variables. Parameters again need to be given in order of increased
 #' lag (i.e., first element for t, second element for t - 1,...)
-#' @param Xvals Numeric vector denoting the values of the exogenous variables 
+#' @param x Numeric vector denoting the values of the exogenous variables 
 #' X at each time t. These values serve as one type of impulses to the system to 
 #' be simulated.
-#' @param Epsvals Numeric vector denoting the values of the residuals at each 
+#' @param residuals Numeric vector denoting the values of the residuals at each 
 #' time t. These values serve as one type of impulses to the system to be 
 #' simulated.
-#' @param nt Integer denoting the number of time steps to simulate.
-#' @param Burnin Logical denoting whether to use a burnin for the simulation. 
+#' @param burnin Logical denoting whether to use a burnin for the simulation. 
 #' Recommended to be \code{TRUE} when you expect the initial conditions to lie 
 #' far away from the mean of the process. Note that we recommend to set this 
 #' argument to \code{FALSE} when you provide a vector of regression residuals
-#' to the argument \code{Epsvals}.
+#' to the argument \code{residuals}. Defaults to \code{TRUE}.
 #' 
 #' @example 
 #' 
 #' @export
-# 
-# TO DO:
-#   - Merge nt with Xvals and/or Epsvals: Should all have the same length
-#   - Merge the different parameters?
-#   - Provide defaults that are informative
-#   - Can't we just provide initial conditions that are close to the mean, thus
-#     not requiring a burnin? => NOTE: Apparently, this is exactly what it does
-#   - Provide comprehensive documentation + small rewrite of variable names
-IRF_generator <- function(intercept, 
-                          ARparams, 
-                          Xparams, 
-                          Xvals, 
-                          Epsvals,
-                          Burnin){  
+irf <- function(intercept, 
+                ar_params, 
+                x_params, 
+                x, 
+                residuals,
+                burnin = TRUE){  
   
   # Determine the sample size (the number of values to generate) based on the 
-  # values provided by Xvals and Epsvals. Make the simulated length of the 
+  # values provided by x and residuals. Make the simulated length of the 
   # impulse response depend on the maximal length of these two.
-  Nx <- length(Xvals)
-  Ne <- length(Epsvals)
+  Nx <- length(x)
+  Ne <- length(residuals)
 
   if(Nx < Ne) {
-    Xvals <- c(Xvals, rep(0, Ne - Nx))
-    warning("Length of Xvals is smaller than length of Epsvals. Imputing zeros in Xvals.")
+    x <- c(x, rep(0, Ne - Nx))
+    warning("Length of x is smaller than length of residuals. Imputing zeros in x.")
 
   } else if(Nx > Ne) {
-    Epsvals <- c(Epsvals, rep(0, Nx - Ne))
-    warning("Length of Epsvals is smaller than length of Xvals. Imputing zeros in Epsvals.")
+    residuals <- c(residuals, rep(0, Nx - Ne))
+    warning("Length of residuals is smaller than length of x. Imputing zeros in residuals.")
   }
 
-  N <- length(Xvals)
+  N <- length(x)
 
 
 
@@ -76,15 +67,15 @@ IRF_generator <- function(intercept,
   # where \phi_j is the autoregressive effect for lag j.
   #
   # We create a value theta for each datapoint of the impulse response (length 
-  # `N`), each retrieving its value through the values in `ARparams` and the 
+  # `N`), each retrieving its value through the values in `ar_params` and the 
   # lag `p`. To aid us in this, we first create a lower-triangular matrix 
   # containing the relevant autoregressive coefficients for each lag. Then, we 
   # loop over each of the datapoints and multiply with the previous values of 
   # \theta, giving us to value of \theta at the current time i.
   #
   # Create the autoregressive matrix
-  p <- length(ARparams)
-  phi <- rep(ARparams, each = p) %>% 
+  p <- length(ar_params)
+  phi <- rep(ar_params, each = p) %>% 
     matrix(nrow = p, ncol = p)
   phi[upper.tri(phi)] <- 0
 
@@ -119,11 +110,11 @@ IRF_generator <- function(intercept,
   #
   # We again create a value psi for each datapoint of the impulse response 
   # (length `N`), getting its values through the previously defined theta and 
-  # `Xparams`. We again use a matrix-like approach, avoiding a double for-loop.
+  # `x_params`. We again use a matrix-like approach, avoiding a double for-loop.
   #
   # Create the slope matrix
-  q <- length(Xparams)
-  beta <- rep(Xparams, each = q) %>% 
+  q <- length(x_params)
+  beta <- rep(x_params, each = q) %>% 
     matrix(nrow = q, ncol = q)
   beta[upper.tri(beta)] <- 0
 
@@ -155,8 +146,8 @@ IRF_generator <- function(intercept,
   # to Equation 25, which makes explicit use of the impulse response notation.
   irf_x <- irf_eps <- irf_intercept <- numeric(N)
   for(i in 1:N) {     
-    irf_x[i] <- sum(psi[1:i] * Xvals[i:1])
-    irf_eps[i] <- sum(theta[1:i] * Epsvals[i:1])
+    irf_x[i] <- sum(psi[1:i] * x[i:1])
+    irf_eps[i] <- sum(theta[1:i] * residuals[i:1])
     irf_intercept[i] <- sum(theta[1:i] * intercept)
   }
 
@@ -168,8 +159,8 @@ IRF_generator <- function(intercept,
   #   \mu = \frac{\alpha}{1 - \sum \phi_i}
   #
   # Otherwise, you keep the sum as defined above.
-  if(Burnin){
-    irf_intercept[] <- intercept / (1 - sum(ARparams))
+  if(burnin){
+    irf_intercept[] <- intercept / (1 - sum(ar_params))
   }
   
   y <- irf_x + irf_eps + irf_intercept
@@ -181,8 +172,8 @@ IRF_generator <- function(intercept,
     "irf_intercept" = irf_intercept,
     "irf_x" = irf_x, 
     "irf_eps" = irf_eps, 
-    "X" = Xvals, 
-    "Eps" = Epsvals    
+    "x" = x, 
+    "residuals" = residuals    
   ) 
   
   return(output)  
