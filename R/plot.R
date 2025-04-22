@@ -6,91 +6,184 @@
 # TO DO:
 #   - Discuss with Sigert what he want to get out of this function, what plots 
 #     should look like etc
-IRFplotfun <- function(data, 
-                       type, 
-                       legends){ # Provdide in original (wide) format
-  
-  
-  ## Convert to long format
-  datalong <- data %>% as.data.frame() %>% pivot_longer(cols = c(IRF_x, IRFe, IRFtotal, IRFintercept))
-  
-  
-  ## Code levels
-  
-  datalong$name <- factor(datalong$name, levels = c("IRF_x", "IRFe", "IRFtotal", "IRFintercept"))
-  
-  # If only one IRF is needed, The IRF = the total IRF. In this case, hide the total IRF for plotting purposes.
-  
-  if(any(data$IRFintercept != 0)){
-    datalong <- datalong
-  } else{
-    datalong <- datalong %>% filter(name != "IRFintercept")
+
+#' Plot impulse responses
+#' 
+#' Plots the impulse response functions based on the provided input.
+#' 
+#' @return Plot visualizing the impulse response for the predefined model.
+#' 
+#' @rdname irf_plot
+#' 
+#' @export
+setGeneric("irf_plot", function(object, ...) standardGeneric("irf_plot"))
+
+#' @details 
+#' This version of the method takes in the same arguments as \code{\link[irf]{irf}}
+#' and outputs the plot based on its output. Calls the other \code{irf_plot}
+#' method under the hood, ensuring the same output in both cases. 
+#' 
+#' This method is useful when exploring parameter sets, but may be less useful
+#' if one wants to inspect the output of \code{\link[irf]{irf}}, as it is not 
+#' returned.
+#' 
+#' @param intercept Numeric denoting the intercept to use for the impulse response 
+#' function.
+#' @param ar_params Numeric vector denoting the autoregressive parameters to be
+#' used for the impulse response function. Parameters need to be given in order
+#' of increased lag (i.e., first element for t - 1, second element for t - 2,...)
+#' @param x_params Numeric vector denoting the values of the slopes for the 
+#' exogenous variables. Parameters again need to be given in order of increased
+#' lag (i.e., first element for t, second element for t - 1,...)
+#' @param x Numeric vector denoting the values of the exogenous variables 
+#' X at each time t. These values serve as one type of impulses to the system to 
+#' be simulated. Defaults to \code{NULL}, which means an empty vector of the same
+#' length as \code{residuals} (if provided).
+#' @param residuals Numeric vector denoting the values of the residuals at each 
+#' time t. These values serve as one type of impulses to the system to be 
+#' simulated. Defaults to \code{NULL}, which means an empty vector of the same
+#' length as \code{x} (if provided).
+#' @param burnin Logical denoting whether to use a burnin for the simulation. 
+#' Recommended to be \code{TRUE} when you expect the initial conditions to lie 
+#' far away from the mean of the process. Note that we recommend to set this 
+#' argument to \code{FALSE} when you provide a vector of regression residuals
+#' to the argument \code{residuals}. Defaults to \code{TRUE}.
+#' @param ... Arguments passed on to \code{\link[irf]{irf}}.
+#' 
+#' @rdname irf_plot
+#' 
+#' @examples 
+#' 
+#' @export
+setMethod("irf_plot", signature(object = "numeric"), function(object, 
+                                                              ar_params, 
+                                                              x_params,
+                                                              x = NULL,
+                                                              residuals = NULL,
+                                                              burnin = TRUE,
+                                                              ...) {
+    
+    # Execute the `irf` function to retrieve the needed impulse responses
+    data <- irf(
+      object, 
+      ar_params, 
+      x_params, 
+      x = x, 
+      residuals = residuals, 
+      burnin = burnin
+    )
+
+    # Execute the other `irf_plot` method to create and return the plot
+    return(
+      irf_plot(
+        data, 
+        ...
+      )
+    )
   }
+)
   
-  if(type == "Impulse response"){
-    datalong <- datalong %>% filter(name != "IRFintercept")
+#' @details 
+#' This version of the method takes in the output of the \code{\link[irf]{irf}}
+#' function and outputs a plot displaying the computed impulse responses.
+#' 
+#' @param data Output of the \code{\link[irf]{irf}} function.
+#' @param type Type
+#' @param legend Legend
+#' @param ... Arguments passed on to \code{\link[irf]{irf}}.
+#' 
+#' @rdname irf_plot
+#' 
+#' @examples 
+#' 
+#' @export
+setMethod("irf_plot", signature(object = "data.frame"), function(object, 
+                                                                 type,
+                                                                 legend,
+                                                                 ...) {
+    
+      ## Convert to long format
+    datalong <- data %>% as.data.frame() %>% pivot_longer(cols = c(IRF_x, IRFe, IRFtotal, IRFintercept))
+    
+    
+    ## Code levels
+    
+    datalong$name <- factor(datalong$name, levels = c("IRF_x", "IRFe", "IRFtotal", "IRFintercept"))
+    
+    # If only one IRF is needed, The IRF = the total IRF. In this case, hide the total IRF for plotting purposes.
+    
+    if(any(data$IRFintercept != 0)){
+      datalong <- datalong
+    } else{
+      datalong <- datalong %>% filter(name != "IRFintercept")
+    }
+    
+    if(type == "Impulse response"){
+      datalong <- datalong %>% filter(name != "IRFintercept")
+    }
+    
+    
+    if(any(data$X != 0) & any(data$Eps != 0)){
+      datalong <- datalong
+    } else{
+      datalong <- datalong %>% filter(name != "IRFtotal")
+    }
+    
+    if(any(data$X != 0)){
+      datalong <- datalong
+    } else{
+      datalong <- datalong %>% filter(name != "IRF_x")
+    }
+    
+    if(any(data$Eps != 0)){
+      datalong <- datalong
+    } else{
+      datalong <- datalong %>% filter(name != "IRFe")
+    }
+    
+    datalong$name <- factor(datalong$name, levels = unique(datalong$name))
+    fixed_colors <- c("IRF_x" = "red4", "IRFe" = "green4", "IRFtotal" = "black", "IRFintercept" = "gray")
+    fixed_linetypes <- c("IRF_x" = "solid", "IRFe" = "solid", "IRFtotal" = "dashed", "IRFintercept" = "solid")
+    
+    
+    if(type != "Impulse response"){
+      fixed_labels <- c("IRF_x" = TeX("$h_{x} * x$"), "IRFe" = TeX("$h_{v} * v$"), "IRFtotal" = TeX("$y_{t}$"), "IRFintercept" = TeX("$h_{1}*1$"))  
+      xlabel <- "t (time index)"
+      legendlabel <- "Cumulative response"
+    }
+    else{
+      fixed_labels <- c("IRF_x" = TeX("$h_{x}(s)$"), "IRFe" = TeX("$h_{v}(s)$"), "IRFtotal" = "Total response", "IRFintercept" = TeX("$h_{1}(s)$"))
+      xlabel <- "s (time step since input)"
+      legendlabel <- "Impulse response"
+    }
+    
+    
+    oplot <- ggplot(data = datalong, aes(x = time, y = value, color = name, linetype = name)) +
+      geom_line(aes(group = name), size = 0.8) +  # Make sure linetype is mapped here
+      theme_minimal() + 
+      scale_color_manual(values = fixed_colors, labels = fixed_labels) + 
+      geom_segment(data = datalong %>% filter(datalong$X != 0), aes(x = time, xend = time, y = 0, yend = X), color = "red4", linetype = "dotted", alpha = 0.95) + 
+      geom_segment(data = datalong %>% filter(datalong$Eps != 0),aes(x = time, xend = time, y = 0, yend = Eps), color = "green4", linetype = "dotted", alpha = 0.95) + 
+      geom_point(data = datalong %>% filter(datalong$X != 0), aes(x = time, y = X), shape = 18, size = 1, color = "red4") + 
+      geom_point(data = datalong %>% filter(datalong$Eps != 0),aes(x = time, y = Eps), shape = 16, size = 1, color = "green4") +  
+      scale_linetype_manual(
+        values = fixed_linetypes
+      ) +
+      guides(color = guide_legend(title = legendlabel), linetype = "none") + xlab(xlabel) + ylab("") + theme(axis.text.x=element_text(size=rel(1))) + theme(axis.title.x=element_text(size=rel(1))) + theme(legend.text = element_text(size=rel(1)) ) +
+      scale_x_continuous(breaks = seq(0, max(datalong$time), by = 1), labels = c('0','1','2','3', rep("", max(datalong$time) -3))) + theme(panel.grid.minor.x = element_blank()) # Remove minor grid lines
+    
+    
+    if(legends == "None"){
+      oplot <- oplot + theme(legend.position = "none")
+    } 
+    
+    #oplot <- ggplot(data = data, aes(x = time, y = value, color = name))
+    #oplot <- oplot + geom_line(aes(group = name),  size = 1) + theme_bw() + scale_fill_manual(values = c("orange", "green","gray","red")) + scale_color_manual(values = c("red","green","yellow", "black")) + geom_segment(aes(x = time, xend = time, y = 0, yend = X), color = "red") + geom_segment(aes(x = time, xend = time, y = 0, yend = Eps), color = "green") + geom_point(aes(x = time, y = X), shape = 18, size = 2, color = "red") + geom_point(aes(x = time, y = Eps), shape = 1, size = 2, color = "green") +   scale_linetype_manual(labels = c("IRF_x", "IRFe", "IRFtotal", "IRFintercept"), values = c("dashed", "dotdash", "solid", "solid")) # Adjust to match your 'name' levels
+    
+    # scale_color_manual(labels = c("IRF_x", "IRFe", "IRFtotal", "IRFintercept"), values = c("red4", "green4", "black", "gray"))
+    #     labels = c("IRF_x", "IRFe", "IRFtotal", "IRFintercept"), 
+    
+    return(oplot)
   }
+)
   
-  
-  if(any(data$X != 0) & any(data$Eps != 0)){
-    datalong <- datalong
-  } else{
-    datalong <- datalong %>% filter(name != "IRFtotal")
-  }
-  
-  if(any(data$X != 0)){
-    datalong <- datalong
-  } else{
-    datalong <- datalong %>% filter(name != "IRF_x")
-  }
-  
-  if(any(data$Eps != 0)){
-    datalong <- datalong
-  } else{
-    datalong <- datalong %>% filter(name != "IRFe")
-  }
-  
-  datalong$name <- factor(datalong$name, levels = unique(datalong$name))
-  fixed_colors <- c("IRF_x" = "red4", "IRFe" = "green4", "IRFtotal" = "black", "IRFintercept" = "gray")
-  fixed_linetypes <- c("IRF_x" = "solid", "IRFe" = "solid", "IRFtotal" = "dashed", "IRFintercept" = "solid")
-  
-  
-  if(type != "Impulse response"){
-    fixed_labels <- c("IRF_x" = TeX("$h_{x} * x$"), "IRFe" = TeX("$h_{v} * v$"), "IRFtotal" = TeX("$y_{t}$"), "IRFintercept" = TeX("$h_{1}*1$"))  
-    xlabel <- "t (time index)"
-    legendlabel <- "Cumulative response"
-  }
-  else{
-    fixed_labels <- c("IRF_x" = TeX("$h_{x}(s)$"), "IRFe" = TeX("$h_{v}(s)$"), "IRFtotal" = "Total response", "IRFintercept" = TeX("$h_{1}(s)$"))
-    xlabel <- "s (time step since input)"
-    legendlabel <- "Impulse response"
-  }
-  
-  
-  oplot <- ggplot(data = datalong, aes(x = time, y = value, color = name, linetype = name)) +
-    geom_line(aes(group = name), size = 0.8) +  # Make sure linetype is mapped here
-    theme_minimal() + 
-    scale_color_manual(values = fixed_colors, labels = fixed_labels) + 
-    geom_segment(data = datalong %>% filter(datalong$X != 0), aes(x = time, xend = time, y = 0, yend = X), color = "red4", linetype = "dotted", alpha = 0.95) + 
-    geom_segment(data = datalong %>% filter(datalong$Eps != 0),aes(x = time, xend = time, y = 0, yend = Eps), color = "green4", linetype = "dotted", alpha = 0.95) + 
-    geom_point(data = datalong %>% filter(datalong$X != 0), aes(x = time, y = X), shape = 18, size = 1, color = "red4") + 
-    geom_point(data = datalong %>% filter(datalong$Eps != 0),aes(x = time, y = Eps), shape = 16, size = 1, color = "green4") +  
-    scale_linetype_manual(
-      values = fixed_linetypes
-    ) +
-    guides(color = guide_legend(title = legendlabel), linetype = "none") + xlab(xlabel) + ylab("") + theme(axis.text.x=element_text(size=rel(1))) + theme(axis.title.x=element_text(size=rel(1))) + theme(legend.text = element_text(size=rel(1)) ) +
-    scale_x_continuous(breaks = seq(0, max(datalong$time), by = 1), labels = c('0','1','2','3', rep("", max(datalong$time) -3))) + theme(panel.grid.minor.x = element_blank()) # Remove minor grid lines
-  
-  
-  if(legends == "None"){
-    oplot <- oplot + theme(legend.position = "none")
-  } 
-  
-  #oplot <- ggplot(data = data, aes(x = time, y = value, color = name))
-  #oplot <- oplot + geom_line(aes(group = name),  size = 1) + theme_bw() + scale_fill_manual(values = c("orange", "green","gray","red")) + scale_color_manual(values = c("red","green","yellow", "black")) + geom_segment(aes(x = time, xend = time, y = 0, yend = X), color = "red") + geom_segment(aes(x = time, xend = time, y = 0, yend = Eps), color = "green") + geom_point(aes(x = time, y = X), shape = 18, size = 2, color = "red") + geom_point(aes(x = time, y = Eps), shape = 1, size = 2, color = "green") +   scale_linetype_manual(labels = c("IRF_x", "IRFe", "IRFtotal", "IRFintercept"), values = c("dashed", "dotdash", "solid", "solid")) # Adjust to match your 'name' levels
-  
-  # scale_color_manual(labels = c("IRF_x", "IRFe", "IRFtotal", "IRFintercept"), values = c("red4", "green4", "black", "gray"))
-  #     labels = c("IRF_x", "IRFe", "IRFtotal", "IRFintercept"), 
-  
-  return(oplot)
-}

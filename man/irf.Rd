@@ -34,6 +34,15 @@ far away from the mean of the process. Note that we recommend to set this
 argument to \code{FALSE} when you provide a vector of regression residuals
 to the argument \code{residuals}. Defaults to \code{TRUE}.}
 }
+\value{
+Dataframe containing the impulse responses. The column \code{"time"} 
+contains the time step starting at 0. The columns \code{"irf_intercept"}, 
+\code{"irf_x"}, \code{"irf_eps"} contain the expected impulse responses 
+for the intercept, the exogeneous variables, and the residuals respectively
+and sum up to the total impulse response under column \code{"irf"}. Finally,
+the columns \code{"x"} and \code{"residuals"} contain the provided values 
+for those arguments.
+}
 \description{
 For the impulses provided to \code{x} and \code{residuals}, we distinguish 
 between two types, namely singular and cumulative impulses. For the singular 
