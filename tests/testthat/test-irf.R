@@ -94,7 +94,7 @@ testthat::test_that(
     testthat::expect_true(is.data.frame(tst))
     testthat::expect_equal(
       colnames(tst),
-      c("time", "IRFx", "IRFe", "X", "Eps", "IRFtotal", "IRFintercept")
+      c("time", "irf", "irf_intercept", "irf_x", "irf_eps", "X", "Eps")
     )
     testthat::expect_equal(nrow(tst), 10)
     testthat::expect_equal(tst$X, vals)
@@ -152,7 +152,7 @@ testthat::test_that(
         rep(0, 10),
         TRUE
       ) %>% 
-        dplyr::select(time, IRFtotal) %>% 
+        dplyr::select(time, irf) %>% 
         as.matrix() %>% 
         `rownames<-` (NULL) %>% 
         `colnames<-` (NULL)
@@ -179,7 +179,7 @@ testthat::test_that(
         rep(0, 10),
         TRUE
       ) %>% 
-        dplyr::select(time, IRFtotal) %>% 
+        dplyr::select(time, irf) %>% 
         as.matrix() %>% 
         `rownames<-` (NULL) %>% 
         `colnames<-` (NULL)
@@ -206,7 +206,7 @@ testthat::test_that(
         rep(0, 10),
         TRUE
       ) %>% 
-        dplyr::select(time, IRFtotal) %>% 
+        dplyr::select(time, irf) %>% 
         as.matrix() %>% 
         `rownames<-` (NULL) %>% 
         `colnames<-` (NULL)
@@ -236,7 +236,7 @@ testthat::test_that(
         vals,
         TRUE
       ) %>% 
-        dplyr::select(time, IRFtotal) %>% 
+        dplyr::select(time, irf) %>% 
         as.matrix() %>% 
         `rownames<-` (NULL) %>% 
         `colnames<-` (NULL)
@@ -262,7 +262,7 @@ testthat::test_that(
         vals,
         TRUE
       ) %>% 
-        dplyr::select(time, IRFtotal) %>% 
+        dplyr::select(time, irf) %>% 
         as.matrix() %>% 
         `rownames<-` (NULL) %>% 
         `colnames<-` (NULL)
