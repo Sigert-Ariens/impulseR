@@ -26,7 +26,48 @@
 #' argument to \code{FALSE} when you provide a vector of regression residuals
 #' to the argument \code{residuals}. Defaults to \code{TRUE}.
 #' 
-#' @example 
+#' @examples 
+#' # Create parameters of an ADL(2, 2), meaning having two lags in the residuals
+#' # and two lags in the values of x. These will be used for all examples.
+#' params <- list(
+#'   "intercept" = 1, 
+#'   "autoregression" = c(0.5, 0.1),
+#'   "slopes" = c(2, 0.5)
+#' )
+#' 
+#' # Use with single impulse of x in the beginning of the study, with burnin
+#' irf(
+#'   1, 
+#'   c(0.5, 0.1),
+#'   c(2, 0.5),
+#'   x = c(1, rep(0, 9))
+#' )
+#' 
+#' # Use with single impulse of x in the beginning of the study, without burnin
+#' irf(
+#'   1, 
+#'   c(0.5, 0.1),
+#'   c(2, 0.5),
+#'   x = c(1, rep(0, 9)),
+#'   burnin = FALSE
+#' )
+#' 
+#' # Use with multiple values for the residuals, with burnin
+#' irf(
+#'   1, 
+#'   c(0.5, 0.1),
+#'   c(2, 0.5),
+#'   residuals = rnorm(10)
+#' )
+#' 
+#' # Use with multiple values for the residuals, without burnin
+#' irf(
+#'   1, 
+#'   c(0.5, 0.1),
+#'   c(2, 0.5),
+#'   residuals = rnorm(10),
+#'   burnin = FALSE
+#' )
 #' 
 #' @export
 irf <- function(intercept, 
