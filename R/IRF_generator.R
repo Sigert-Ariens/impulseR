@@ -62,6 +62,8 @@ IRF_generator <- function(intercept,
 
   N <- length(Xvals)
 
+
+
   # Use Equation 15 to generate the impulse response parameters for the effect 
   # of the residuals epsilon. Specifically, these equations tell us that:
   #
@@ -70,6 +72,8 @@ IRF_generator <- function(intercept,
   #   ...
   #   \theta_i = \phi_1 \theta_{i - 1} + ... \phi_p \theta_{i - p}
   #   ...
+  #
+  # where \phi_j is the autoregressive effect for lag j.
   #
   # We create a value theta for each datapoint of the impulse response (length 
   # `N`), each retrieving its value through the values in `ARparams` and the 
@@ -99,28 +103,45 @@ IRF_generator <- function(intercept,
     theta[i] <- sum(terms)
   }
   
-  
-  ### Generate psi coefficients 
-  
-  q <- length(Xparams)  # Length of Xparams
-  
-  # Initialize Psi
-  Psi <- rep(0, N)
 
-  # Start from h_{x}(0)
-  Psi[1] <- Xparams[1]
   
-  
-  # Derive the rest using the recurrence relation (eqs 19 & 23)
-  for (i in 2:N) {
-    Psi[i] <- 0  
-    for (j in 1:q) {
-      if (i - (j - 1) >= 1) {  
-        # TO DO: Can't we do the same in a vectorized way?
-        Psi[i] <- Psi[i] + Xparams[j] * theta[i - (j - 1)]
-      }
+  # Use Equation 19 to generate the impulse response parameters associated to 
+  # the exogeneous variables x. Specifically, these equations tell us that:
+  #
+  #   \psi_0 = \theta_0 \beta_{L0}
+  #   \psi_1 = \theta_1 \beta_{L0} + \theta_0 \beta_{L1}
+  #   ...
+  #   \psi_i = \theta_i \beta_{L0} + \theta_{i - 1} \beta_{L1} + ... \theta_{i - p} \beta_{LP}
+  #   ...
+  #
+  # where Lj is used to denote lag j, and \beta is the slope of the exogeneous
+  # variable at a given lag.
+  #
+  # We again create a value psi for each datapoint of the impulse response 
+  # (length `N`), getting its values through the previously defined theta and 
+  # `Xparams`. We again use a matrix-like approach, avoiding a double for-loop.
+  #
+  # Create the slope matrix
+  q <- length(Xparams)
+  beta <- rep(Xparams, each = q) %>% 
+    matrix(nrow = q, ncol = q)
+  beta[upper.tri(beta)] <- 0
+
+  # Initialize psi and loop over the datapoints, applying Equation 19 to get 
+  # \psi
+  psi <- numeric(N)
+
+  for(i in 1:N) {
+    if(i - q < 1) {
+      terms <- beta[i, 1:i] %*% theta[i:1]
+    } else {
+      terms <- beta[q, ] %*% theta[i:(i - q + 1)]
     }
+
+    psi[i] <- sum(terms)
   }
+
+
   
   ### Provide implied equillibrium of intercept response (lim t \to \infty \sum_{s=0}^{t}h_{1}§(s)1_{t-s})
   
@@ -135,7 +156,7 @@ IRF_generator <- function(intercept,
   
   for (t in 1:N) { # equation 22
     
-    IRF_x[t] <- sum(Psi[1:t]*Xvals[t:1])  # One sided convolution
+    IRF_x[t] <- sum(psi[1:t]*Xvals[t:1])  # One sided convolution
     IRFeps[t] <- sum(theta[1:t]*Epsvals[t:1]) # One sided convolution
     IRFint_raw[t] <- sum(theta[1:t]*intercept)
   }
