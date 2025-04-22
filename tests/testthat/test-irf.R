@@ -37,9 +37,42 @@ testthat::test_that(
 
 # Test expected warnings
 testthat::test_that(
-  "Testing expected warnings",
+  "Testing expected warning: Deviations in length of Xvals and Epsvals",
   {
-    
+    # Create a function that only takes in Xvals and Epsvals. Makes the test 
+    # easier to read
+    fx <- function(Xvals, Epsvals) {
+      return(
+        irf::IRF_generator(
+          parameters[[1]]$intercept,
+          parameters[[1]]$eps,
+          parameters[[1]]$x,
+          Xvals,
+          Epsvals,
+          TRUE
+        )
+      )
+    }
+
+    # When x has too few values
+    vals_x <- rep(1, 5)
+    vals_e <- rep(1, 10)
+
+    testthat::expect_warning(fx(vals_x, vals_e))
+
+    tst <- suppressWarnings(fx(vals_x, vals_e))
+    testthat::expect_equal(tst$X, rep(c(1, 0), each = 5))
+    testthat::expect_equal(tst$Eps, rep(1, each = 10))
+
+    # When epsilon has too few values
+    vals_x <- rep(1, 10)
+    vals_e <- rep(1, 5)
+
+    testthat::expect_warning(fx(vals_x, vals_e))
+
+    tst <- suppressWarnings(fx(vals_x, vals_e))
+    testthat::expect_equal(tst$X, rep(1, each = 10))
+    testthat::expect_equal(tst$Eps, rep(c(1, 0), each = 5))
   }
 )
 
@@ -55,7 +88,6 @@ testthat::test_that(
       parameters[[1]]$x, 
       vals, 
       rep(0, 10),
-      10,
       TRUE
     )
 
@@ -76,7 +108,6 @@ testthat::test_that(
       parameters[[1]]$x, 
       rep(0, 10),
       vals,
-      10,
       TRUE
     )
 
@@ -92,7 +123,6 @@ testthat::test_that(
       parameters[[1]]$x, 
       vals_x,
       vals_eps,
-      10,
       TRUE
     )
 
@@ -120,7 +150,6 @@ testthat::test_that(
         x$x, 
         vals, 
         rep(0, 10),
-        10,
         TRUE
       ) %>% 
         dplyr::select(time, IRFtotal) %>% 
@@ -148,7 +177,6 @@ testthat::test_that(
         x$x, 
         vals, 
         rep(0, 10),
-        10,
         TRUE
       ) %>% 
         dplyr::select(time, IRFtotal) %>% 
@@ -176,7 +204,6 @@ testthat::test_that(
         x$x, 
         vals, 
         rep(0, 10),
-        10,
         TRUE
       ) %>% 
         dplyr::select(time, IRFtotal) %>% 
@@ -207,7 +234,6 @@ testthat::test_that(
         x$x, 
         rep(0, 10), 
         vals,
-        10,
         TRUE
       ) %>% 
         dplyr::select(time, IRFtotal) %>% 
@@ -234,7 +260,6 @@ testthat::test_that(
         x$x, 
         rep(0, 10), 
         vals,
-        10,
         TRUE
       ) %>% 
         dplyr::select(time, IRFtotal) %>% 
