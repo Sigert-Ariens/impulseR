@@ -27,18 +27,29 @@ for(i in eps_params) {
   }
 }
 
+# Test expected error
+testthat::test_that(
+  "Testing expected error: No provided x and residuals",
+  {
+    testthat::expect_error(irf::irf(0, 0.5, 1))
+
+    testthat::expect_no_error(irf::irf(0, 0.5, 1, x = rep(1, 10)))
+    testthat::expect_no_error(irf::irf(0, 0.5, 1, residuals = rep(1, 10)))
+  }
+)
+
 # Test expected warnings
 testthat::test_that(
-  "Testing expected warning: Deviations in length of Xvals and Epsvals",
+  "Testing expected warning: Deviations in length of x and residuals",
   {
-    # Create a function that only takes in Xvals and Epsvals. Makes the test 
+    # Create a function that only takes in x and residuals Makes the test 
     # easier to read
     fx <- function(x, residuals) {
       return(
         irf::irf(
-          parameters[[1]]$intercept,
-          parameters[[1]]$eps,
-          parameters[[1]]$x,
+          parameters[[50]]$intercept,
+          parameters[[50]]$eps,
+          parameters[[50]]$x,
           x,
           residuals,
           TRUE
@@ -75,9 +86,9 @@ testthat::test_that(
     # Based on x
     vals <- c(1, rep(0, 9))
     tst <- irf::irf(
-      parameters[[1]]$intercept,
-      parameters[[1]]$eps,
-      parameters[[1]]$x, 
+      parameters[[50]]$intercept,
+      parameters[[50]]$eps,
+      parameters[[50]]$x, 
       vals, 
       rep(0, 10),
       TRUE
@@ -95,9 +106,9 @@ testthat::test_that(
     # Based on eps
     vals <- rep(c(1, -1), times = 5)
     tst <- irf::irf(
-      parameters[[1]]$intercept,
-      parameters[[1]]$eps,
-      parameters[[1]]$x, 
+      parameters[[50]]$intercept,
+      parameters[[50]]$eps,
+      parameters[[50]]$x, 
       rep(0, 10),
       vals,
       TRUE
@@ -110,9 +121,9 @@ testthat::test_that(
     vals_x <- c(1, rep(0, 9))
     vals_eps <- rep(c(1, -1), times = 5)
     tst <- irf::irf(
-      parameters[[1]]$intercept,
-      parameters[[1]]$eps,
-      parameters[[1]]$x, 
+      parameters[[50]]$intercept,
+      parameters[[50]]$eps,
+      parameters[[50]]$x, 
       vals_x,
       vals_eps,
       TRUE
@@ -120,6 +131,64 @@ testthat::test_that(
 
     testthat::expect_equal(tst$x, vals_x)
     testthat::expect_equal(tst$residuals, vals_eps)
+  }
+)
+
+# Test for some implicit handling of variables, based on the defaults of the 
+# code
+testthat::test_that(
+  "Testing defaults of x and residuals",
+  {
+    # Defaults for residuals
+    tst <- irf::irf(
+      parameters[[50]]$intercept,
+      parameters[[50]]$eps,
+      parameters[[50]]$x,
+      x = rep(1, 10)
+    )
+
+    testthat::expect_equal(tst$residuals, rep(0, 10))
+
+    # Defaults for x
+    tst <- irf::irf(
+      parameters[[50]]$intercept,
+      parameters[[50]]$eps,
+      parameters[[50]]$x,
+      residuals = rep(1, 10)
+    )
+
+    testthat::expect_equal(tst$x, rep(0, 10))
+  }
+)
+
+testthat::test_that(
+  "Testing effect of burnin",
+  {
+    # Create burned in and none-burned in data.
+    burned <- irf::irf(
+      1, 
+      c(0.5, 0.25), 
+      1,
+      x = rep(1, 10),
+      burnin = TRUE
+    )$irf_intercept
+
+    not_burned <- irf::irf(
+      1, 
+      c(0.5, 0.25), 
+      1,
+      x = rep(1, 10),
+      burnin = FALSE
+    )$irf_intercept
+
+    # Compare the values of `irf_intercept` based on analytic values of the 
+    # non-zero intercept
+    testthat::expect_equal(burned, rep(1/0.25, 10))
+    testthat::expect_equal(
+      not_burned,
+      c(1, 1.5, 2, 2.375, 2.688, 2.938, 3.141, 3.305, 3.438, 3.545),
+      tolerance = 10^(-2)
+    )
   }
 )
 
