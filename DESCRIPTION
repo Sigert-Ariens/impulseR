@@ -1,6 +1,6 @@
 Package: irf
 Type: Package
-Title: Impulse response
+Title: Impulse response functions
 Version: 1.0
 Date: 2025-04-03
 Author: c(
@@ -16,7 +16,7 @@ Author: c(
         email = "niels.vanhasbroeck@gmail.com",
         comment = c(ORCID = 0000-0002-1235-8902)
     ))
-Maintainer: Niels Vanhasbroeck <niels.vanhasbroeck@gmail.com>
+Maintainer: Sigert Ariens <sigert.ariens@kuleuven.be>
 Description: Contains functions allowing users to derive and visualize impulse responses based on autoregressive models.
 License: GPL v3
 Encoding: UTF-8
@@ -27,7 +27,7 @@ Imports:
 RoxygenNote: 7.3.2
 Collate:
     'utility.R'
-    'IRF_generator.R'
+    'irf.R'
     'plot.R'
 Suggests: 
     fs,
