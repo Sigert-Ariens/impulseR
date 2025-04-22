@@ -149,43 +149,42 @@ IRF_generator <- function(intercept,
   #
   #   irf_x = \sum \psi_k L^k x_t
   #   irf_\epsilon = \sum \theta_k L^k \epsilon_t
-  #   irf_\text{intercept} \propto \sum \theta_k L^k 1_t
+  #   irf_\text{intercept} = \sum \alpha \theta_k L^k 1_t
   #
-  # It is these sums that we are computing here.
+  # It is these sums that we are computing here. Note that this is also equivalent
+  # to Equation 25, which makes explicit use of the impulse response notation.
   irf_x <- irf_eps <- irf_intercept <- numeric(N)
   for(i in 1:N) {     
     irf_x[i] <- sum(psi[1:i] * Xvals[i:1])
     irf_eps[i] <- sum(theta[1:i] * Epsvals[i:1])
     irf_intercept[i] <- sum(theta[1:i] * intercept)
   }
-  
-  ### Generate y_{t}, equation 26
-  
-  ### Decide what to do with intercept. If Burnin == True, replace sum(theta[1:t]*intercept) with intercept/(1-(sum(ARparams)))
-  
-  if(Burnin == TRUE){
-    ### Provide implied equillibrium of intercept response (lim t \to \infty \sum_{s=0}^{t}h_{1}§(s)1_{t-s})
-    limintercept <- intercept/(1-(sum(ARparams)))
-    IRFintercept = limintercept
-  }else{
-    IRFintercept = IRFint_raw
+
+  # Use these sums to generate y_t, following Equation 26. First, decide what 
+  # to do with the intercept based on the argument `burnin`. If `burnin = TRUE`, 
+  # replace the previously computed sum with the long-time limit of the process, 
+  # computed as:
+  #
+  #   \mu = \frac{\alpha}{1 - \sum \phi_i}
+  #
+  # Otherwise, you keep the sum as defined above.
+  if(Burnin){
+    irf_intercept[] <- intercept / (1 - sum(ARparams))
   }
   
-  IRFtot <- IRF_x + IRFeps + IRFintercept
+  y <- irf_x + irf_eps + irf_intercept
 
   # Prepare the output data: Add the time index, the individual impulse response functions cumulative responses, and the total output y_{t}
   output <- data.frame(
     "time" = 1:N - 1, 
-    "irf" = IRFtot,
+    "irf" = y,
     "irf_intercept" = irf_intercept,
     "irf_x" = irf_x, 
     "irf_eps" = irf_eps, 
     "X" = Xvals, 
     "Eps" = Epsvals    
-  )
+  ) 
   
-  
-  return(output)
-  
+  return(output)  
 }
 
