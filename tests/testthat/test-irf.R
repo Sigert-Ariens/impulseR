@@ -10,10 +10,10 @@ eps_params <- list(
 )
 
 x_params <- append(
-  lapply(eps, \(x) 2 * x), 
+  lapply(eps_params, \(x) 2 * x), 
   append(
-    lapply(eps, \(x) 0 * x), 
-    lapply(eps, \(x) -2 * x)
+    lapply(eps_params, \(x) 0 * x), 
+    lapply(eps_params, \(x) -2 * x)
   )
 )
 
@@ -41,14 +41,14 @@ testthat::test_that(
   {
     # Create a function that only takes in Xvals and Epsvals. Makes the test 
     # easier to read
-    fx <- function(Xvals, Epsvals) {
+    fx <- function(x, residuals) {
       return(
-        irf::IRF_generator(
+        irf::irf(
           parameters[[1]]$intercept,
           parameters[[1]]$eps,
           parameters[[1]]$x,
-          Xvals,
-          Epsvals,
+          x,
+          residuals,
           TRUE
         )
       )
@@ -61,8 +61,8 @@ testthat::test_that(
     testthat::expect_warning(fx(vals_x, vals_e))
 
     tst <- suppressWarnings(fx(vals_x, vals_e))
-    testthat::expect_equal(tst$X, rep(c(1, 0), each = 5))
-    testthat::expect_equal(tst$Eps, rep(1, each = 10))
+    testthat::expect_equal(tst$x, rep(c(1, 0), each = 5))
+    testthat::expect_equal(tst$residuals, rep(1, each = 10))
 
     # When epsilon has too few values
     vals_x <- rep(1, 10)
@@ -71,8 +71,8 @@ testthat::test_that(
     testthat::expect_warning(fx(vals_x, vals_e))
 
     tst <- suppressWarnings(fx(vals_x, vals_e))
-    testthat::expect_equal(tst$X, rep(1, each = 10))
-    testthat::expect_equal(tst$Eps, rep(c(1, 0), each = 5))
+    testthat::expect_equal(tst$x, rep(1, each = 10))
+    testthat::expect_equal(tst$residuals, rep(c(1, 0), each = 5))
   }
 )
 
@@ -82,7 +82,7 @@ testthat::test_that(
   {
     # Based on x
     vals <- c(1, rep(0, 9))
-    tst <- irf::IRF_generator(
+    tst <- irf::irf(
       parameters[[1]]$intercept,
       parameters[[1]]$eps,
       parameters[[1]]$x, 
@@ -94,15 +94,15 @@ testthat::test_that(
     testthat::expect_true(is.data.frame(tst))
     testthat::expect_equal(
       colnames(tst),
-      c("time", "irf", "irf_intercept", "irf_x", "irf_eps", "X", "Eps")
+      c("time", "irf", "irf_intercept", "irf_x", "irf_eps", "x", "residuals")
     )
     testthat::expect_equal(nrow(tst), 10)
-    testthat::expect_equal(tst$X, vals)
-    testthat::expect_equal(tst$Eps, rep(0, 10))
+    testthat::expect_equal(tst$x, vals)
+    testthat::expect_equal(tst$residuals, rep(0, 10))
 
     # Based on eps
     vals <- rep(c(1, -1), times = 5)
-    tst <- irf::IRF_generator(
+    tst <- irf::irf(
       parameters[[1]]$intercept,
       parameters[[1]]$eps,
       parameters[[1]]$x, 
@@ -111,13 +111,13 @@ testthat::test_that(
       TRUE
     )
 
-    testthat::expect_equal(tst$X, rep(0, 10))
-    testthat::expect_equal(tst$Eps, vals)
+    testthat::expect_equal(tst$x, rep(0, 10))
+    testthat::expect_equal(tst$residuals, vals)
 
     # Based on both
     vals_x <- c(1, rep(0, 9))
     vals_eps <- rep(c(1, -1), times = 5)
-    tst <- irf::IRF_generator(
+    tst <- irf::irf(
       parameters[[1]]$intercept,
       parameters[[1]]$eps,
       parameters[[1]]$x, 
@@ -126,8 +126,8 @@ testthat::test_that(
       TRUE
     )
 
-    testthat::expect_equal(tst$X, vals_x)
-    testthat::expect_equal(tst$Eps, vals_eps)
+    testthat::expect_equal(tst$x, vals_x)
+    testthat::expect_equal(tst$residuals, vals_eps)
   }
 )
 
@@ -144,7 +144,7 @@ testthat::test_that(
     vals <- c(1, rep(0, 9))
     tst <- lapply(
       parameters, 
-      \(x) irf::IRF_generator(
+      \(x) irf::irf(
         x$intercept, 
         x$eps,
         x$x, 
@@ -171,7 +171,7 @@ testthat::test_that(
     vals <- c(1, -1, rep(0, 8))
     tst <- lapply(
       parameters, 
-      \(x) irf::IRF_generator(
+      \(x) irf::irf(
         x$intercept, 
         x$eps,
         x$x, 
@@ -198,7 +198,7 @@ testthat::test_that(
     vals <- rep(c(1, -1), times = 5)
     tst <- lapply(
       parameters, 
-      \(x) irf::IRF_generator(
+      \(x) irf::irf(
         x$intercept, 
         x$eps,
         x$x, 
@@ -228,7 +228,7 @@ testthat::test_that(
     vals <- c(1, rep(0, 9))
     tst <- lapply(
       parameters, 
-      \(x) irf::IRF_generator(
+      \(x) irf::irf(
         x$intercept, 
         x$eps,
         x$x, 
@@ -254,7 +254,7 @@ testthat::test_that(
     vals <- rep(c(1, -1), times = 5)
     tst <- lapply(
       parameters, 
-      \(x) irf::IRF_generator(
+      \(x) irf::irf(
         x$intercept, 
         x$eps,
         x$x, 
