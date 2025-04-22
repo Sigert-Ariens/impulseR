@@ -27,14 +27,6 @@ for(i in eps_params) {
   }
 }
 
-# Test expected errors
-testthat::test_that(
-  "Testing expected errors",
-  {
-    
-  }
-)
-
 # Test expected warnings
 testthat::test_that(
   "Testing expected warning: Deviations in length of Xvals and Epsvals",
