@@ -127,9 +127,15 @@ IRF_generator <- function(intercept,
   IRFtot <- IRF_x + IRFeps + IRFintercept
 
   # Prepare the output data: Add the time index, the individual impulse response functions cumulative responses, and the total output y_{t}
-  output <- cbind(IRF_x, time) %>% as.data.frame() %>% add_column(IRFe = IRFeps) %>% 
-    add_column(X = Xvals) %>% add_column(Eps = Epsvals) %>% add_column(IRFtotal = IRFtot) %>% 
-    add_column(IRFintercept = IRFintercept) 
+  output <- data.frame(
+    "time" = time, 
+    "IRFx" = IRF_x, 
+    "IRFe" = IRFeps, 
+    "X" = Xvals, 
+    "Eps" = Epsvals, 
+    "IRFtotal" = IRFtot,
+    "IRFintercept" = IRFintercept
+  )
   
   
   return(output)
