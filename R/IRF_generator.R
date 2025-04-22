@@ -42,24 +42,39 @@ IRF_generator <- function(intercept,
                           ARparams, 
                           Xparams, 
                           Xvals, 
-                          Epsvals, 
-                          nt, 
+                          Epsvals,
                           Burnin){  
   
+  # Determine the sample size (the number of values to generate) based on the 
+  # values provided by Xvals and Epsvals.
+  Nx <- length(Xvals)
+  Ne <- length(Epsvals)
+
+  if(Nx < Ne) {
+    Xvals <- c(Xvals, rep(0, Ne - Nx))
+    warning("Length of Xvals is smaller than length of Epsvals. Imputing zeros in Xvals.")
+
+  } else if(Nx > Ne) {
+    Epsvals <- c(Epsvals, rep(0, Nx - Ne))
+    warning("Length of Epsvals is smaller than length of Xvals. Imputing zeros in Epsvals.")
+  }
+
+  N <- length(Xvals)
+
   ### Generate coefficients of (1-\sum_{i=1}^{k}phi_{k}L^{k})^{-1} (equations 15 & 19)
   
   
   p <- length(ARparams)  # Length of AR parameters
   
   # Initialize theta coefficients
-  theta <- rep(0, nt)  
+  theta <- rep(0, N)  
   
   # Manually set the initial conditions 
   theta[1] <- 1  
   theta[2] <- ARparams[1]  
   
   # Equations 15 & 19
-  for (i in 3:nt) {
+  for (i in 3:N) {
     theta[i] <- 0  # Initialize ARcoefs[i] to 0 before summing
     
     for (j in 1:p) {
@@ -76,14 +91,14 @@ IRF_generator <- function(intercept,
   q <- length(Xparams)  # Length of Xparams
   
   # Initialize Psi
-  Psi <- rep(0, nt)
+  Psi <- rep(0, N)
 
   # Start from h_{x}(0)
   Psi[1] <- Xparams[1]
   
   
   # Derive the rest using the recurrence relation (eqs 19 & 23)
-  for (i in 2:nt) {
+  for (i in 2:N) {
     Psi[i] <- 0  
     for (j in 1:q) {
       if (i - (j - 1) >= 1) {  
@@ -104,14 +119,14 @@ IRF_generator <- function(intercept,
   IRFint_raw <- c()
   
   
-  for (t in 1:nt) { # equation 22
+  for (t in 1:N) { # equation 22
     
     IRF_x[t] <- sum(Psi[1:t]*Xvals[t:1])  # One sided convolution
     IRFeps[t] <- sum(theta[1:t]*Epsvals[t:1]) # One sided convolution
     IRFint_raw[t] <- sum(theta[1:t]*intercept)
   }
   
-  time <- seq(1:nt)
+  time <- seq(1:N)
   time <- time-1
   
   ### Generate y_{t}, equation 26
