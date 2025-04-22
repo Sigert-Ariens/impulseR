@@ -4,7 +4,7 @@
 \alias{irf}
 \title{Generate impulse response}
 \usage{
-irf(intercept, ar_params, x_params, x, residuals, burnin = TRUE)
+irf(intercept, ar_params, x_params, x = NULL, residuals = NULL, burnin = TRUE)
 }
 \arguments{
 \item{intercept}{Numeric denoting the intercept to use for the impulse response 
@@ -20,11 +20,13 @@ lag (i.e., first element for t, second element for t - 1,...)}
 
 \item{x}{Numeric vector denoting the values of the exogenous variables 
 X at each time t. These values serve as one type of impulses to the system to 
-be simulated.}
+be simulated. Defaults to \code{NULL}, which means an empty vector of the same
+length as \code{residuals} (if provided).}
 
 \item{residuals}{Numeric vector denoting the values of the residuals at each 
 time t. These values serve as one type of impulses to the system to be 
-simulated.}
+simulated. Defaults to \code{NULL}, which means an empty vector of the same
+length as \code{x} (if provided).}
 
 \item{burnin}{Logical denoting whether to use a burnin for the simulation. 
 Recommended to be \code{TRUE} when you expect the initial conditions to lie 

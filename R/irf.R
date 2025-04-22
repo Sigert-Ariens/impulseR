@@ -16,10 +16,12 @@
 #' lag (i.e., first element for t, second element for t - 1,...)
 #' @param x Numeric vector denoting the values of the exogenous variables 
 #' X at each time t. These values serve as one type of impulses to the system to 
-#' be simulated.
+#' be simulated. Defaults to \code{NULL}, which means an empty vector of the same
+#' length as \code{residuals} (if provided).
 #' @param residuals Numeric vector denoting the values of the residuals at each 
 #' time t. These values serve as one type of impulses to the system to be 
-#' simulated.
+#' simulated. Defaults to \code{NULL}, which means an empty vector of the same
+#' length as \code{x} (if provided).
 #' @param burnin Logical denoting whether to use a burnin for the simulation. 
 #' Recommended to be \code{TRUE} when you expect the initial conditions to lie 
 #' far away from the mean of the process. Note that we recommend to set this 
@@ -73,10 +75,26 @@
 irf <- function(intercept, 
                 ar_params, 
                 x_params, 
-                x, 
-                residuals,
+                x = NULL, 
+                residuals = NULL,
                 burnin = TRUE){  
   
+  # Check whether x or residuals (or both) are provided. If not, then we have to 
+  # throw an error. 
+  #
+  # If the one is null while the other is not, then we have to create the other
+  # with all zeros.
+  if(is.null(x) & is.null(residuals)) {
+    stop("Neither `x` nor `residuals` is provided. Cannot proceed.")
+
+  } else if(is.null(x) & !is.null(residuals)) {
+    x <- numeric(length(residuals))
+
+  } else if(!is.null(x) & is.null(residuals)) {
+    residuals <- numeric(length(x))
+
+  }
+
   # Determine the sample size (the number of values to generate) based on the 
   # values provided by x and residuals. Make the simulated length of the 
   # impulse response depend on the maximal length of these two.
@@ -85,11 +103,11 @@ irf <- function(intercept,
 
   if(Nx < Ne) {
     x <- c(x, rep(0, Ne - Nx))
-    warning("Length of x is smaller than length of residuals. Imputing zeros in x.")
+    warning("Length of `x` is smaller than length of `residuals`. Imputing zeros in `x`.")
 
   } else if(Nx > Ne) {
     residuals <- c(residuals, rep(0, Nx - Ne))
-    warning("Length of residuals is smaller than length of x. Imputing zeros in residuals.")
+    warning("Length of `residuals` is smaller than length of `x`. Imputing zeros in `residuals`.")
   }
 
   N <- length(x)
