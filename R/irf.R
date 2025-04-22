@@ -28,6 +28,14 @@
 #' argument to \code{FALSE} when you provide a vector of regression residuals
 #' to the argument \code{residuals}. Defaults to \code{TRUE}.
 #' 
+#' @return Dataframe containing the impulse responses. The column \code{"time"} 
+#' contains the time step starting at 0. The columns \code{"irf_intercept"}, 
+#' \code{"irf_x"}, \code{"irf_eps"} contain the expected impulse responses 
+#' for the intercept, the exogeneous variables, and the residuals respectively
+#' and sum up to the total impulse response under column \code{"irf"}. Finally,
+#' the columns \code{"x"} and \code{"residuals"} contain the provided values 
+#' for those arguments.
+#' 
 #' @examples 
 #' # Create parameters of an ADL(2, 2), meaning having two lags in the residuals
 #' # and two lags in the values of x. These will be used for all examples.
