@@ -46,7 +46,8 @@ IRF_generator <- function(intercept,
                           Burnin){  
   
   # Determine the sample size (the number of values to generate) based on the 
-  # values provided by Xvals and Epsvals.
+  # values provided by Xvals and Epsvals. Make the simulated length of the 
+  # impulse response depend on the maximal length of these two.
   Nx <- length(Xvals)
   Ne <- length(Epsvals)
 
@@ -61,28 +62,41 @@ IRF_generator <- function(intercept,
 
   N <- length(Xvals)
 
-  ### Generate coefficients of (1-\sum_{i=1}^{k}phi_{k}L^{k})^{-1} (equations 15 & 19)
-  
-  
-  p <- length(ARparams)  # Length of AR parameters
-  
-  # Initialize theta coefficients
-  theta <- rep(0, N)  
-  
-  # Manually set the initial conditions 
-  theta[1] <- 1  
-  theta[2] <- ARparams[1]  
-  
-  # Equations 15 & 19
-  for (i in 3:N) {
-    theta[i] <- 0  # Initialize ARcoefs[i] to 0 before summing
-    
-    for (j in 1:p) {
-      if (i - j >= 1) {  
-        # TO DO: Can't we do the same in a vectorized way?
-        theta[i] <- theta[i] + ARparams[j] * theta[i - j]
-      }
+  # Use Equation 15 to generate the impulse response parameters for the effect 
+  # of the residuals epsilon. Specifically, these equations tell us that:
+  #
+  #   \theta_0 = 1
+  #   \theta_1 = \phi_1
+  #   ...
+  #   \theta_i = \phi_1 \theta_{i - 1} + ... \phi_p \theta_{i - p}
+  #   ...
+  #
+  # We create a value theta for each datapoint of the impulse response (length 
+  # `N`), each retrieving its value through the values in `ARparams` and the 
+  # lag `p`. To aid us in this, we first create a lower-triangular matrix 
+  # containing the relevant autoregressive coefficients for each lag. Then, we 
+  # loop over each of the datapoints and multiply with the previous values of 
+  # \theta, giving us to value of \theta at the current time i.
+  #
+  # Create the autoregressive matrix
+  p <- length(ARparams)
+  phi <- rep(ARparams, each = p) %>% 
+    matrix(nrow = p, ncol = p)
+  phi[upper.tri(phi)] <- 0
+
+  # Initialize theta
+  theta <- numeric(N)
+  theta[1] <- 1
+
+  # Loop over the datapoints and apply Equation 15 to get \theta.
+  for(i in 2:N) {
+    if(i - p < 1) {
+      terms <- phi[(i - 1), 1:(i - 1)] %*% theta[(i - 1):1]
+    } else {
+      terms <- phi[p, ] %*% theta[(i - 1):(i - p)]
     }
+
+    theta[i] <- sum(terms)
   }
   
   
