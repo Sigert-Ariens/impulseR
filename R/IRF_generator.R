@@ -143,32 +143,29 @@ IRF_generator <- function(intercept,
 
 
   
-  ### Provide implied equillibrium of intercept response (lim t \to \infty \sum_{s=0}^{t}h_{1}§(s)1_{t-s})
-  
-  limintercept <- intercept/(1-(sum(ARparams)))
-  
-  ## Set up output variables 
-  
-  IRF_x <- c()
-  IRFeps <- c()
-  IRFint_raw <- c()
-  
-  
-  for (t in 1:N) { # equation 22
-    
-    IRF_x[t] <- sum(psi[1:t]*Xvals[t:1])  # One sided convolution
-    IRFeps[t] <- sum(theta[1:t]*Epsvals[t:1]) # One sided convolution
-    IRFint_raw[t] <- sum(theta[1:t]*intercept)
+  # Set up some of the output variables and do the one-sided convolutions of 
+  # \psi with the values of x and of \theta with the values of the residuals 
+  # \epsilon. We do this based on Equation 20, where:
+  #
+  #   irf_x = \sum \psi_k L^k x_t
+  #   irf_\epsilon = \sum \theta_k L^k \epsilon_t
+  #   irf_\text{intercept} \propto \sum \theta_k L^k 1_t
+  #
+  # It is these sums that we are computing here.
+  irf_x <- irf_eps <- irf_intercept <- numeric(N)
+  for(i in 1:N) {     
+    irf_x[i] <- sum(psi[1:i] * Xvals[i:1])
+    irf_eps[i] <- sum(theta[1:i] * Epsvals[i:1])
+    irf_intercept[i] <- sum(theta[1:i] * intercept)
   }
-  
-  time <- seq(1:N)
-  time <- time-1
   
   ### Generate y_{t}, equation 26
   
   ### Decide what to do with intercept. If Burnin == True, replace sum(theta[1:t]*intercept) with intercept/(1-(sum(ARparams)))
   
   if(Burnin == TRUE){
+    ### Provide implied equillibrium of intercept response (lim t \to \infty \sum_{s=0}^{t}h_{1}§(s)1_{t-s})
+    limintercept <- intercept/(1-(sum(ARparams)))
     IRFintercept = limintercept
   }else{
     IRFintercept = IRFint_raw
@@ -178,13 +175,13 @@ IRF_generator <- function(intercept,
 
   # Prepare the output data: Add the time index, the individual impulse response functions cumulative responses, and the total output y_{t}
   output <- data.frame(
-    "time" = time, 
-    "IRFx" = IRF_x, 
-    "IRFe" = IRFeps, 
+    "time" = 1:N - 1, 
+    "irf" = IRFtot,
+    "irf_intercept" = irf_intercept,
+    "irf_x" = irf_x, 
+    "irf_eps" = irf_eps, 
     "X" = Xvals, 
-    "Eps" = Epsvals, 
-    "IRFtotal" = IRFtot,
-    "IRFintercept" = IRFintercept
+    "Eps" = Epsvals    
   )
   
   
