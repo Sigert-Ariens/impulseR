@@ -380,7 +380,8 @@ setMethod("irf_plot", signature(object = "data.frame"), function(object,
       ggplot2::scale_linetype_manual(
         values = linetypes
       ) +
-      ggplot2::scale_linewidth_manual(
+      ggplot2::scale_discrete_manual(
+        aesthetic = "linewidth",
         values = linewidths
       ) +
       
