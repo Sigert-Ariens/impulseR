@@ -37,6 +37,7 @@ RoxygenNote: 7.3.2
 Collate:
     'utility.R'
     'irf.R'
+    'impulse.R'
     'plot.R'
 Suggests: 
     fs,
