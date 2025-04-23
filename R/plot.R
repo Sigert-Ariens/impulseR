@@ -12,10 +12,6 @@
 #' while the second method is more useful when exploring the effect of different 
 #' parameter sets/models.
 #' 
-#' @param object Either a numeric denoting the intercept to use for the impulse 
-#' response function or the output of the \code{\link[impulseR]{irf}} function, 
-#' depending on the method you would like to call
-#' 
 #' @return Plot visualizing the impulse response for the predefined model.
 #' 
 #' @examples 
@@ -42,6 +38,8 @@
 #' @export
 setGeneric("irf_plot", function(object, ...) standardGeneric("irf_plot"))
 
+#' @param intercept Numeric denoting the intercept to use for the impulse response 
+#' function.
 #' @param ar_params Numeric vector denoting the autoregressive parameters to be
 #' used for the impulse response function. Parameters need to be given in order
 #' of increased lag (i.e., first element for t - 1, second element for t - 2,...)
@@ -67,17 +65,17 @@ setGeneric("irf_plot", function(object, ...) standardGeneric("irf_plot"))
 #' @rdname irf_plot 
 #' 
 #' @export
-setMethod("irf_plot", signature(object = "numeric"), function(object, 
-                                                              ar_params, 
-                                                              x_params,
-                                                              x = NULL,
-                                                              residuals = NULL,
-                                                              burnin = TRUE,
-                                                              ...) {
+setMethod("irf_plot", signature(), function(intercept, 
+                                            ar_params, 
+                                            x_params,
+                                            x = NULL,
+                                            residuals = NULL,
+                                            burnin = TRUE,
+                                            ...) {
     
     # Execute the `irf` function to retrieve the needed impulse responses
     data <- irf(
-      object, 
+      intercept, 
       ar_params, 
       x_params, 
       x = x, 
@@ -94,7 +92,8 @@ setMethod("irf_plot", signature(object = "numeric"), function(object,
     )
   }
 )
-  
+
+#' @param object Output of the \code{\link[impulseR]{irf}} function
 #' @param cols Character vector denoting the impulse responses you would like 
 #' to plot. The values in this vector should be columns in \code{data} and are 
 #' thus typically limited to \code{"irf"}, \code{"irf_x"}, \code{"irf_eps"},
