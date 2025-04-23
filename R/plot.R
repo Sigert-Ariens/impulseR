@@ -107,19 +107,19 @@ setMethod("irf_plot", signature(), function(intercept,
 #' @param ylabel Character denoting the label of the y-axis. Defaults to 
 #' \code{NULL}, that is no such label
 #' @param title.size Integer denoting the size of the title. Defaults to a 
-#' relative size of \code{3} as defined by the \code{\link[ggplot2]{rel}} function
+#' relative size of \code{1.5} as defined by the \code{\link[ggplot2]{rel}} function
 #' @param title.hjust Numeric denoting the justification of the title. Defaults 
 #' to \code{0.5}, or centered justification
 #' @param label.size Integer denoting the size of the axis labels. Defaults to a 
-#' relative size of \code{2} as defined by the \code{\link[ggplot2]{rel}} function
+#' relative size of \code{1} as defined by the \code{\link[ggplot2]{rel}} function
 #' @param axis.text.size Integer denoting the size of the axis text. Defaults to 
-#' a relative size of \code{1.5} as defined by the \code{\link[ggplot2]{rel}} 
+#' a relative size of \code{0.75} as defined by the \code{\link[ggplot2]{rel}} 
 #' function
 #' @param legend.title.size Integer denoting the size of the legend title. 
-#' Defaults to a relative size of \code{2.5} as defined by the 
+#' Defaults to a relative size of \code{1.25} as defined by the 
 #' \code{\link[ggplot2]{rel}} function
 #' @param legend.text.size Integer denoting the size of the legend text. 
-#' Defaults to a relative size of \code{2} as defined by the 
+#' Defaults to a relative size of \code{1} as defined by the 
 #' \code{\link[ggplot2]{rel}} function
 #' @param irf.color,x.color,eps.color,intercept.color Character denoting the 
 #' colors to use to visualize the total response (\code{irf.}), the response to 
@@ -171,12 +171,12 @@ setMethod("irf_plot", signature(object = "data.frame"), function(object,
                                                                  title = NULL,
                                                                  xlabel = NULL,
                                                                  ylabel = NULL,
-                                                                 title.size = ggplot2::rel(3),
+                                                                 title.size = ggplot2::rel(1.5),
                                                                  title.hjust = 0.5,
-                                                                 label.size = ggplot2::rel(2),
-                                                                 axis.text.size = ggplot2::rel(1.5),
-                                                                 legend.title.size = ggplot2::rel(2.5),
-                                                                 legend.text.size = ggplot2::rel(2),
+                                                                 label.size = ggplot2::rel(1),
+                                                                 axis.text.size = ggplot2::rel(0.75),
+                                                                 legend.title.size = ggplot2::rel(1.25),
+                                                                 legend.text.size = ggplot2::rel(1),
                                                                  x.color = "red4",
                                                                  x.linetype = "solid",
                                                                  x.linewidth = 1,
