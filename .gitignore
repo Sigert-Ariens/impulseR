@@ -4,3 +4,5 @@ questions*
 Paper*
 *.sav
 tmp*
+inst/doc
+docs/
