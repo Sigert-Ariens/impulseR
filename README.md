@@ -12,11 +12,7 @@ remotes::install_gitlab("u0133721/impulseR", host = "gitlab.kuleuven.be/")
 
 To use the package, use `library` 
 
-```{r, echo = FALSE, include = FALSE}
-devtools::install()
-```
-
-```{r}
+```{r, eval = FALSE}
 library(impulseR)
 ```
 
