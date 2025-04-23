@@ -3,25 +3,34 @@ Type: Package
 Title: Impulse response functions
 Version: 1.0
 Date: 2025-04-03
-Author: c(
+Authors@R: c(
     person(
         "Sigert", 
         "Ariens", 
         email = "sigert.ariens@kuleuven.be",
-        comment = c(ORCID = 0000-0002-7423-0090)
+        comment = c(ORCID = 0000-0002-7423-0090),
+        role = c("aut", "cre")
     ),
     person(
         "Niels", 
         "Vanhasbroeck", 
         email = "niels.vanhasbroeck@gmail.com",
-        comment = c(ORCID = 0000-0002-1235-8902)
+        comment = c(ORCID = 0000-0002-1235-8902),
+        role = c("aut", "cre")
+    ),
+    person(
+        "Eva", 
+        "Ceulemans", 
+        email = "eva.ceulemans@kuleuven.be",
+        comment = c(ORCID = 0000-0002-7611-4683),
+        role = "aut"
     ))
-Maintainer: Sigert Ariens <sigert.ariens@kuleuven.be>
 Description: Contains functions allowing users to derive and visualize impulse responses based on autoregressive models.
 License: GPL v3
 Encoding: UTF-8
 Imports: 
     ggplot2,
+    tidyr,
     gtools,
     latex2exp
 RoxygenNote: 7.3.2
@@ -31,7 +40,8 @@ Collate:
     'plot.R'
 Suggests: 
     fs,
+    knitr,
+    rmarkdown,
     testthat (>= 3.0.0)
-Remotes:
-    ndpvh/predped
 Config/testthat/edition: 3
+VignetteBuilder: knitr
