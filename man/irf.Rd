@@ -61,34 +61,34 @@ params <- list(
 
 # Use with single impulse of x in the beginning of the study, with burnin
 irf(
-  1, 
-  c(0.5, 0.1),
-  c(2, 0.5),
+  params$intercept, 
+  params$autoregression,
+  params$slopes,
   x = c(1, rep(0, 9))
 )
 
 # Use with single impulse of x in the beginning of the study, without burnin
 irf(
-  1, 
-  c(0.5, 0.1),
-  c(2, 0.5),
+  params$intercept, 
+  params$autoregression,
+  params$slopes,
   x = c(1, rep(0, 9)),
   burnin = FALSE
 )
 
 # Use with multiple values for the residuals, with burnin
 irf(
-  1, 
-  c(0.5, 0.1),
-  c(2, 0.5),
+  params$intercept, 
+  params$autoregression,
+  params$slopes,
   residuals = rnorm(10)
 )
 
 # Use with multiple values for the residuals, without burnin
 irf(
-  1, 
-  c(0.5, 0.1),
-  c(2, 0.5),
+  params$intercept, 
+  params$autoregression,
+  params$slopes,
   residuals = rnorm(10),
   burnin = FALSE
 )
