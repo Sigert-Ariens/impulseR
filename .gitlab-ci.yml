@@ -1,0 +1,78 @@
+image: rocker/tidyverse:4.1.2
+
+cache:
+  key: global-cache
+  # paths:
+  #     - "~/.local/share/renv"
+
+stages:
+    - man
+    - pkgdown
+    - pkgdown-move
+    - deploy
+    
+commit-man:
+    stage: man
+    before_script:
+        - git config --global user.email "${GITLAB_USER_EMAIL}"
+        - git config --global user.name "${GITLAB_USER_NAME}"
+    script:
+        - echo "Committing man files to git"
+        - apt-get update -qq && apt-get install -y libxt6
+        - Rscript -e 'devtools::document()'
+        - git add NAMESPACE man
+        - |-
+          # Check if we have modifications to commit
+          CHANGES=$(git status --porcelain man NAMESPACE | wc -l)
+    
+          if [ "$CHANGES" -gt "0" ]; then
+            # Show the status of files that are about to be created, updated or deleted
+            git status
+    
+            # Commit all changes      
+            git commit -m "Updated manual files"
+    
+            ## Push back to Gitlab using secret token created earlier with "skip-ci" option to stop builds triggering in a loop
+            git push "https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_REPOSITORY_URL#*@}" "HEAD:${CI_COMMIT_REF_NAME}" -o ci.skip
+            
+          fi
+
+create_site:
+    stage: pkgdown
+    allow_failure: true
+    when: on_success
+    script:
+        # - Rscript -e 'install.packages( "remotes", type = "source" )'
+        - Rscript -e 'remotes::install_cran(c("pkgdown"), upgrade = "never")'
+        - Rscript -e 'remotes::install_github("tidyverse/tidytemplate")'
+        - Rscript -e 'pkgdown::build_site()'
+    artifacts:
+        paths:
+            - docs
+        expire_in: 30 days
+
+unpack_site:
+    stage: pkgdown-move
+    dependencies:
+        - create_site
+    script:
+        - mkdir -p public
+        # - apt-get install -y curl
+        - 'curl --location --output artifacts.zip --header "JOB-TOKEN: $CI_JOB_TOKEN" "https://gitlab.kuleuven.be/api/v4/projects/$CI_PROJECT_ID/jobs/artifacts/production/download?job=pages" &&
+          unzip artifacts.zip &&
+          rm artifacts.zip &&
+          echo "copied production artifacts" ||
+          echo "copied production artifacts failed"'
+        - cp -r docs/* public
+    artifacts:
+        paths:
+            - public
+        expire_in: 30 days
+
+pages:
+    stage: deploy
+    script:
+        - echo "deployment with cache"
+    artifacts:
+        paths:
+            - public
