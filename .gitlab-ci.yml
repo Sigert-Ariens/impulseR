@@ -45,7 +45,7 @@ create_site:
     script:
         # - Rscript -e 'install.packages( "remotes", type = "source" )'
         - Rscript -e 'remotes::install_cran(c("pkgdown"), upgrade = "never")'
-        - Rscript -e 'remotes::install_github("tidyverse/tidytemplate")'
+        # - Rscript -e 'remotes::install_github("tidyverse/tidytemplate")'
         - Rscript -e 'pkgdown::build_site()'
     artifacts:
         paths:
