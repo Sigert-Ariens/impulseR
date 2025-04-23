@@ -98,92 +98,249 @@ setMethod("irf_plot", signature(object = "numeric"), function(object,
 #' 
 #' @export
 setMethod("irf_plot", signature(object = "data.frame"), function(object, 
-                                                                 type,
-                                                                 legend,
+                                                                 cols = NULL,
+                                                                 title = NULL,
+                                                                 xlabel = NULL,
+                                                                 ylabel = NULL,
+                                                                 title.size = ggplot2::rel(2),
+                                                                 label.size = ggplot2::rel(1),
+                                                                 axis.text.size = ggplot2::rel(1),
+                                                                 legend.title.size = ggplot2::rel(1),
+                                                                 legend.text.size = ggplot2::rel(1),
+                                                                 x.color = "red4",
+                                                                 x.linetype = "solid",
+                                                                 x.linewidth = 1,
+                                                                 x.label = latex2exp::TeX("$h_x * x$"),
+                                                                 eps.color = "green4",
+                                                                 eps.linetype = "solid",
+                                                                 eps.linewidth = 1,
+                                                                 eps.label = latex2exp::TeX("$h_v * v$"),
+                                                                 irf.color = "black",
+                                                                 irf.linetype = "dashed",
+                                                                 irf.linewidth = 1,
+                                                                 irf.label = latex2exp::TeX("$y_t$"),
+                                                                 intercept.color = "gray",
+                                                                 intercept.linetype = "solid",
+                                                                 intercept.linewidth = 1,
+                                                                 intercept.label = latex2exp::TeX("$h_1 * 1$"),
+                                                                 impulse.size = 2,
+                                                                 impulse.shape = 19,
+                                                                 impulse.x.shape = impulse.shape,
+                                                                 impulse.eps.shape = impulse.shape,
+                                                                 impulse.linetype = "dotted",
+                                                                 impulse.linewidth = 1,
+                                                                 impulse.alpha = 0.95,
+                                                                 legend = TRUE,
+                                                                 legend.title = NULL,
+                                                                 legend.position = "right",
                                                                  ...) {
     
-      ## Convert to long format
-    datalong <- data %>% as.data.frame() %>% pivot_longer(cols = c(IRF_x, IRFe, IRFtotal, IRFintercept))
-    
-    
-    ## Code levels
-    
-    datalong$name <- factor(datalong$name, levels = c("IRF_x", "IRFe", "IRFtotal", "IRFintercept"))
-    
-    # If only one IRF is needed, The IRF = the total IRF. In this case, hide the total IRF for plotting purposes.
-    
-    if(any(data$IRFintercept != 0)){
-      datalong <- datalong
-    } else{
-      datalong <- datalong %>% filter(name != "IRFintercept")
+    # Convert dataframe to long format, making the call to ggplot2 somewhat 
+    # easier.
+    data <- tidyr::pivot_longer(
+      object,
+      cols = c(irf, irf_x, irf_eps, irf_intercept)
+    )
+
+    # Determine which IRFs to plot, based on the `cols` argument. If NULL, then 
+    # it will use the default of all columns.
+    if(is.null(cols)) {
+      cols <- unique(data$name) 
     }
+
+    # Filter out all of the IRFs that you don't want to plot.
+    #
+    # TO DO: Sigert has an additional filter here looking for whether X or Eps 
+    # was filled with values. If not, he filtered them out as well. All these 
+    # filters commented out for now.
+    data <- data[data$name %in% cols, ]
     
-    if(type == "Impulse response"){
-      datalong <- datalong %>% filter(name != "IRFintercept")
+    # if(any(data$IRFintercept != 0)){
+    #   datalong <- datalong
+    # } else{
+    #   datalong <- datalong %>% filter(name != "IRFintercept")
+    # }
+    
+    # if(type == "Impulse response"){
+    #   datalong <- datalong %>% filter(name != "IRFintercept")
+    # }
+    
+    
+    # if(any(data$X != 0) & any(data$Eps != 0)){
+    #   datalong <- datalong
+    # } else{
+    #   datalong <- datalong %>% filter(name != "IRFtotal")
+    # }
+    
+    # if(any(data$X != 0)){
+    #   datalong <- datalong
+    # } else{
+    #   datalong <- datalong %>% filter(name != "IRF_x")
+    # }
+    
+    # if(any(data$Eps != 0)){
+    #   datalong <- datalong
+    # } else{
+    #   datalong <- datalong %>% filter(name != "IRFe")
+    # }
+    
+    # Create some of the plotting variables that will influence what the plot 
+    # will look like for each of the separate IRFs. These variables are made 
+    # based on the values provided by the user.
+    colors <- c(
+      "irf" = irf.color,
+      "irf_x" = x.color,
+      "irf_eps" = eps.color,
+      "irf_intercept" = intercept.color
+    )
+
+    linetypes <- c(
+      "irf" = irf.linetype,
+      "irf_x" = x.linetype,
+      "irf_eps" = eps.linetype,
+      "irf_intercept" = intercept.linetype
+    )
+
+    linewidths <- c(
+      "irf" = irf.linewidth,
+      "irf_x" = x.linewidth,
+      "irf_eps" = eps.linewidth,
+      "irf_intercept" = intercept.linewidth
+    )
+
+    labels <- c(
+      "irf" = irf.label,
+      "irf_x" = x.label,
+      "irf_eps" = eps.label,
+      "irf_intercept" = intercept.label
+    )
+
+    # Some other plotting characteristics to take care of
+    if(is.null(legend.title)) {
+      # Differentiate between cumulative responses and single impulses
+      legend.title <- ifelse(
+        (sum(object$x != 0) == 1) | (sum(object$residuals != 0) == 1),
+        "Impulse response",
+        "Cumulative response"
+      )
     }
-    
-    
-    if(any(data$X != 0) & any(data$Eps != 0)){
-      datalong <- datalong
-    } else{
-      datalong <- datalong %>% filter(name != "IRFtotal")
+
+    if(is.null(xlabel)) {
+      # Differentiate between cumulative responses and single impulses
+      xlabel <- ifelse(
+        (sum(object$x != 0) == 1) | (sum(object$residuals != 0) == 1),
+        "s (time since input)",
+        "t (time)"
+      )
     }
+
+    impulses <- object[, c("time", "x", "residuals")]
     
-    if(any(data$X != 0)){
-      datalong <- datalong
-    } else{
-      datalong <- datalong %>% filter(name != "IRF_x")
-    }
-    
-    if(any(data$Eps != 0)){
-      datalong <- datalong
-    } else{
-      datalong <- datalong %>% filter(name != "IRFe")
-    }
-    
-    datalong$name <- factor(datalong$name, levels = unique(datalong$name))
-    fixed_colors <- c("IRF_x" = "red4", "IRFe" = "green4", "IRFtotal" = "black", "IRFintercept" = "gray")
-    fixed_linetypes <- c("IRF_x" = "solid", "IRFe" = "solid", "IRFtotal" = "dashed", "IRFintercept" = "solid")
-    
-    
-    if(type != "Impulse response"){
-      fixed_labels <- c("IRF_x" = TeX("$h_{x} * x$"), "IRFe" = TeX("$h_{v} * v$"), "IRFtotal" = TeX("$y_{t}$"), "IRFintercept" = TeX("$h_{1}*1$"))  
-      xlabel <- "t (time index)"
-      legendlabel <- "Cumulative response"
-    }
-    else{
-      fixed_labels <- c("IRF_x" = TeX("$h_{x}(s)$"), "IRFe" = TeX("$h_{v}(s)$"), "IRFtotal" = "Total response", "IRFintercept" = TeX("$h_{1}(s)$"))
-      xlabel <- "s (time step since input)"
-      legendlabel <- "Impulse response"
-    }
-    
-    
-    oplot <- ggplot(data = datalong, aes(x = time, y = value, color = name, linetype = name)) +
-      geom_line(aes(group = name), size = 0.8) +  # Make sure linetype is mapped here
-      theme_minimal() + 
-      scale_color_manual(values = fixed_colors, labels = fixed_labels) + 
-      geom_segment(data = datalong %>% filter(datalong$X != 0), aes(x = time, xend = time, y = 0, yend = X), color = "red4", linetype = "dotted", alpha = 0.95) + 
-      geom_segment(data = datalong %>% filter(datalong$Eps != 0),aes(x = time, xend = time, y = 0, yend = Eps), color = "green4", linetype = "dotted", alpha = 0.95) + 
-      geom_point(data = datalong %>% filter(datalong$X != 0), aes(x = time, y = X), shape = 18, size = 1, color = "red4") + 
-      geom_point(data = datalong %>% filter(datalong$Eps != 0),aes(x = time, y = Eps), shape = 16, size = 1, color = "green4") +  
-      scale_linetype_manual(
-        values = fixed_linetypes
+
+
+    # Create the actual plot.
+    data$name <- factor(data$name)
+    x_impulse <- impulses[impulses$x != 0, ]
+    eps_impulse <- impulses[impulses$residuals != 0, ]
+    axis.breaks <- 1:max(data$time)
+
+    plt <- ggplot2::ggplot(
+      data = data, 
+      ggplot2::aes(
+        x = time, 
+        y = value, 
+        color = name, 
+        linetype = name,
+        linewidth = name
+      )
+    ) +
+      # Content
+      ggplot2::geom_line() +  
+
+      ggplot2::annotate(
+        "segment",
+        x = x_impulse$time, 
+        xend = x_impulse$time, 
+        y = 0,
+        yend = x_impulse$x,
+        color = x.color,
+        linewidth = impulse.linewidth,
+        linetype = impulse.linetype,
+        alpha = impulse.alpha
       ) +
-      guides(color = guide_legend(title = legendlabel), linetype = "none") + xlab(xlabel) + ylab("") + theme(axis.text.x=element_text(size=rel(1))) + theme(axis.title.x=element_text(size=rel(1))) + theme(legend.text = element_text(size=rel(1)) ) +
-      scale_x_continuous(breaks = seq(0, max(datalong$time), by = 1), labels = c('0','1','2','3', rep("", max(datalong$time) -3))) + theme(panel.grid.minor.x = element_blank()) # Remove minor grid lines
+      ggplot2::annotate(
+        "point",
+        x = x_impulse$time, 
+        y = x_impulse$x, 
+        fill = x.color,
+        color = x.color,
+        linewidth = impulse.linewidth,
+        shape = impulse.x.shape,
+        alpha = impulse.alpha
+      ) +
+
+      ggplot2::annotate(
+        "segment",
+        x = eps_impulse$time, 
+        xend = eps_impulse$time, 
+        y = 0,
+        yend = eps_impulse$residuals,
+        color = eps.color,
+        linewidth = impulse.linewidth,
+        linetype = impulse.linetype,
+        alpha = impulse.alpha
+      ) +
+      ggplot2::annotate(
+        "point",
+        x = eps_impulse$time, 
+        y = eps_impulse$residuals, 
+        fill = x.color,
+        color = x.color,
+        linewidth = impulse.linewidth,
+        shape = impulse.eps.shape,
+        alpha = impulse.alpha
+      ) + 
+      
+      # Aesthetics of the content otherwise not defined in the geoms
+      ggplot2::scale_color_manual(
+        values = colors, 
+        labels = labels
+      ) + 
+      ggplot2::scale_linetype_manual(
+        values = linetypes
+      ) +
+      ggplot2::scale_linewidth_manual(
+        values = linewidths
+      ) +
+      
+      # Theme and other stuff
+      # TO DO: Ask Sigert about the scale_x_continuous: Why done this way?
+      # ggplot2::scale_x_continuous(
+      #   breaks = axis.breaks, 
+      #   labels = c('0','1','2','3', rep("", max(datalong$time) -3))
+      # ) + 
+      ggplot2::labs(
+        title = ifelse(is.null(title), "", title),
+        x = xlabel, 
+        y = ifelse(is.null(ylabel), "", ylabel)
+      ) +
+      ggplot2::theme_minimal() + 
+      ggplot2::theme(
+        panel.grid.minor.x = ggplot2::element_blank(), 
+        plot.title = ggplot2::element_text(size = title.size),
+        axis.text = ggplot2::element_text(size = axis.text.size), 
+        axis.title = ggplot2::element_text(size = label.size),
+        legend.position = ifelse(legend, legend.position, "none"),
+        legend.title = ggplot2::element_text(size = legend.title.size),
+        legend.text = ggplot2::element_text(size = legend.text.size)
+      ) +
+      ggplot2::guides(
+        color = ggplot2::guide_legend(title = legend.title), 
+        linetype = "none",
+        linewidth = "none"
+      )
     
-    
-    if(legends == "None"){
-      oplot <- oplot + theme(legend.position = "none")
-    } 
-    
-    #oplot <- ggplot(data = data, aes(x = time, y = value, color = name))
-    #oplot <- oplot + geom_line(aes(group = name),  size = 1) + theme_bw() + scale_fill_manual(values = c("orange", "green","gray","red")) + scale_color_manual(values = c("red","green","yellow", "black")) + geom_segment(aes(x = time, xend = time, y = 0, yend = X), color = "red") + geom_segment(aes(x = time, xend = time, y = 0, yend = Eps), color = "green") + geom_point(aes(x = time, y = X), shape = 18, size = 2, color = "red") + geom_point(aes(x = time, y = Eps), shape = 1, size = 2, color = "green") +   scale_linetype_manual(labels = c("IRF_x", "IRFe", "IRFtotal", "IRFintercept"), values = c("dashed", "dotdash", "solid", "solid")) # Adjust to match your 'name' levels
-    
-    # scale_color_manual(labels = c("IRF_x", "IRFe", "IRFtotal", "IRFintercept"), values = c("red4", "green4", "black", "gray"))
-    #     labels = c("IRF_x", "IRFe", "IRFtotal", "IRFintercept"), 
-    
-    return(oplot)
+    return(plt)
   }
 )
   
