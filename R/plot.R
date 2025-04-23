@@ -365,8 +365,8 @@ setMethod("irf_plot", signature(object = "data.frame"), function(object,
         "point",
         x = eps_impulse$time, 
         y = eps_impulse$residuals, 
-        fill = x.color,
-        color = x.color,
+        fill = eps.color,
+        color = eps.color,
         shape = impulse.eps.shape,
         alpha = impulse.alpha
       ) + 
