@@ -12,6 +12,10 @@
 #' while the second method is more useful when exploring the effect of different 
 #' parameter sets/models.
 #' 
+#' @param object Either a numeric denoting the intercept to use for the impulse 
+#' response function or the output of the \code{\link[irf]{irf}} function, 
+#' depending on the method you would like to call
+#' 
 #' @return Plot visualizing the impulse response for the predefined model.
 #' 
 #' @examples 
@@ -38,8 +42,6 @@
 #' @export
 setGeneric("irf_plot", function(object, ...) standardGeneric("irf_plot"))
 
-#' @param intercept Numeric denoting the intercept to use for the impulse response 
-#' function.
 #' @param ar_params Numeric vector denoting the autoregressive parameters to be
 #' used for the impulse response function. Parameters need to be given in order
 #' of increased lag (i.e., first element for t - 1, second element for t - 2,...)
@@ -93,7 +95,6 @@ setMethod("irf_plot", signature(object = "numeric"), function(object,
   }
 )
   
-#' @param data Output of the \code{\link[irf]{irf}} function
 #' @param cols Character vector denoting the impulse responses you would like 
 #' to plot. The values in this vector should be columns in \code{data} and are 
 #' thus typically limited to \code{"irf"}, \code{"irf_x"}, \code{"irf_eps"},
@@ -209,7 +210,7 @@ setMethod("irf_plot", signature(object = "data.frame"), function(object,
     # easier.
     data <- tidyr::pivot_longer(
       object,
-      cols = c(irf, irf_x, irf_eps, irf_intercept)
+      cols = c("irf", "irf_x", "irf_eps", "irf_intercept")
     )
 
     # Determine which IRFs to plot, based on the `cols` argument. If NULL, then 

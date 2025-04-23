@@ -60,6 +60,10 @@ irf_plot(object, ...)
 )
 }
 \arguments{
+\item{object}{Either a numeric denoting the intercept to use for the impulse 
+response function or the output of the \code{\link[irf]{irf}} function, 
+depending on the method you would like to call}
+
 \item{...}{Arguments passed on to the \code{\link[irf]{irf_plot}} method for 
 \code{data.frame}}
 
@@ -176,11 +180,6 @@ input and to \code{"Cumulative responses"} for multiple inputs}
 
 \item{legend.position}{Character denoting the position of the legend. Ignored
 if \code{legend = FALSE}. Defaults to \code{"right"}}
-
-\item{intercept}{Numeric denoting the intercept to use for the impulse response 
-function.}
-
-\item{data}{Output of the \code{\link[irf]{irf}} function}
 }
 \value{
 Plot visualizing the impulse response for the predefined model.
