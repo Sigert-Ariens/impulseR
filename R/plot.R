@@ -4,8 +4,8 @@
 #' Plots the impulse response functions based on the provided input.
 #' 
 #' Two versions of this method exist. The first version takes in the output 
-#' of the \code{\link[irf]{irf}} function and builds a plot based on this output.
-#' The second version takes in the same arguments as \code{\link[irf]{irf}} 
+#' of the \code{\link[impulseR]{irf}} function and builds a plot based on this output.
+#' The second version takes in the same arguments as \code{\link[impulseR]{irf}} 
 #' and builds a plot based on its results. 
 #' 
 #' The first method is more useful for visualization of a completed analysis, 
@@ -13,7 +13,7 @@
 #' parameter sets/models.
 #' 
 #' @param object Either a numeric denoting the intercept to use for the impulse 
-#' response function or the output of the \code{\link[irf]{irf}} function, 
+#' response function or the output of the \code{\link[impulseR]{irf}} function, 
 #' depending on the method you would like to call
 #' 
 #' @return Plot visualizing the impulse response for the predefined model.
@@ -61,7 +61,7 @@ setGeneric("irf_plot", function(object, ...) standardGeneric("irf_plot"))
 #' far away from the mean of the process. Note that we recommend to set this 
 #' argument to \code{FALSE} when you provide a vector of regression residuals
 #' to the argument \code{residuals}. Defaults to \code{TRUE}.
-#' @param ... Arguments passed on to the \code{\link[irf]{irf_plot}} method for 
+#' @param ... Arguments passed on to the \code{\link[impulseR]{irf_plot}} method for 
 #' \code{data.frame}
 #' 
 #' @rdname irf_plot 
