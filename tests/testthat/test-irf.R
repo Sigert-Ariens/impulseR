@@ -31,10 +31,10 @@ for(i in eps_params) {
 testthat::test_that(
   "Testing expected error: No provided x and residuals",
   {
-    testthat::expect_error(irf::irf(0, 0.5, 1))
+    testthat::expect_error(impulseR::irf(0, 0.5, 1))
 
-    testthat::expect_no_error(irf::irf(0, 0.5, 1, x = rep(1, 10)))
-    testthat::expect_no_error(irf::irf(0, 0.5, 1, residuals = rep(1, 10)))
+    testthat::expect_no_error(impulseR::irf(0, 0.5, 1, x = rep(1, 10)))
+    testthat::expect_no_error(impulseR::irf(0, 0.5, 1, residuals = rep(1, 10)))
   }
 )
 
@@ -46,7 +46,7 @@ testthat::test_that(
     # easier to read
     fx <- function(x, residuals) {
       return(
-        irf::irf(
+        impulseR::irf(
           parameters[[50]]$intercept,
           parameters[[50]]$eps,
           parameters[[50]]$x,
@@ -85,7 +85,7 @@ testthat::test_that(
   {
     # Based on x
     vals <- c(1, rep(0, 9))
-    tst <- irf::irf(
+    tst <- impulseR::irf(
       parameters[[50]]$intercept,
       parameters[[50]]$eps,
       parameters[[50]]$x, 
@@ -105,7 +105,7 @@ testthat::test_that(
 
     # Based on eps
     vals <- rep(c(1, -1), times = 5)
-    tst <- irf::irf(
+    tst <- impulseR::irf(
       parameters[[50]]$intercept,
       parameters[[50]]$eps,
       parameters[[50]]$x, 
@@ -120,7 +120,7 @@ testthat::test_that(
     # Based on both
     vals_x <- c(1, rep(0, 9))
     vals_eps <- rep(c(1, -1), times = 5)
-    tst <- irf::irf(
+    tst <- impulseR::irf(
       parameters[[50]]$intercept,
       parameters[[50]]$eps,
       parameters[[50]]$x, 
@@ -140,7 +140,7 @@ testthat::test_that(
   "Testing defaults of x and residuals",
   {
     # Defaults for residuals
-    tst <- irf::irf(
+    tst <- impulseR::irf(
       parameters[[50]]$intercept,
       parameters[[50]]$eps,
       parameters[[50]]$x,
@@ -150,7 +150,7 @@ testthat::test_that(
     testthat::expect_equal(tst$residuals, rep(0, 10))
 
     # Defaults for x
-    tst <- irf::irf(
+    tst <- impulseR::irf(
       parameters[[50]]$intercept,
       parameters[[50]]$eps,
       parameters[[50]]$x,
@@ -165,7 +165,7 @@ testthat::test_that(
   "Testing effect of burnin",
   {
     # Create burned in and none-burned in data.
-    burned <- irf::irf(
+    burned <- impulseR::irf(
       1, 
       c(0.5, 0.25), 
       1,
@@ -173,7 +173,7 @@ testthat::test_that(
       burnin = TRUE
     )$irf_intercept
 
-    not_burned <- irf::irf(
+    not_burned <- impulseR::irf(
       1, 
       c(0.5, 0.25), 
       1,
@@ -205,7 +205,7 @@ testthat::test_that(
     vals <- c(1, rep(0, 9))
     tst <- lapply(
       parameters, 
-      \(x) irf::irf(
+      \(x) impulseR::irf(
         x$intercept, 
         x$eps,
         x$x, 
@@ -232,7 +232,7 @@ testthat::test_that(
     vals <- c(1, -1, rep(0, 8))
     tst <- lapply(
       parameters, 
-      \(x) irf::irf(
+      \(x) impulseR::irf(
         x$intercept, 
         x$eps,
         x$x, 
@@ -259,7 +259,7 @@ testthat::test_that(
     vals <- rep(c(1, -1), times = 5)
     tst <- lapply(
       parameters, 
-      \(x) irf::irf(
+      \(x) impulseR::irf(
         x$intercept, 
         x$eps,
         x$x, 
@@ -289,7 +289,7 @@ testthat::test_that(
     vals <- c(1, rep(0, 9))
     tst <- lapply(
       parameters, 
-      \(x) irf::irf(
+      \(x) impulseR::irf(
         x$intercept, 
         x$eps,
         x$x, 
@@ -315,7 +315,7 @@ testthat::test_that(
     vals <- rep(c(1, -1), times = 5)
     tst <- lapply(
       parameters, 
-      \(x) irf::irf(
+      \(x) impulseR::irf(
         x$intercept, 
         x$eps,
         x$x, 

@@ -1,6 +1,6 @@
-Package: irf
+Package: impulseR
 Type: Package
-Title: Impulse response functions
+Title: Impulse Response Functions
 Version: 1.0
 Date: 2025-04-03
 Authors@R: c(
@@ -8,21 +8,21 @@ Authors@R: c(
         "Sigert", 
         "Ariens", 
         email = "sigert.ariens@kuleuven.be",
-        comment = c(ORCID = 0000-0002-7423-0090),
+        comment = c(ORCID = "0000-0002-7423-0090"),
         role = c("aut", "cre")
     ),
     person(
         "Niels", 
         "Vanhasbroeck", 
         email = "niels.vanhasbroeck@gmail.com",
-        comment = c(ORCID = 0000-0002-1235-8902),
+        comment = c(ORCID = "0000-0002-1235-8902"),
         role = "aut"
     ),
     person(
         "Eva", 
         "Ceulemans", 
         email = "eva.ceulemans@kuleuven.be",
-        comment = c(ORCID = 0000-0002-7611-4683),
+        comment = c(ORCID = "0000-0002-7611-4683"),
         role = "aut"
     ))
 Description: Contains functions allowing users to derive and visualize impulse responses based on autoregressive models.
