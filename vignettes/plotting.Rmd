@@ -1,0 +1,8 @@
+---
+title: "Plots"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Plots}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
