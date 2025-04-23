@@ -2,8 +2,8 @@ image: rocker/tidyverse:4.1.2
 
 cache:
   key: global-cache
-  # paths:
-  #     - "~/.local/share/renv"
+  paths:
+    - ${R_LIBS}
 
 stages:
     - man
@@ -21,6 +21,7 @@ commit-man:
         - apt-get update -qq && apt-get install -y libxt6
         - Rscript -e 'remotes::install_cran(c("latex2exp"), upgrade = "never")'
         - Rscript -e 'devtools::document()'
+        - R -e 'devtools::check(manual = FALSE, cran = TRUE, remote = TRUE, incoming = TRUE, force_suggests = FALSE, error_on = "warning")'
         - git add NAMESPACE man
         - |-
           # Check if we have modifications to commit
