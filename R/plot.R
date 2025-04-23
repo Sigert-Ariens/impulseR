@@ -228,30 +228,30 @@ setMethod("irf_plot", signature(object = "data.frame"), function(object,
     # if(any(data$IRFintercept != 0)){
     #   datalong <- datalong
     # } else{
-    #   datalong <- datalong %>% filter(name != "IRFintercept")
+    #   datalong <- datalong |> filter(name != "IRFintercept")
     # }
     
     # if(type == "Impulse response"){
-    #   datalong <- datalong %>% filter(name != "IRFintercept")
+    #   datalong <- datalong |> filter(name != "IRFintercept")
     # }
     
     
     # if(any(data$X != 0) & any(data$Eps != 0)){
     #   datalong <- datalong
     # } else{
-    #   datalong <- datalong %>% filter(name != "IRFtotal")
+    #   datalong <- datalong |> filter(name != "IRFtotal")
     # }
     
     # if(any(data$X != 0)){
     #   datalong <- datalong
     # } else{
-    #   datalong <- datalong %>% filter(name != "IRF_x")
+    #   datalong <- datalong |> filter(name != "IRF_x")
     # }
     
     # if(any(data$Eps != 0)){
     #   datalong <- datalong
     # } else{
-    #   datalong <- datalong %>% filter(name != "IRFe")
+    #   datalong <- datalong |> filter(name != "IRFe")
     # }
     
     # Create some of the plotting variables that will influence what the plot 

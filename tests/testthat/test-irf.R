@@ -212,10 +212,10 @@ testthat::test_that(
         vals, 
         rep(0, 10),
         TRUE
-      ) %>% 
-        dplyr::select(time, irf) %>% 
-        as.matrix() %>% 
-        `rownames<-` (NULL) %>% 
+      ) |> 
+        dplyr::select(time, irf) |> 
+        as.matrix() |> 
+        `rownames<-` (NULL) |> 
         `colnames<-` (NULL)
     )
 
@@ -239,10 +239,10 @@ testthat::test_that(
         vals, 
         rep(0, 10),
         TRUE
-      ) %>% 
-        dplyr::select(time, irf) %>% 
-        as.matrix() %>% 
-        `rownames<-` (NULL) %>% 
+      ) |> 
+        dplyr::select(time, irf) |> 
+        as.matrix() |> 
+        `rownames<-` (NULL) |> 
         `colnames<-` (NULL)
     )
 
@@ -266,10 +266,10 @@ testthat::test_that(
         vals, 
         rep(0, 10),
         TRUE
-      ) %>% 
-        dplyr::select(time, irf) %>% 
-        as.matrix() %>% 
-        `rownames<-` (NULL) %>% 
+      ) |> 
+        dplyr::select(time, irf) |> 
+        as.matrix() |> 
+        `rownames<-` (NULL) |> 
         `colnames<-` (NULL)
     )
 
@@ -296,10 +296,10 @@ testthat::test_that(
         rep(0, 10), 
         vals,
         TRUE
-      ) %>% 
-        dplyr::select(time, irf) %>% 
-        as.matrix() %>% 
-        `rownames<-` (NULL) %>% 
+      ) |> 
+        dplyr::select(time, irf) |> 
+        as.matrix() |> 
+        `rownames<-` (NULL) |> 
         `colnames<-` (NULL)
     )
 
@@ -322,10 +322,10 @@ testthat::test_that(
         rep(0, 10), 
         vals,
         TRUE
-      ) %>% 
-        dplyr::select(time, irf) %>% 
-        as.matrix() %>% 
-        `rownames<-` (NULL) %>% 
+      ) |> 
+        dplyr::select(time, irf) |> 
+        as.matrix() |> 
+        `rownames<-` (NULL) |> 
         `colnames<-` (NULL)
     )
 

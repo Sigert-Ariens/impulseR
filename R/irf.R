@@ -142,7 +142,7 @@ irf <- function(intercept,
   #
   # Create the autoregressive matrix
   p <- length(ar_params)
-  phi <- rep(ar_params, each = p) %>% 
+  phi <- rep(ar_params, each = p) |> 
     matrix(nrow = p, ncol = p)
   phi[upper.tri(phi)] <- 0
 
@@ -181,7 +181,7 @@ irf <- function(intercept,
   #
   # Create the slope matrix
   q <- length(x_params)
-  beta <- rep(x_params, each = q) %>% 
+  beta <- rep(x_params, each = q) |> 
     matrix(nrow = q, ncol = q)
   beta[upper.tri(beta)] <- 0
 
