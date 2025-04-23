@@ -16,7 +16,7 @@ Authors@R: c(
         "Vanhasbroeck", 
         email = "niels.vanhasbroeck@gmail.com",
         comment = c(ORCID = 0000-0002-1235-8902),
-        role = c("aut", "cre")
+        role = "aut"
     ),
     person(
         "Eva", 
@@ -26,12 +26,12 @@ Authors@R: c(
         role = "aut"
     ))
 Description: Contains functions allowing users to derive and visualize impulse responses based on autoregressive models.
-License: GPL v3
+License: GPL-3
 Encoding: UTF-8
 Imports: 
     ggplot2,
     tidyr,
-    gtools,
+    methods,
     latex2exp
 RoxygenNote: 7.3.2
 Collate:
