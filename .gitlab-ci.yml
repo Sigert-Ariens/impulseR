@@ -19,7 +19,7 @@ commit-man:
     script:
         - echo "Committing man files to git"
         - apt-get update -qq && apt-get install -y libxt6
-        - Rscript -e 'remotes::install_cran(c("latex2exp"), upgrade = "never")'
+        - Rscript -e 'remotes::install_cran(c("latex2exp", "ggplot2"), upgrade = "never")'
         - Rscript -e 'devtools::document()'
         - R -e 'devtools::check(manual = FALSE, cran = TRUE, remote = TRUE, incoming = TRUE, force_suggests = FALSE, error_on = "warning")'
         - git add NAMESPACE man
