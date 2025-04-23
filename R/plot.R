@@ -344,7 +344,6 @@ setMethod("irf_plot", signature(object = "data.frame"), function(object,
         y = x_impulse$x, 
         fill = x.color,
         color = x.color,
-        linewidth = impulse.linewidth,
         shape = impulse.x.shape,
         alpha = impulse.alpha
       ) +
@@ -366,7 +365,6 @@ setMethod("irf_plot", signature(object = "data.frame"), function(object,
         y = eps_impulse$residuals, 
         fill = x.color,
         color = x.color,
-        linewidth = impulse.linewidth,
         shape = impulse.eps.shape,
         alpha = impulse.alpha
       ) + 
