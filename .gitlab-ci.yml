@@ -8,7 +8,7 @@ cache:
 stages:
   - test
   - coverage
-  - document
+  - man
   - pkgdown
   - pkgdown-move
   - deploy
