@@ -48,8 +48,8 @@ coverage:
   coverage: '/Coverage: \d+.\d+\%/'
   allow_failure: true
   when: on_success
-  only:
-    - master
+#   only:
+#     - master
   script:
     - Rscript -e 'remotes::install_local(dependencies = TRUE, upgrade = "never", force = TRUE)'
     - Rscript -e 'remotes::install_cran(c("covr", "DT"), upgrade = "never")'
@@ -68,6 +68,7 @@ commit-man:
         - echo "Committing man files to git"
         - apt-get update -qq && apt-get install -y libxt6
         - apt-get install -y qpdf libcctz-dev
+        - Rscript -e 'remotes::install_local(dependencies = TRUE, upgrade = "always", force = TRUE, INSTALL_opts = "--install-tests")'
         - Rscript -e 'devtools::document()'
         - git add NAMESPACE man
         - |-
