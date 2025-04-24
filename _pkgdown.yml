@@ -1,0 +1,20 @@
+url: https://gitlab.kuleuven.be/u0133721/impulseR
+
+template:
+  bootstrap: 5
+  light-switch: true 
+  theme: github-light
+  theme-dark: github-dark
+
+navbar:
+  structure:
+  components:
+    articals:
+      text: How to use
+      menu:
+      - text: Impulse response functions
+        href: articles/impulse_response.html
+      - text: Analysis
+        href: articles/getting_started.html
+      - text: Plotting
+        href: articles/plotting.html
