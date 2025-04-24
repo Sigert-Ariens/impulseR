@@ -1,4 +1,4 @@
 library(testthat)
 library(impulseR)
 
-test_check("impulseR")
+testthat::test_check("impulseR")
