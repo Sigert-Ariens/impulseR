@@ -9,12 +9,12 @@ template:
 navbar:
   structure:
   components:
-    articals:
+    articles:
       text: How to use
       menu:
       - text: Impulse response functions
         href: articles/impulse_response.html
       - text: Analysis
         href: articles/getting_started.html
-      - text: Plotting
+      - text: Plots
         href: articles/plotting.html
