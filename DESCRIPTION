@@ -3,6 +3,7 @@ Type: Package
 Title: Impulse Response Functions
 Version: 1.0
 Date: 2025-04-03
+URL: https://gitlab.kuleuven.be/u0133721/impulseR
 Authors@R: c(
     person(
         "Sigert", 
