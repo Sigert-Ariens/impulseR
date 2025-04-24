@@ -6,10 +6,58 @@ cache:
     - ${R_LIBS}
 
 stages:
-    - man
-    - pkgdown
-    - pkgdown-move
-    - deploy
+  - test
+  - coverage
+  - document
+  - pkgdown
+  - pkgdown-move
+  - deploy
+
+R-CMD-CHECK:
+  stage: test
+  image: rocker/tidyverse:$VERSION
+  parallel:
+    matrix:
+      - VERSION:
+        - latest
+        - devel
+
+  script:
+    - apt-get update -qq && apt-get install -y libharfbuzz-dev libfribidi-dev libxt6
+    - apt-get install -y qpdf libcctz-dev
+    - echo "Library path for packages :" $R_LIBS
+    - mkdir -p $R_LIBS
+    - Rscript -e 'install.packages("remotes")'
+    - Rscript -e 'unloadNamespace("rlang") ; remotes::install_version("rlang", version = "1.1.1")'
+    - Rscript -e 'remotes::install_local(dependencies = TRUE, upgrade = "always", force = TRUE, INSTALL_opts = "--install-tests")'
+    - Rscript -e 'install.packages("stringi")'
+    - Rscript -e 'devtools::document()'
+    - R -e 'devtools::check(manual = FALSE, cran = TRUE, remote = TRUE, incoming = TRUE, force_suggests = FALSE, error_on = "warning")'
+    - chmod -R 555 $R_LIBS
+    - sudo -Eu rstudio R -e 'library(testthat); library(impulseR); test_check("impulseR", reporter = c("fail", "summary"), path = "tests")'
+
+# To produce a code coverage report as a GitLab page see
+# https://about.gitlab.com/2016/11/03/publish-code-coverage-report-with-gitlab-pages/
+# To have the coverage percentage appear as a gitlab badge follow these
+# instructions:
+# https://docs.gitlab.com/ee/user/project/pipelines/settings.html#test-coverage-parsing
+# The coverage parsing string is
+# Coverage: \d+\.\d+
+coverage:
+  stage: coverage
+  coverage: '/Coverage: \d+.\d+\%/'
+  allow_failure: true
+  when: on_success
+  only:
+    - master
+  script:
+    - Rscript -e 'remotes::install_local(dependencies = TRUE, upgrade = "never", force = TRUE)'
+    - Rscript -e 'remotes::install_cran(c("covr", "DT"), upgrade = "never")'
+    - Rscript -e 'covr::gitlab(quiet = FALSE)'
+  artifacts:
+    paths:
+      - public
+    expire_in: 30 days
     
 commit-man:
     stage: man
@@ -20,10 +68,7 @@ commit-man:
         - echo "Committing man files to git"
         - apt-get update -qq && apt-get install -y libxt6
         - apt-get install -y qpdf libcctz-dev
-        - Rscript -e 'unloadNamespace("rlang") ; remotes::install_version("rlang", version = "1.1.1")'
-        - Rscript -e 'remotes::install_cran(c("latex2exp", "ggplot2"), upgrade = "never")'
         - Rscript -e 'devtools::document()'
-        - R -e 'devtools::check(manual = FALSE, cran = TRUE, remote = TRUE, incoming = TRUE, force_suggests = FALSE, error_on = "warning")'
         - git add NAMESPACE man
         - |-
           # Check if we have modifications to commit
@@ -46,7 +91,6 @@ create_site:
     allow_failure: true
     when: on_success
     script:
-        # - Rscript -e 'install.packages( "remotes", type = "source" )'
         - Rscript -e 'remotes::install_cran(c("pkgdown"), upgrade = "never")'
         # - Rscript -e 'remotes::install_github("tidyverse/tidytemplate")'
         - Rscript -e 'pkgdown::build_site()'
