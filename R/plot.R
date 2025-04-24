@@ -77,9 +77,9 @@ setMethod("irf_plot", signature(), function(intercept = 0,
     
     # Execute the `irf` function to retrieve the needed impulse responses
     data <- irf(
-      intercept, 
-      ar_params, 
-      x_params, 
+      intercept = intercept, 
+      ar_params = ar_params, 
+      x_params = x_params, 
       x = x, 
       residuals = residuals, 
       burnin = burnin
@@ -204,8 +204,7 @@ setMethod("irf_plot", signature(object = "data.frame"), function(object,
                                                                  impulse.alpha = 0.95,
                                                                  legend = TRUE,
                                                                  legend.title = NULL,
-                                                                 legend.position = "right",
-                                                                 ...) {
+                                                                 legend.position = "right") {
     
     # Convert dataframe to long format, making the call to ggplot2 somewhat 
     # easier.
