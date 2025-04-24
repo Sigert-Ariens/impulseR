@@ -4,19 +4,28 @@
 \alias{irf}
 \title{Generate impulse response}
 \usage{
-irf(intercept, ar_params, x_params, x = NULL, residuals = NULL, burnin = TRUE)
+irf(
+  intercept = 0,
+  ar_params = 0,
+  x_params = 0,
+  x = NULL,
+  residuals = NULL,
+  burnin = TRUE
+)
 }
 \arguments{
 \item{intercept}{Numeric denoting the intercept to use for the impulse response 
-function.}
+function. Defaults to \code{0}}
 
 \item{ar_params}{Numeric vector denoting the autoregressive parameters to be
 used for the impulse response function. Parameters need to be given in order
-of increased lag (i.e., first element for t - 1, second element for t - 2,...)}
+of increased lag (i.e., first element for t - 1, second element for t - 2,...).
+Defaults to \code{0}}
 
 \item{x_params}{Numeric vector denoting the values of the slopes for the 
 exogenous variables. Parameters again need to be given in order of increased
-lag (i.e., first element for t, second element for t - 1,...)}
+lag (i.e., first element for t, second element for t - 1,...). Defaults to 
+\code{0}}
 
 \item{x}{Numeric vector denoting the values of the exogenous variables 
 X at each time t. These values serve as one type of impulses to the system to 

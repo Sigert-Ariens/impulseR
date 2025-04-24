@@ -2,16 +2,16 @@
 % Please edit documentation in R/plot.R
 \name{irf_plot}
 \alias{irf_plot}
-\alias{irf_plot,numeric-method}
+\alias{irf_plot,ANY-method}
 \alias{irf_plot,data.frame-method}
 \title{Plot impulse responses}
 \usage{
 irf_plot(object, ...)
 
-\S4method{irf_plot}{numeric}(
-  object,
-  ar_params,
-  x_params,
+\S4method{irf_plot}{ANY}(
+  intercept = 0,
+  ar_params = 0,
+  x_params = 0,
   x = NULL,
   residuals = NULL,
   burnin = TRUE,
@@ -24,12 +24,12 @@ irf_plot(object, ...)
   title = NULL,
   xlabel = NULL,
   ylabel = NULL,
-  title.size = ggplot2::rel(3),
+  title.size = ggplot2::rel(1.5),
   title.hjust = 0.5,
-  label.size = ggplot2::rel(2),
-  axis.text.size = ggplot2::rel(1.5),
-  legend.title.size = ggplot2::rel(2.5),
-  legend.text.size = ggplot2::rel(2),
+  label.size = ggplot2::rel(1),
+  axis.text.size = ggplot2::rel(0.75),
+  legend.title.size = ggplot2::rel(1.25),
+  legend.text.size = ggplot2::rel(1),
   x.color = "red4",
   x.linetype = "solid",
   x.linewidth = 1,
@@ -60,20 +60,23 @@ irf_plot(object, ...)
 )
 }
 \arguments{
-\item{object}{Either a numeric denoting the intercept to use for the impulse 
-response function or the output of the \code{\link[impulseR]{irf}} function, 
-depending on the method you would like to call}
+\item{object}{Output of the \code{\link[impulseR]{irf}} function}
 
 \item{...}{Arguments passed on to the \code{\link[impulseR]{irf_plot}} method for 
 \code{data.frame}}
 
+\item{intercept}{Numeric denoting the intercept to use for the impulse response 
+function. Defaults to \code{0}}
+
 \item{ar_params}{Numeric vector denoting the autoregressive parameters to be
 used for the impulse response function. Parameters need to be given in order
-of increased lag (i.e., first element for t - 1, second element for t - 2,...)}
+of increased lag (i.e., first element for t - 1, second element for t - 2,...).
+Defaults to \code{0}}
 
 \item{x_params}{Numeric vector denoting the values of the slopes for the 
 exogenous variables. Parameters again need to be given in order of increased
-lag (i.e., first element for t, second element for t - 1,...)}
+lag (i.e., first element for t, second element for t - 1,...). Defaults to 
+\code{0}}
 
 \item{x}{Numeric vector denoting the values of the exogenous variables 
 X at each time t. These values serve as one type of impulses to the system to 
@@ -108,24 +111,24 @@ for multiple inputs}
 \code{NULL}, that is no such label}
 
 \item{title.size}{Integer denoting the size of the title. Defaults to a 
-relative size of \code{3} as defined by the \code{\link[ggplot2]{rel}} function}
+relative size of \code{1.5} as defined by the \code{\link[ggplot2]{rel}} function}
 
 \item{title.hjust}{Numeric denoting the justification of the title. Defaults 
 to \code{0.5}, or centered justification}
 
 \item{label.size}{Integer denoting the size of the axis labels. Defaults to a 
-relative size of \code{2} as defined by the \code{\link[ggplot2]{rel}} function}
+relative size of \code{1} as defined by the \code{\link[ggplot2]{rel}} function}
 
 \item{axis.text.size}{Integer denoting the size of the axis text. Defaults to 
-a relative size of \code{1.5} as defined by the \code{\link[ggplot2]{rel}} 
+a relative size of \code{0.75} as defined by the \code{\link[ggplot2]{rel}} 
 function}
 
 \item{legend.title.size}{Integer denoting the size of the legend title. 
-Defaults to a relative size of \code{2.5} as defined by the 
+Defaults to a relative size of \code{1.25} as defined by the 
 \code{\link[ggplot2]{rel}} function}
 
 \item{legend.text.size}{Integer denoting the size of the legend text. 
-Defaults to a relative size of \code{2} as defined by the 
+Defaults to a relative size of \code{1} as defined by the 
 \code{\link[ggplot2]{rel}} function}
 
 \item{irf.color, x.color, eps.color, intercept.color}{Character denoting the 
