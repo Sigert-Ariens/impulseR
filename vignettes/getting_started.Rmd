@@ -187,6 +187,13 @@ While all needed information is contained within the output of `irf`, it is usef
 This function can be used in two ways. First, one can provide the output of the `irf` function as follows:
 
 ```{r, warning = FALSE}
+#| fig.alt: >
+#|   One sees four lines; (a) A horizontal gray line that describes the intercept, (b) a red solid wavy line that describes the reaction of the system to the impulse from the covariate, (c) a green solid wavy line that describes the reaction of the system to the impulse from the residuals, and (d) a black dashed line that describes the total response of the system.
+#|   Additionally, there are two vertical lines and two points that represent the impulse of the covariate and the impulse of the residual. 
+#|   Importantly, the black line can be obtained through summing the gray, red, and green lines.
+#| fig.cap: > 
+#|   _Visualization of an impulse response function for an ADL(3, 3) with parameters $\alpha = 0$, $\beta_i = \{ 2, -1, 0.25 \}$, and $\gamma_i = \{ 0.75, 0.5, -0.1 \}$. 
+#|   Impulses consist of a singular unit impulse in the covariate $x$ (positive) and the residuals $\epsilon$ (negative) at the start of the simulation._
 results <- irf(
   intercept = 0,
   x_params = c(2, -1, 0.25),
@@ -201,6 +208,10 @@ irf_plot(results)
 Alternatively, one can provide the parameters and impulses to `irf_plot` immediately:
 
 ```{r, warning = FALSE}
+#| fig.alt: >
+#|   One sees the same plot as before.
+#| fig.cap: > 
+#|   _Visualization of an impulse response function for the same ADL(3, 3) model as before, but now computed and visualized in a single step._
 irf_plot(
   intercept = 0,
   x_params = c(2, -1, 0.25),
