@@ -1,4 +1,4 @@
-image: rocker/tidyverse:4.1.2
+image: rocker/tidyverse:latest
 
 cache:
   key: global-cache
