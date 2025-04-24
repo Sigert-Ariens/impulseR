@@ -219,7 +219,7 @@ testthat::test_that(
     )
 
     ref <- readRDS(
-      file.path("ref", "ref_x_single.Rds")
+      testthat::test_path("ref", "ref_x_single.Rds")
     )
 
     testthat::expect_equal(tst, ref)
@@ -245,7 +245,7 @@ testthat::test_that(
     )
 
     ref <- readRDS(
-      file.path("ref", "ref_x_double.Rds")
+      testthat::test_path("ref", "ref_x_double.Rds")
     )
 
     testthat::expect_equal(tst, ref)
@@ -271,7 +271,7 @@ testthat::test_that(
     )
 
     ref <- readRDS(
-      file.path("ref", "ref_x_multiple.Rds")
+      testthat::test_path("ref", "ref_x_multiple.Rds")
     )
 
     testthat::expect_equal(tst, ref)
@@ -300,7 +300,7 @@ testthat::test_that(
     )
 
     ref <- readRDS(
-      file.path("ref", "ref_eps_single.Rds")
+      testthat::test_path("ref", "ref_eps_single.Rds")
     )
 
     testthat::expect_equal(tst, ref)
@@ -325,7 +325,7 @@ testthat::test_that(
     )
 
     ref <- readRDS(
-      file.path("ref", "ref_eps_multiple.Rds")
+      testthat::test_path("ref", "ref_eps_multiple.Rds")
     )
 
     testthat::expect_equal(tst, ref)
