@@ -3,6 +3,7 @@
 #' 
 #' Plots the impulse response functions based on the provided input.
 #' 
+#' @details
 #' Two versions of this method exist. The first version takes in the output 
 #' of the \code{\link[impulseR]{irf}} function and builds a plot based on this output.
 #' The second version takes in the same arguments as \code{\link[impulseR]{irf}} 
