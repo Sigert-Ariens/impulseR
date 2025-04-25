@@ -1,3 +1,48 @@
+#' Estimate a one-dimensional ADL
+#' 
+#' Estimate the parameters of an $ADL(p, k)$, where $p$ represents the number of
+#' lags in the dependent variable $y$ and $k$ represents the number of lags in 
+#' the covariate $x$. Relating this to the mathematics, we get:
+#' 
+#' \begin{equation}
+#'   y_t = \alpha + \sum_{i = 0}^k \beta_i x_{t - i} + \sum_{i = 1}^p \gamma_i y_{t - i} + \epsilon_t
+#' \end{equation}
+#' 
+#' @param object Dataframe containing the variables of interest
+#' @param cols Character vector denoting the columns containing the variables of
+#' interest. First character should denote the dependent variable, the second 
+#' one the covariate of interest. Defaults to \code{c("y", "x")}
+#' @param y_lags Integer denoting the number of lags to include for the 
+#' dependent variable. Starts at the value \code{1}. Defaults to \code{NA}, 
+#' communicating that you don't want to use any lagged values of the dependent 
+#' variable
+#' @param x_lags Integer denoting the number of lags to include for the 
+#' covariate. Starts at the value \code{0}. Defaults to \code{NA}, communicating 
+#' that you don't want to use any lagged values of the dependent variable
+#' 
+#' @return Named list containing the estimated model (\code{model}), the 
+#' parameters that were estimated as used by the \code{\link[impulseR]{irf}} 
+#' function (\code{intercept}, \code{x_params}, \code{ar_params}), and the 
+#' impulses obtained from the data (\code{x}, \code{residuals})
+#' 
+#' @examples 
+#' # Define a dataset
+#' x <- rnorm(100)
+#' data <- data.frame(
+#'   DV = 1 + 2 * x + rnorm(100),
+#'   IV = x
+#' )
+#' 
+#' # Estimate an ADL(2, 2)
+#' estimate(
+#'   data, 
+#'   cols = c("DV", "IV"),
+#'   y_lags = 2, 
+#'   x_lags = 2
+#' )
+#' 
+#' @rdname estimate 
+#' 
 #' @export
 estimate <- function(object,
                      cols = c("y", "x"),
