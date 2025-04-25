@@ -57,12 +57,12 @@ testthat::test_that(
     # Based on x
     vals <- c(1, rep(0, 9))
     tst <- impulseR::irf(
-      parameters[[50]]$intercept,
-      parameters[[50]]$eps,
-      parameters[[50]]$x, 
-      vals, 
-      rep(0, 10),
-      TRUE
+      intercept = parameters[[50]]$intercept,
+      ar_params = parameters[[50]]$eps,
+      x_params = parameters[[50]]$x, 
+      x = vals, 
+      residuals = rep(0, 10),
+      burnin = TRUE
     )
 
     testthat::expect_true(is.data.frame(tst))
@@ -77,12 +77,12 @@ testthat::test_that(
     # Based on eps
     vals <- rep(c(1, -1), times = 5)
     tst <- impulseR::irf(
-      parameters[[50]]$intercept,
-      parameters[[50]]$eps,
-      parameters[[50]]$x, 
-      rep(0, 10),
-      vals,
-      TRUE
+      intercept = parameters[[50]]$intercept,
+      ar_params = parameters[[50]]$eps,
+      x_params = parameters[[50]]$x, 
+      x = rep(0, 10), 
+      residuals = vals,
+      burnin = TRUE
     )
 
     testthat::expect_equal(tst$x, rep(0, 10))
@@ -92,12 +92,12 @@ testthat::test_that(
     vals_x <- c(1, rep(0, 9))
     vals_eps <- rep(c(1, -1), times = 5)
     tst <- impulseR::irf(
-      parameters[[50]]$intercept,
-      parameters[[50]]$eps,
-      parameters[[50]]$x, 
-      vals_x,
-      vals_eps,
-      TRUE
+      intercept = parameters[[50]]$intercept,
+      ar_params = parameters[[50]]$eps,
+      x_params = parameters[[50]]$x, 
+      x = vals_x, 
+      residuals = vals_eps,
+      burnin = TRUE
     )
 
     testthat::expect_equal(tst$x, vals_x)
