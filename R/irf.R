@@ -39,16 +39,18 @@
 #' 
 #' # Generate data
 #' set.seed(1)
-#' x <- rnorm(100)
-#' data <- data(
-#'   y = 1 + 2 * x, 
-#'   x = x
+#' data <- irf(
+#'   intercept = 1, 
+#'   x_params = c(1, 2, -0.5),
+#'   ar_params = c(0.9, -0.1, 0.25),
+#'   x = rnorm(100),
+#'   residuals = rnorm(100)
 #' )
 #' 
 #' # Decompose based on an ADL(2, 2)
 #' irf(
 #'   data, 
-#'   cols = c("y", "x"),
+#'   cols = c("irf", "x"),
 #'   x_lags = 2, 
 #'   y_lags = 2
 #' )
@@ -342,6 +344,8 @@ setMethod("irf", signature(), function(intercept = 0,
   }
 )
 
+#' @rdname irf 
+#' 
 #' @export
 setMethod("irf", signature(object = "numeric"), function(object, 
                                                          ar_params = 0, 

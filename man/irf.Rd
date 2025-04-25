@@ -4,6 +4,7 @@
 \alias{irf}
 \alias{irf,data.frame-method}
 \alias{irf,ANY-method}
+\alias{irf,numeric-method}
 \title{Generate impulse response}
 \usage{
 irf(object, ...)
@@ -12,6 +13,15 @@ irf(object, ...)
 
 \S4method{irf}{ANY}(
   intercept = 0,
+  ar_params = 0,
+  x_params = 0,
+  x = NULL,
+  residuals = NULL,
+  burnin = TRUE
+)
+
+\S4method{irf}{numeric}(
+  object,
   ar_params = 0,
   x_params = 0,
   x = NULL,
@@ -105,16 +115,18 @@ as \code{x_lags = NA, y_lags = 1}.
 
 # Generate data
 set.seed(1)
-x <- rnorm(100)
-data <- data(
-  y = 1 + 2 * x, 
-  x = x
+data <- irf(
+  intercept = 1, 
+  x_params = c(1, 2, -0.5),
+  ar_params = c(0.9, -0.1, 0.25),
+  x = rnorm(100),
+  residuals = rnorm(100)
 )
 
 # Decompose based on an ADL(2, 2)
 irf(
   data, 
-  cols = c("y", "x"),
+  cols = c("irf", "x"),
   x_lags = 2, 
   y_lags = 2
 )

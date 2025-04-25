@@ -4,9 +4,7 @@
 #' lags in the dependent variable $y$ and $k$ represents the number of lags in 
 #' the covariate $x$. Relating this to the mathematics, we get:
 #' 
-#' \begin{equation}
-#'   y_t = \alpha + \sum_{i = 0}^k \beta_i x_{t - i} + \sum_{i = 1}^p \gamma_i y_{t - i} + \epsilon_t
-#' \end{equation}
+#' \eqn{y_t = \alpha + \sum_{i = 0}^k \beta_i x_{t - i} + \sum_{i = 1}^p \gamma_i y_{t - i} + \epsilon_t}
 #' 
 #' @param object Dataframe containing the variables of interest
 #' @param cols Character vector denoting the columns containing the variables of

@@ -34,9 +34,7 @@ lags in the dependent variable $y$ and $k$ represents the number of lags in
 the covariate $x$. Relating this to the mathematics, we get:
 }
 \details{
-\begin{equation}
-  y_t = \alpha + \sum_{i = 0}^k \beta_i x_{t - i} + \sum_{i = 1}^p \gamma_i y_{t - i} + \epsilon_t
-\end{equation}
+\eqn{y_t = \alpha + \sum_{i = 0}^k \beta_i x_{t - i} + \sum_{i = 1}^p \gamma_i y_{t - i} + \epsilon_t}
 }
 \examples{
 # Define a dataset
