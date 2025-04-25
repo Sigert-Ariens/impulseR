@@ -342,3 +342,23 @@ setMethod("irf", signature(), function(intercept = 0,
   }
 )
 
+#' @export
+setMethod("irf", signature(object = "numeric"), function(object, 
+                                                         ar_params = 0, 
+                                                         x_params = 0, 
+                                                         x = NULL, 
+                                                         residuals = NULL,
+                                                         burnin = TRUE){  
+  # Pass on to the non-signature variant
+  return(
+    irf(
+      intercept = object, 
+      ar_params = ar_params, 
+      x_params = x_params, 
+      x = x, 
+      residuals = residuals, 
+      burnin = burnin
+    )
+  )
+})
+
