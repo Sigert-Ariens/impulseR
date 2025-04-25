@@ -133,18 +133,14 @@ setMethod("irf", signature(object = "data.frame"), function(object,
       x_lags = x_lags
     )
 
-    # Define the x-impulses and the residual impulses
-    x <- params$x 
-    residuals <- params$summary$residuals
-
     # Pass on to the other irf-method to do the remainder of the computations
     return(
       irf(
-        intercept = intercept,
-        x_params = x_params,
-        ar_params = ar_params,
-        x = x, 
-        residuals = residuals,
+        intercept = params$intercept,
+        x_params = params$x_params,
+        ar_params = params$ar_params,
+        x = params$x, 
+        residuals = params$residuals,
         burnin = FALSE
       )
     )
