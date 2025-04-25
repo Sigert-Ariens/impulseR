@@ -55,8 +55,7 @@ irf_plot(object, ...)
   impulse.alpha = 0.95,
   legend = TRUE,
   legend.title = NULL,
-  legend.position = "right",
-  ...
+  legend.position = "right"
 )
 }
 \arguments{

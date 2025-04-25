@@ -37,6 +37,7 @@ Imports:
 RoxygenNote: 7.3.2
 Collate:
     'utility.R'
+    'estimate.R'
     'irf.R'
     'impulse.R'
     'plot.R'

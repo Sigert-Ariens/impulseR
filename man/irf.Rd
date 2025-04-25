@@ -2,9 +2,15 @@
 % Please edit documentation in R/irf.R
 \name{irf}
 \alias{irf}
+\alias{irf,data.frame-method}
+\alias{irf,ANY-method}
 \title{Generate impulse response}
 \usage{
-irf(
+irf(object, ...)
+
+\S4method{irf}{data.frame}(object, cols = c("y", "x"), y_lags = NA, x_lags = NA)
+
+\S4method{irf}{ANY}(
   intercept = 0,
   ar_params = 0,
   x_params = 0,
@@ -14,6 +20,21 @@ irf(
 )
 }
 \arguments{
+\item{object}{Dataframe containing the variables of interest}
+
+\item{cols}{Character vector denoting the columns containing the variables of
+interest. First character should denote the dependent variable, the second 
+one the covariate of interest. Defaults to \code{c("y", "x")}}
+
+\item{y_lags}{Integer denoting the number of lags to include for the 
+dependent variable. Starts at the value \code{1}. Defaults to \code{NA}, 
+communicating that you don't want to use any lagged values of the dependent 
+variable}
+
+\item{x_lags}{Integer denoting the number of lags to include for the 
+covariate. Starts at the value \code{0}. Defaults to \code{NA}, communicating 
+that you don't want to use any lagged values of the dependent variable}
+
 \item{intercept}{Numeric denoting the intercept to use for the impulse response 
 function. Defaults to \code{0}}
 
@@ -53,15 +74,58 @@ the columns \code{"x"} and \code{"residuals"} contain the provided values
 for those arguments.
 }
 \description{
-For the impulses provided to \code{x} and \code{residuals}, we distinguish 
-between two types, namely singular and cumulative impulses. For the singular 
-impulses, we recommend providing vectors of the form \code{c(1, 0, 0,...)} as
-input to one or both of the arguments. For cumulative impulses, you can 
-provide an arbitrary vector.
+Create impulse response functions based on either a specific set of parameters
+or a dataset and specified model.
+}
+\details{
+Method that allows for the estimation of the impulse response function. Two 
+methods exist. First, you can base the impulse response functions on your own
+a priori chosen set of parameters through the arguments \code{intercept}, 
+\code{x_params}, and \code{ar_params}. In this case, you also need to provide
+the impulses to the covariates through \code{"x"} and/or the impulses to the 
+residuals through \code{"residuals"}.
+
+Second, you can decompose your observed data into a part that describes the 
+impulses from the covariates and/or a part that describes the impulses from
+the residuals. To use this, you provide your data as a data.frame to the 
+\code{object} argument and define the number of lags to use for the covariate
+through \code{x_lags} (starting at lag 0, that is time t) and the number of 
+lags for the dependent variable through \code{y_lags} (starting at lag 1, 
+that is time t - 1). For example, to define an ADL(2, 1), you define 
+\code{x_lags = 1, y_lags = 2}.
+
+The code \code{NA} can be provided if you don't want to use a particular type 
+of lag. For example, a linear regression is defined as 
+\code{x_lags = 0, y_lags = NA}, while a lag-1 autoregressive model is defined 
+as \code{x_lags = NA, y_lags = 1}.
 }
 \examples{
-# Create parameters of an ADL(2, 2), meaning having two lags in the residuals
-# and two lags in the values of x. These will be used for all examples.
+#########################
+# BASED ON DATA
+
+# Generate data
+set.seed(1)
+x <- rnorm(100)
+data <- data(
+  y = 1 + 2 * x, 
+  x = x
+)
+
+# Decompose based on an ADL(2, 2)
+irf(
+  data, 
+  cols = c("y", "x"),
+  x_lags = 2, 
+  y_lags = 2
+)
+
+
+
+#########################
+# BASED ON PARAMETERS
+
+# Create parameters of an ADL(2, 1), meaning having two lags in the residuals
+# and one lag in the values of x. These will be used for all examples.
 params <- list(
   "intercept" = 1, 
   "autoregression" = c(0.5, 0.1),
