@@ -5,8 +5,10 @@ eps_params <- list(
   0, 
   0.5, 
   c(0.5, 0.25),
+  c(0.5, 0.25, -0.1),
   -0.5, 
-  c(-0.5, 0.25)
+  c(-0.5, 0.25),
+  c(-0.5, 0.25, -0.1)
 )
 
 x_params <- append(
@@ -26,3 +28,13 @@ for(i in eps_params) {
     )
   }
 }
+
+# Define the number of lags for each of the parameter sets, allowing us to recover
+# the parameters
+est_eps_lags <- c(NA, 1, 2, 3, 1, 2, 3)
+est_x_lags <- rep(est_eps_lags, times = 3)
+
+est_lags <- cbind(
+  rep(est_eps_lags, each = length(est_x_lags)),
+  rep(est_x_lags, times = length(est_eps_lags))
+)
