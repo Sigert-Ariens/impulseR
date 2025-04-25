@@ -34,6 +34,30 @@
 #' for those arguments.
 #' 
 #' @examples 
+#' #########################
+#' # BASED ON DATA
+#' 
+#' # Generate data
+#' set.seed(1)
+#' x <- rnorm(100)
+#' data <- data(
+#'   y = 1 + 2 * x, 
+#'   x = x
+#' )
+#' 
+#' # Decompose based on an ADL(2, 2)
+#' irf(
+#'   data, 
+#'   cols = c("y", "x"),
+#'   x_lags = 2, 
+#'   y_lags = 2
+#' )
+#' 
+#' 
+#' 
+#' #########################
+#' # BASED ON PARAMETERS
+#' 
 #' # Create parameters of an ADL(2, 1), meaning having two lags in the residuals
 #' # and one lag in the values of x. These will be used for all examples.
 #' params <- list(
