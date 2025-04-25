@@ -1,4 +1,16 @@
 testthat::test_that(
+  "Testing known errors",
+  {
+    testthat::expect_error(impulseR::estimate(
+      object = data.frame(Y = numeric(100), X = numeric(100)),
+      cols = c("y", "x"),
+      x_lags = 2,
+      y_lags = 2
+    ))
+  }
+)
+
+testthat::test_that(
   "Testing the recovery of estimation",
   {
     tst <- logical(length(parameters))
