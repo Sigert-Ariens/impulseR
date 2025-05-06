@@ -125,7 +125,9 @@ setGeneric("irf", function(object, ...) standardGeneric("irf"))
 setMethod("irf", signature(object = "data.frame"), function(object,
                                                             cols = c("y", "x"),
                                                             y_lags = NA, 
-                                                            x_lags = NA) {
+                                                            x_lags = NA,
+                                                            x = NULL,
+                                                            residuals = NULL) {
     
     # Estimate the model of the requested specifications
     params <- estimate(
@@ -135,17 +137,32 @@ setMethod("irf", signature(object = "data.frame"), function(object,
       x_lags = x_lags
     )
 
-    # Pass on to the other irf-method to do the remainder of the computations
-    return(
-      irf(
-        intercept = params$intercept,
-        x_params = params$x_params,
-        ar_params = params$ar_params,
-        x = params$x, 
-        residuals = params$residuals,
-        burnin = FALSE
+    # Pass on to the other irf-method to do the remainder of the computations.
+    # Differentiate between provided residuals and/or covariate impulses, or 
+    # the ones that have been computed in the estimation function.
+    if(is.null(x) & is.null(residuals)) {
+      return(
+        irf(
+          intercept = params$intercept,
+          x_params = params$x_params,
+          ar_params = params$ar_params,
+          x = params$x, 
+          residuals = params$residuals,
+          burnin = FALSE
+        )
       )
-    )
+    } else {
+      return(
+        irf(
+          intercept = params$intercept, 
+          x_params = params$x_params, 
+          ar_params = params$ar_params,
+          x = x, 
+          residuals = residuals, 
+          burnin = TRUE
+        )
+      )
+    }
   }
 )
 
