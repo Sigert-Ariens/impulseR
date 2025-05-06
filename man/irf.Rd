@@ -9,7 +9,14 @@
 \usage{
 irf(object, ...)
 
-\S4method{irf}{data.frame}(object, cols = c("y", "x"), y_lags = NA, x_lags = NA)
+\S4method{irf}{data.frame}(
+  object,
+  cols = c("y", "x"),
+  y_lags = NA,
+  x_lags = NA,
+  x = NULL,
+  residuals = NULL
+)
 
 \S4method{irf}{ANY}(
   intercept = 0,
@@ -45,6 +52,16 @@ variable}
 covariate. Starts at the value \code{0}. Defaults to \code{NA}, communicating 
 that you don't want to use any lagged values of the dependent variable}
 
+\item{x}{Numeric vector denoting the values of the exogenous variables 
+X at each time t. These values serve as one type of impulses to the system to 
+be simulated. Defaults to \code{NULL}, which means an empty vector of the same
+length as \code{residuals} (if provided).}
+
+\item{residuals}{Numeric vector denoting the values of the residuals at each 
+time t. These values serve as one type of impulses to the system to be 
+simulated. Defaults to \code{NULL}, which means an empty vector of the same
+length as \code{x} (if provided).}
+
 \item{intercept}{Numeric denoting the intercept to use for the impulse response 
 function. Defaults to \code{0}}
 
@@ -57,16 +74,6 @@ Defaults to \code{0}}
 exogenous variables. Parameters again need to be given in order of increased
 lag (i.e., first element for t, second element for t - 1,...). Defaults to 
 \code{0}}
-
-\item{x}{Numeric vector denoting the values of the exogenous variables 
-X at each time t. These values serve as one type of impulses to the system to 
-be simulated. Defaults to \code{NULL}, which means an empty vector of the same
-length as \code{residuals} (if provided).}
-
-\item{residuals}{Numeric vector denoting the values of the residuals at each 
-time t. These values serve as one type of impulses to the system to be 
-simulated. Defaults to \code{NULL}, which means an empty vector of the same
-length as \code{x} (if provided).}
 
 \item{burnin}{Logical denoting whether to use a burnin for the simulation. 
 Recommended to be \code{TRUE} when you expect the initial conditions to lie 

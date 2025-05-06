@@ -4,10 +4,10 @@
 \alias{estimate}
 \title{Estimate a one-dimensional ADL}
 \usage{
-estimate(object, cols = c("y", "x"), y_lags = NULL, x_lags = NULL)
+estimate(data, cols = c("y", "x"), y_lags = NULL, x_lags = NULL)
 }
 \arguments{
-\item{object}{Dataframe containing the variables of interest}
+\item{data}{Dataframe containing the variables of interest}
 
 \item{cols}{Character vector denoting the columns containing the variables of
 interest. First character should denote the dependent variable, the second 
@@ -29,11 +29,13 @@ function (\code{intercept}, \code{x_params}, \code{ar_params}), and the
 impulses obtained from the data (\code{x}, \code{residuals})
 }
 \description{
+Estimate a one-dimensional ADL
+}
+\details{
 Estimate the parameters of an $ADL(p, k)$, where $p$ represents the number of
 lags in the dependent variable $y$ and $k$ represents the number of lags in 
 the covariate $x$. Relating this to the mathematics, we get:
-}
-\details{
+
 \eqn{y_t = \alpha + \sum_{i = 0}^k \beta_i x_{t - i} + \sum_{i = 1}^p \gamma_i y_{t - i} + \epsilon_t}
 }
 \examples{
