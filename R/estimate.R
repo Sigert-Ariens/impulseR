@@ -1,5 +1,6 @@
 #' Estimate a one-dimensional ADL
 #' 
+#' @details
 #' Estimate the parameters of an $ADL(p, k)$, where $p$ represents the number of
 #' lags in the dependent variable $y$ and $k$ represents the number of lags in 
 #' the covariate $x$. Relating this to the mathematics, we get:
