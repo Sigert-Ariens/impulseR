@@ -55,6 +55,16 @@
 #'   y_lags = 2
 #' )
 #' 
+#' # Use your own impulses to evaluate this model
+#' irf(
+#'   data, 
+#'   cols = c("irf", "x"),
+#'   x_lags = 2, 
+#'   y_lags = 2, 
+#'   x = impulse(100),
+#'   residuals = impulse(100)
+#' )
+#' 
 #' 
 #' 
 #' #########################
