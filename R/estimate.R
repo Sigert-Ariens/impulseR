@@ -6,7 +6,7 @@
 #' 
 #' \eqn{y_t = \alpha + \sum_{i = 0}^k \beta_i x_{t - i} + \sum_{i = 1}^p \gamma_i y_{t - i} + \epsilon_t}
 #' 
-#' @param object Dataframe containing the variables of interest
+#' @param data Dataframe containing the variables of interest
 #' @param cols Character vector denoting the columns containing the variables of
 #' interest. First character should denote the dependent variable, the second 
 #' one the covariate of interest. Defaults to \code{c("y", "x")}
@@ -42,17 +42,17 @@
 #' @rdname estimate 
 #' 
 #' @export
-estimate <- function(object,
+estimate <- function(data,
                      cols = c("y", "x"),
                      y_lags = NULL, 
                      x_lags = NULL) {
 
   # Check whether the columns specified can be found in the dataset
-  if(!all(cols %in% colnames(object))) {
-    stop("Columns specified in `cols` cannot be found in the supplie dataframe.")
+  if(!all(cols %in% colnames(data))) {
+    stop("Columns specified in `cols` cannot be found in the supplied dataframe.")
   }
 
-  object <- object[, cols] |>
+  data <- data[, cols] |>
     `colnames<-` (c("y", "x"))
 
   # Check whether any lags have been provided. If not, then we have to estimate
@@ -64,11 +64,11 @@ estimate <- function(object,
     return(
       list(
         "model" = list(),
-        "intercept" = mean(object$y),
+        "intercept" = mean(data$y),
         "x_params" = 0,
         "ar_params" = 0,
-        "x" = object$x,
-        "residuals" = object$y - mean(object$y)
+        "x" = data$x,
+        "residuals" = data$y - mean(data$y)
       )
     )
   }
@@ -77,54 +77,18 @@ estimate <- function(object,
 
   # Use the lm-function to estimate the parameters of the model. Before doing 
   # this, we create a matrix containing all of the different lagged variables, 
-  # which can be supplied to lm
-  N <- nrow(object)
-
-  if(!is.na(y_lags)) {
-    X1 <- matrix(
-      NA, 
-      nrow = N,
-      ncol = y_lags
-    ) 
-
-    for(i in 1:y_lags) {
-      idx <- 1:(N - i)
-      X1[idx + i, i] <- object$y[idx]
-    }
-
-    cols1 <- paste0("ylag_", 1:y_lags)
-  }
-
-  if(!is.na(x_lags)) {
-    X2 <- matrix(
-      NA, 
-      nrow = N,
-      ncol = x_lags + 1
-    ) 
-
-    for(i in 0:x_lags) {
-      idx <- 1:(N - i)
-      X2[idx + i, i + 1] <- object$x[idx]
-    }
-
-    cols2 <- paste0("xlag_", 0:x_lags)
-  }
-
-  if(exists("X1") & exists("X2")) {
-    X__ <- cbind(X1, X2) |>
-      `colnames<-` (c(cols1, cols2))
-  } else if(exists("X1")) {
-    X__ <- X1 |>
-      `colnames<-` (cols1)
-  } else {
-    X__ <- X2 |>
-      `colnames<-` (cols2)
-  }
-
-  # Delete NA-values out of the dataset and do the actual analysis
+  # which can be supplied to lm.
+  #
+  # Before applying lm, filter out the NA-values
+  X__ <- prepare_data(
+    data, 
+    cols = c("y", "x"),
+    x_lags = x_lags,
+    y_lags = y_lags
+  )
   idx <- !is.na(rowSums(X__))
 
-  y <- object$y[idx]
+  y <- data$y[idx]
   X__ <- X__[idx,]
 
   results <- lm(y ~ X__)
@@ -150,8 +114,137 @@ estimate <- function(object,
     x_params <- coefs[2:(2 + x_lags)]
 
   }
+  
+  
+  
+  # Now that this has been done, return a list containing all of this information
+  return(
+    list(
+      "model" = results,
+      "intercept" = intercept,
+      "ar_params" = ar_params,
+      "x_params" = x_params,
+      "x" = data$x, 
+      "residuals" = compute_residuals(
+        data, 
+        cols = c("y", "x"),
+        intercept = intercept,
+        ar_params = ar_params,
+        x_params = x_params, 
+        residuals = results$residuals
+      )
+    )
+  )
+}
 
+#' Compute residuals of a lagged model
+#' 
+#' @details
+#' In lagged models, residuals are only defined for \code{N - lags} datapoints, 
+#' as the value of the predicted y-values depends on a set of initial conditions.
+#' This function computes the residuals for all \code{N} datapoints, thus 
+#' including the initial conditions in its output. 
+#' 
+#' Used under the hood in the \code{\link[impulseR]{estimate}} function. 
+#' 
+#' @param data Dataframe containing the variables of interest
+#' @param cols Character vector denoting the columns containing the variables of
+#' interest. First character should denote the dependent variable, the second 
+#' one the covariate of interest. Defaults to \code{c("y", "x")}
+#' @param intercept Numeric denoting the intercept to use for the impulse response 
+#' function. Defaults to \code{0}
+#' @param ar_params Numeric vector denoting the autoregressive parameters to be
+#' used for the impulse response function. Parameters need to be given in order
+#' of increased lag (i.e., first element for t - 1, second element for t - 2,...).
+#' Defaults to \code{0}
+#' @param x_params Numeric vector denoting the values of the slopes for the 
+#' exogenous variables. Parameters again need to be given in order of increased
+#' lag (i.e., first element for t, second element for t - 1,...). Defaults to 
+#' \code{0}
+#' @param residuals Numeric vector denoting the values of already known values 
+#' of the residuals at some time t (e.g., those acquired through the \code{lm} 
+#' function). Defaults to \code{NULL}, signalling the creation of a new vector 
+#' of residuals based on the parameters that were provided to the function.
+#' 
+#' @return Numeric vector containing the residuals at a particular time t.
+#' 
+#' @examples 
+#' # Define a dataset
+#' x <- rnorm(100)
+#' data <- data.frame(
+#'   DV = 1 + 2 * x + rnorm(100),
+#'   IV = x
+#' )
+#' 
+#' # For these data, compute the residuals of an ADL(2, 2)
+#' residuals <- compute_residuals(
+#'   data, 
+#'   cols = c("DV", "IV"),
+#'   intercept = 0.5, 
+#'   ar_params = c(0.75, 0.25),
+#'   x_params = c(1.5, 0.25)
+#' )
+#' 
+#' @export 
+compute_residuals <- function(data, 
+                              cols = c("y", "x"),
+                              intercept = 0, 
+                              ar_params = 0, 
+                              x_params = 0, 
+                              residuals = NULL) {
 
+  # Check whether columns are contained in the data
+  if(!all(cols %in% colnames(data))) {
+    stop("Columns specified in `cols` cannot be found in the supplied dataframe.")
+  }
+  
+  data <- data[, cols] |>
+    `colnames<-` (c("y", "x"))
+
+  # Define the lags in x and y based on the parameters that are provided.
+  x_lags <- ifelse(
+    (length(x_params) != 1) & (x_params[1] != 0),
+    length(x_params) - 1,
+    NA
+  )
+  y_lags <- ifelse(
+    (length(ar_params) != 1) & (ar_params[1] != 0),
+    length(ar_params),
+    NA
+  )
+
+  # Compute the number of datapoints
+  N <- nrow(data)
+
+  # Compute the residuals that are defined by the model. Do this through 
+  # subtracting actual data from predictions based on the model.
+  #
+  # Only perform this computation if residuals are not defined yet.
+  if(is.null(residuals)) {
+    # Prepare the data and parameters for the prediction step.
+    X <- prepare_data(
+      data, 
+      cols = c("y", "x"),
+      x_lags = x_lags,
+      y_lags = y_lags
+    )
+
+    if(!is.na(x_lags) & !is.na(y_lags)) {
+      params <- c(ar_params, x_params)
+
+    } else if(!is.na(x_lags)) {
+      params <- x_params
+
+    } else if(!is.na(y_lags)) {
+      params <- ar_params
+
+    }
+
+    # Predict the values y_hat based on the parameters and compute the residuals
+    # for those data that have been considered.
+    y_hat <- intercept + X %*% params
+    residuals <- y[(N - nrow(X)):N] - y_hat
+  }
 
   # Compute the residuals with which the researcher can reproduce their data and 
   # examine which components matter most. Basically, this is a correction for 
@@ -159,14 +252,13 @@ estimate <- function(object,
   # conditions starting from the correct lag.
   #
   # Parameters are vectorized so that you don't have to think about it too much.
-  residuals <- as.numeric(results$residuals)
   n_inx <- N - length(residuals)
 
   # Adding to the residuals is only needed whenever we're having lagged effects,
   # otherwise we don't need it.
   if(n_inx != 0) {
-    y0 <- inx <- object$y[1:n_inx]
-    x0 <- object$x[1:n_inx]
+    y0 <- inx <- data$y[1:n_inx]
+    x0 <- data$x[1:n_inx]
 
     if(!is.na(y_lags)) {
       phi <- matrix(
@@ -220,18 +312,123 @@ estimate <- function(object,
 
     residuals <- c(inx, residuals)
   }
-  
-  
-  
-  # Now that this has been done, return a list containing all of this information
-  return(
-    list(
-      "model" = results,
-      "intercept" = intercept,
-      "ar_params" = ar_params,
-      "x_params" = x_params,
-      "x" = object$x, 
-      "residuals" = residuals
-    )
-  )
+
+  return(residuals)
+}
+
+#' Prepare data for analysis
+#' 
+#' @details
+#' Transforms a data.frame in such a way that we can estimate the parameters 
+#' for the specified number of lags in y and x.
+#' 
+#' Used under the hood in the \code{\link[impulseR]{estimate}} function. 
+#' 
+#' @param data Dataframe containing the variables of interest
+#' @param cols Character vector denoting the columns containing the variables of
+#' interest. First character should denote the dependent variable, the second 
+#' one the covariate of interest. Defaults to \code{c("y", "x")}
+#' @param y_lags Integer denoting the number of lags to include for the 
+#' dependent variable. Starts at the value \code{1}. Defaults to \code{NA}, 
+#' communicating that you don't want to use any lagged values of the dependent 
+#' variable
+#' @param x_lags Integer denoting the number of lags to include for the 
+#' covariate. Starts at the value \code{0}. Defaults to \code{NA}, communicating 
+#' that you don't want to use any lagged values of the dependent variable
+#' 
+#' @return Numeric matrix containing the values of the independent and dependent
+#' variables that are used as predictors in the estimation routine.
+#' 
+#' @examples 
+#' # Define a dataset
+#' x <- rnorm(100)
+#' data <- data.frame(
+#'   DV = 1 + 2 * x + rnorm(100),
+#'   IV = x
+#' )
+#' 
+#' # For these data, prepare the data for estimation for an ADL(2, 2)
+#' prepared_data <- prepared_data(
+#'   data, 
+#'   cols = c("DV", "IV"),
+#'   y_lags = 2, 
+#'   x_lags = 2
+#' )
+#' 
+#' @export 
+prepare_data <- function(data, 
+                         cols = c("y", "x"),
+                         x_lags = NULL,
+                         y_lags = NULL) {
+
+  # Extract the number of data-points.  
+  N <- nrow(data)
+
+  # Check whether columns are contained in the data
+  if(!all(cols %in% colnames(data))) {
+    stop("Columns specified in `cols` cannot be found in the supplied dataframe.")
+  }
+
+  data <- data[, cols] |>
+    `colnames<-` (c("y", "x"))
+
+  # Check whether the number of lags are defined for either one of the variables.
+  # If not, then we cannot prepare the data, provide a warning, and return the 
+  # whole thing.
+  y_lags <- ifelse(is.null(y_lags), NA, y_lags)
+  x_lags <- ifelse(is.null(x_lags), NA, x_lags)
+  if(is.na(y_lags) & is.na(x_lags)) {
+    warning("No lags specified for `y` or `x`. Returning original data.frame.")
+    return(data)
+  }
+
+  # If some lags in y are specified, create a variable X1 that contains the data
+  # across each of those lags.
+  if(!is.na(y_lags)) {
+    X1 <- matrix(
+      NA, 
+      nrow = N,
+      ncol = y_lags
+    ) 
+
+    for(i in 1:y_lags) {
+      idx <- 1:(N - i)
+      X1[idx + i, i] <- data$y[idx]
+    }
+
+    cols1 <- paste0("ylag_", 1:y_lags)
+  }
+
+  # If some lags in x are specified, create a variable X2 that contains the data
+  # across each of those lags.
+  if(!is.na(x_lags)) {
+    X2 <- matrix(
+      NA, 
+      nrow = N,
+      ncol = x_lags + 1
+    ) 
+
+    for(i in 0:x_lags) {
+      idx <- 1:(N - i)
+      X2[idx + i, i + 1] <- data$x[idx]
+    }
+
+    cols2 <- paste0("xlag_", 0:x_lags)
+  }
+
+  # Check for the existence of either of these variables and create a variable
+  # X that contains those values that are of interest for the current model
+  # (either lagged y, lagged x, or both).
+  if(exists("X1") & exists("X2")) {
+    X <- cbind(X1, X2) |>
+      `colnames<-` (c(cols1, cols2))
+  } else if(exists("X1")) {
+    X <- X1 |>
+      `colnames<-` (cols1)
+  } else {
+    X <- X2 |>
+      `colnames<-` (cols2)
+  }
+
+  return(X)
 }
