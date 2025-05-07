@@ -39,6 +39,7 @@ Collate:
     'utility.R'
     'estimate.R'
     'irf.R'
+    'irf_generator.R'
     'impulse.R'
     'plot.R'
 Suggests: 
