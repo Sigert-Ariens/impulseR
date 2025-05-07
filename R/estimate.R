@@ -98,7 +98,9 @@ estimate <- function(data,
 
   # Extract all of the parameters and put them in a format that our package uses
   # under the hood
-  coefs <- summary(results)$coefficients[, 1]
+  coefs <- summary(results)$coefficients[, 1] |>
+    as.numeric() |>
+    `names<-` (NULL)
   
   intercept <- coefs[1]
 
@@ -204,12 +206,12 @@ compute_residuals <- function(data,
 
   # Define the lags in x and y based on the parameters that are provided.
   x_lags <- ifelse(
-    (length(x_params) != 1) & (x_params[1] != 0),
+    (x_params[1] != 0),
     length(x_params) - 1,
     NA
   )
   y_lags <- ifelse(
-    (length(ar_params) != 1) & (ar_params[1] != 0),
+    (ar_params[1] != 0),
     length(ar_params),
     NA
   )
@@ -230,21 +232,32 @@ compute_residuals <- function(data,
       y_lags = y_lags
     )
 
-    if(!is.na(x_lags) & !is.na(y_lags)) {
-      params <- c(ar_params, x_params)
+    if(is.na(x_lags) & is.na(y_lags)) {
+      # If no lags are defined, then our best guess of y_hat is the intercept.
+      # Therefore, the residuals are defined as y - intercept
+      residuals <- data$y - intercept
 
-    } else if(!is.na(x_lags)) {
-      params <- x_params
+    } else {
+      # Otherwise, we can differentiate between several cases
+      if(!is.na(x_lags) & !is.na(y_lags)) {
+        params <- c(ar_params, x_params)
 
-    } else if(!is.na(y_lags)) {
-      params <- ar_params
+      } else if(!is.na(x_lags)) {
+        params <- x_params
 
-    }
+      } else if(!is.na(y_lags)) {
+        params <- ar_params
 
-    # Predict the values y_hat based on the parameters and compute the residuals
-    # for those data that have been considered.
-    y_hat <- intercept + X %*% params
-    residuals <- y[(N - nrow(X)):N] - y_hat
+      } 
+
+      # Delete NAs from X
+      idx <- !is.na(rowSums(X))
+      X <- X[idx, , drop = FALSE]
+
+      # Compute the residuals based on the predicted values for y.
+      y_hat <- intercept + X %*% params
+      residuals <- data$y[(N - nrow(X) + 1):N] - y_hat
+    }    
   }
 
   # Compute the residuals with which the researcher can reproduce their data and 
