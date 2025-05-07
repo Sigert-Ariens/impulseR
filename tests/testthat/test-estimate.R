@@ -1,12 +1,23 @@
 testthat::test_that(
   "Testing known errors",
   {
-    testthat::expect_error(impulseR::estimate(
-      object = data.frame(Y = numeric(100), X = numeric(100)),
-      cols = c("y", "x"),
-      x_lags = 2,
-      y_lags = 2
-    ))
+    # Wrong columns in estimate
+    testthat::expect_error(
+      impulseR::estimate(
+        object = data.frame(Y = numeric(100), X = numeric(100)),
+        cols = c("y", "x"),
+        x_lags = 2,
+        y_lags = 2
+      )
+    )
+
+    # Wrong columns in compute_residuals
+    testthat::expect_error(
+      impulseR::compute_residuals(
+        data.frame(Y = numeric(100), X = numeric(100),
+        cols = c("y", "x"))
+      )
+    )
   }
 )
 
@@ -114,5 +125,70 @@ testthat::test_that(
     # Do the actual check
     testthat::expect_true(all(tst_y))
     testthat::expect_true(all(tst_x))
+  }
+)
+
+testthat::test_that(
+  "Testing creation of initial conditions without any estimated ones",
+  {
+    lags <- c(NA, 1, 2, 3, 4)
+    lags <- data.frame(
+      y_lags = rep(lags, each = length(lags)),
+      x_lags = rep(lags, times = length(lags))
+    )
+
+    tst <- matrix(
+      FALSE,
+      nrow = length(parameters),
+      ncol = nrow(lags)
+    )
+
+    # Idea behind this test: We should be able to exactly replicate the observed
+    # data `y` if we correctly compute the residuals in `estimate`. Residuals 
+    # and other impulse response functions may deviate, however, due to nonexact
+    # recovery of the parameters.
+    #
+    # To make this point even clearer, This analysis is done for different types
+    # of models that do not necessarily correspond to the original generating 
+    # model
+    for(i in seq_along(parameters)) {
+      # Generate data
+      y <- impulseR::irf(
+        intercept = parameters[[i]]$intercept,
+        x_params = parameters[[i]]$x,
+        ar_params = parameters[[i]]$eps,
+        x = rnorm(100),
+        residuals = rnorm(100)
+      )
+
+      # Loop over all possibilities of the lags
+      for(j in seq_len(nrow(lags))) {
+        # Estimate the parameters and retrieve the results
+        results <- impulseR::estimate(
+          y, 
+          cols = c("irf", "x"),
+          y_lags = lags$y_lags[j],
+          x_lags = ifelse(is.na(lags$x_lags[j]), NA, lags$x_lags[j] - 1)
+        ) |>
+          suppressWarnings()
+
+        # Create the impulse response functions
+        residuals <- impulseR::compute_residuals(
+          y, 
+          cols = c("irf", "x"),
+          intercept = results$intercept,
+          x_params = results$x_params,
+          ar_params = results$ar_params,
+          residuals = NULL
+        ) |>
+          suppressWarnings()
+
+        # Check whether the computed residuals are the same in both cases
+        tst[i, j] <- all(round(residuals, 4) == round(results$residuals, 4))
+      }
+    }
+
+    # Do the actual check
+    testthat::expect_true(all(tst))
   }
 )
