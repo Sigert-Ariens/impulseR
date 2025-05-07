@@ -18,6 +18,27 @@ testthat::test_that(
         cols = c("y", "x"))
       )
     )
+
+    # Wrong columns in prepare_data
+    testthat::expect_error(
+      impulseR::prepare_data(
+        data.frame(Y = numeric(100), X = numeric(100),
+        cols = c("y", "x"))
+      )
+    )
+  }
+)
+
+testthat::test_that(
+  "Testing known warnings",
+  {
+    # No lags specified. Also testing output
+    data <- data.frame(y = rnorm(100), x = rnorm(100))
+    testthat::expect_warning(impulseR::prepare_data(data))
+
+    tst <- suppressWarnings(impulseR::prepare_data(data))
+    testthat::expect_equal(tst, data)
+
   }
 )
 
