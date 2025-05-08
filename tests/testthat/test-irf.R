@@ -50,6 +50,50 @@ testthat::test_that(
   }
 )
 
+# Test expected warnings
+testthat::test_that(
+  "Testing expected warning: NAs in x and/or residuals",
+  {
+    # Create x and residuals to be used in the tests
+    x <- rnorm(100)
+    residuals <- rnorm(100)
+
+    x[1:3] <- NA 
+    residuals[4:6] <- NA 
+
+    # Create a temporary function that already has the parameters filled out
+    fx <- function(x = NULL, residuals = NULL) {
+      return(
+        impulseR::irf(
+          intercept = 1, 
+          ar_params = c(0.75, 0.75),
+          x_params = c(2, 2),
+          x = x, 
+          residuals = residuals
+        )
+      )
+    }
+
+    # Check the warning
+    testthat::expect_warning(fx(x = x))
+    testthat::expect_warning(fx(residuals = residuals))
+    testthat::expect_warning(fx(x = x, residuals = residuals))
+
+    # Check the output
+    tst <- suppressWarnings(fx(x = x))
+    testthat::expect_equal(tst$x, x[-c(1:3)])
+    testthat::expect_equal(tst$residuals, numeric(97))
+
+    tst <- suppressWarnings(fx(residuals = residuals))
+    testthat::expect_equal(tst$x, numeric(97))
+    testthat::expect_equal(tst$residuals, residuals[-c(4:6)])
+
+    tst <- suppressWarnings(fx(x = x, residuals = residuals))
+    testthat::expect_equal(tst$x, x[-c(1:6)])
+    testthat::expect_equal(tst$residuals, residuals[-c(1:6)])
+  }
+)
+
 # Test properties of the output.
 testthat::test_that(
   "Testing properties of output",
