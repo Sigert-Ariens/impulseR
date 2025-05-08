@@ -6,3 +6,5 @@ Paper*
 tmp*
 inst/doc
 docs/
+*/.DS_Store
+.DS_Store
