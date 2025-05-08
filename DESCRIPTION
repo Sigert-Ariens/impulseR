@@ -1,0 +1,51 @@
+Package: impulseR
+Type: Package
+Title: Impulse Response Functions
+Version: 1.0
+Date: 2025-04-03
+URL: https://gitlab.kuleuven.be/u0133721/impulseR
+Authors@R: c(
+    person(
+        "Sigert", 
+        "Ariens", 
+        email = "sigert.ariens@kuleuven.be",
+        comment = c(ORCID = "0000-0002-7423-0090"),
+        role = c("aut", "cre")
+    ),
+    person(
+        "Niels", 
+        "Vanhasbroeck", 
+        email = "niels.vanhasbroeck@gmail.com",
+        comment = c(ORCID = "0000-0002-1235-8902"),
+        role = "aut"
+    ),
+    person(
+        "Eva", 
+        "Ceulemans", 
+        email = "eva.ceulemans@kuleuven.be",
+        comment = c(ORCID = "0000-0002-7611-4683"),
+        role = "aut"
+    ))
+Description: Contains functions allowing users to derive and visualize impulse responses based on autoregressive models.
+License: GPL-3
+Encoding: UTF-8
+Imports: 
+    ggplot2,
+    tidyr,
+    methods,
+    latex2exp
+RoxygenNote: 7.3.2
+Collate:
+    'utility.R'
+    'estimate.R'
+    'irf.R'
+    'irf_generator.R'
+    'impulse.R'
+    'plot.R'
+Suggests: 
+    fs,
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+VignetteBuilder: knitr

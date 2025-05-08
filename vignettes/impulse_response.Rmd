@@ -1,0 +1,10 @@
+---
+title: "Impulse Response Functions"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Impulse Response Functions}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+Theory behind the impulse response functions and main equations that are used in the package.
