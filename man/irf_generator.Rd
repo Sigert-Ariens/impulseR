@@ -81,7 +81,7 @@ model's cumulative response based on a provided data set. Each of the four
 use-cases serves its own purpose and can be called in the way specified 
 below.
 
-\textit{Case 1 - Estimate parameters / Data-based impulses:} To compute the 
+*Case 1 - Estimate parameters / Data-based impulses:* To compute the 
 cumulative response of an estimated model, one should provide a 
 \code{data.frame} to the argument \code{data}, together with an indication of 
 how many lags in the residuals (\code{y_lags}) and the covariates 
@@ -96,7 +96,7 @@ specified model using the \code{lm} function. The parameters will then be
 extracted, the values of the covariate and residual impulses computed, and 
 the cumulative impulse responses will then be computed.
 
-\textit{Case 2 - Estimate parameters / Pre-specified impulses:} In this case, 
+*Case 2 - Estimate parameters / Pre-specified impulses:* In this case, 
 one still provides a \code{data.frame} to the argument \code{data} and some 
 values for the \code{y_lags} and \code{x_lags} arguments. Additionally, one 
 should provide (scaled) impulses through the \code{residuals} and/or \code{x} 
@@ -105,7 +105,7 @@ can define their own vector, or that they can use the
 \code{\link[impulseR]{impulse}} or \code{\link[impulseR]{scaled_impulse}} 
 functions to create such a vector.
 
-\textit{Case 3 - Pre-specified parameters / Data-based impulses:} In this 
+*Case 3 - Pre-specified parameters / Data-based impulses:* In this 
 case, one still provides a \code{data.frame} to the argument \code{data}, but 
 doesn't specify the \code{y_lags} and \code{x_lags} arguments. Instead, one 
 should provide the pre-specified parameters of the model through the arguments
@@ -114,7 +114,7 @@ parameters of the model), and \code{x_params} (the slopes of the covariates).
 Note that you should not provide any values for the \code{residuals} and 
 \code{x} arguments: Otherwise the function will execute Case 4.
 
-\textit{Case 4 - Pre-specified parameters / Pre-specified impulses:} Finally, 
+*Case 4 - Pre-specified parameters / Pre-specified impulses:* Finally, 
 this case requires the definition of the parameters (\code{intercept}, 
 \code{ar_params}, \code{x_params}) and the impulses (\code{residuals} and/or
 \code{x}).
