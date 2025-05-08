@@ -28,27 +28,21 @@ library(impulseR)
 
 ## Analyzing impulse responses
 
-While there is only one primary function to be used, there are two ways in which you can analyze the impulse responses of a particular model. In this section, we describe the workflow for both use-cases and refer the interested reader to the section on [Impulse Response Functions](impulse_response.html) for technical information on the practical stuff described here.
+While there is only one primary function to be used -- namely `irf_generator` --, there are multiple ways to use the function for investigating a model's behavior. We distinguish between four cases, based on the distinctions between _Pre-specified Impulses_ vs. _Data-based Impulses_ and between _Pre-specified Parameters_ vs. _Estimated parameters_. In this section, we describe the workflow for these different use-cases and refer the interested reader to the section on [Impulse Response Functions](impulse_response.html) for technical information on the derivation of impulse and cumulative responses.
 
 
 
-### Starting from parameters
+### Case 1: Pre-specified Impulses and Pre-specified Parameters
 
-In the first case, a researcher wants to explore the predictions of a given set of models, for exampel exploring the difference in predictions between a linear regression and an autoregressive model, or between a given model and a nested, restricted variant (e.g., Ariens et al., 2023). To achieve this, we use the `numeric` variant of the `irf` function, which depends on two types of input.
+In the first case, a researcher uses a pre-specified set of impulses and parameters to explore the predictions of different models, for example exploring the difference in predictions between a linear regression and an autoregressive model, or between a given model and a nested, restricted variant (e.g., Ariens et al., 2023). To achieve this, one specifies the parameters through the `intercept`, `x_params`, and `ar_params` arguments and impulses through the `x` and/or `residuals` arguments. Regarding the parameters, one has to specify:
 
-
-
-#### Parameters
-
-First, `irf` needs values for three sets of parameters:
-
-- An intercept, a singular numeric value provided to the `intercept` argument; 
-- A set of slopes, one or multiple values provided to the `x_params` argument. If multiple values are provided, the first value determines the influence of the exogeneous impulses at lag 1, the second value at lag 2, and so on;
-- A set of autoregressive effects, one or multiple numeric values provided to the `ar_params` argument. If multiple values are provided, the first value determines the influence of the residual impulses at lag 1, the second value at lag 2, and so on.
+- `intercept`: A single numeric value that denotes the value of the intercept of the model;
+- `x_params`: One or more numeric values that define a set of slopes for the covariate $x$. If multiple values are provided, the first value determines the influence of the exogeneous impulses at lag 1, the second value at lag 2, and so on;
+- `ar_params`: One or more numeric values that define a set of autoregressive effects. If multiple values are provided, the first value determines the influence of the residual impulses at lag 1, the second value at lag 2, and so on.
 
 To make these arguments more concrete, consider the following general equation that defines the values of $y_t$:
 
-\begin{equation}
+\begin{equation} \label{eq: ADL}
   y_t = \alpha + \sum_{i = 0}^t \beta_i x_{t - i} + \sum_{i = 1}^t \gamma_i y_{t - i} + \epsilon_t
 \end{equation}
 In this equation, $\alpha$ represents the intercept controlled through the argument `intercept`, $\beta_i$ represents the slopes for lags $i$ controlled through the argument `x_params`, and $\gamma_i$ represents the autoregressive effects for lags $i$ controlled through the argument `ar_params`. 
@@ -65,14 +59,19 @@ With this formalization, the package allows for a great deal of potential models
  ADL(2, 2)   | `0`                        | `c(1, 1)`                | `c(0.75, 0.5)`  
 Note that all nonzero values in this table are arbitrary and can take on any value. Furthermore note that the values for the intercept can also become `0` without creating another type of model
 
+Besides the specification of the parameters, one also needs to provide values for the impulses. This is achieved through the arguments:
 
+- `x`: A numeric vector defining the impulses that come from the covariate;
+- `residuals`: A numeric vector defining the impulses that come from the residuals. 
 
-#### Impulses 
+Note that one does not need to define both types of impulses: One can opt for only investigating impulses that come from one source (covariates or residuals), rather than having to specify both at all times.
 
-Second, `irf` requires a specification of the impulses that it should use for analysis. This can be achieved through specifying the arguments `x` for impulses related to the exogeneous variables and/or `residuals` for impulses related to the residuals of the model. For example, if we want to see the effects of the linear regression model with regard to an impulse in `x`, we can use the call:
+Let's put this to practice. Consider an example where we want to investigate the behavior of a linear regression model regard to an impulse in `x`. For simplicity, we set the intercept $\alpha$ of this model to $0$ and fix the slope of the contemporaneous effect $\beta_0$ of $x$ on $y$ to $2$. Additionally, we consider a single impulse coming from $x$ at time $s = 0$. 
+
+With these specifications, we use the following call to compute the impulse response of this model:
 
 ```{r, eval = FALSE}
-irf(
+irf_generator(
   intercept = 0,
   x_params = 2,
   ar_params = 0,
@@ -82,7 +81,7 @@ irf(
 which outputs the following `data.frame`:
 
 ```{r, echo = FALSE}
-irf(
+irf_generator(
   intercept = 0,
   x_params = 2,
   ar_params = 0,
@@ -90,12 +89,12 @@ irf(
 )
 ```
 
-This `data.frame` contains the information of interest, namely the simulated iteration (`time`), the total impulse response (`irf`), its constituent components coming from a specific source (intercept, `irf_intercept`; exogeneous variables, `irf_x`; residuals, `irf_eps`), and the impulses themselves (exogeneous variables, `x`; residuals, `residuals`). 
+This `data.frame` contains the information of interest, namely the simulated iteration (`time`), the total impulse response (`irf`), its constituent components coming from a specific source (intercept, `irf_intercept`; covariate, `irf_x`; residuals, `irf_eps`), and the impulses themselves (covariate, `x`; residuals, `residuals`). 
 
 So how do we interpret this output? For this, we look at the source of the impulse `x` and how the system reacts. At time `0`, we see that the value of `x` is `1`, which goes together with a change in the system of `2` (see `irf`). After time `0`, however, no other impulses of `x` are given and, likewise, the system remains at `0`. Imagine, however, that we change `x` so that there is a stream of impulses, then we get the following results:
 
 ```{r}
-irf(
+irf_generator(
   intercept = 0,
   x_params = 2,
   ar_params = 0,
@@ -108,7 +107,7 @@ Notice that whenever the value of `x` is not `0`, the system responds, which is 
 For more complex models, things become a bit more complicated. Compare the results of the linear regression model with an ADL(1, 1) model, for example:
 
 ```{r}
-irf(
+irf_generator(
   intercept = 0,
   x_params = 2,
   ar_params = 0.75,
@@ -119,7 +118,7 @@ irf(
 Similarly, we can play around with yet more complicated models with multiple lags in both the exogeneous variables and the residuals, for example: 
 
 ```{r}
-irf(
+irf_generator(
   intercept = 0,
   x_params = c(2, -1, 0.25),
   ar_params = c(0.75, 0.5, -0.1),
@@ -131,52 +130,109 @@ In these cases, impulse response functions really pay off: One can see how the t
 
 
 
-#### Single impulses 
+### Case 2: Pre-specified Impulses and Estimated Parameters
 
-Typically, one will want to examine what the model expects will happen after a single impulse. For this, we provide some helper functions `impulse` and `scaled_impulse` for a singular unit impulse and an impulse scaled by a given value, for example the standard deviation of the variable x or of the residuals. Using this requires specifying the number of datapoints one wants to simulate and at which location one want the impulse to happen, for example:
+In the second case, a researcher seeks to investigate the response of a pre-specified model on a set of impulses, but now using estimated (rather than pre-specified) parameters of this model. This use-case may be useful when one wants to investigate the behavior of a given model while requiring its parameters to be ``realistic''.
 
-```{r}
-impulse(5, 1)
-```
-
-In this example, we retrieve a vector of length 5 with a `1` at the first location, with all other values being `0`. Similarly, we can scale such a vector by using `scaled_impulse` so that:
+To achieve this goal, one has to provide the `irf_generator` function with a set of impulses through the arguments `x` and `residuals`, as well as with a data set through the argument `data` and the assumed number of lags for the model to be estimated through the arguments `y_lags` and `x_lags`. For example, using the following dataset:
 
 ```{r}
-scaled_impulse(5, 2, 10)
-```
-which consists of a vector of length 5 with a `10` at the second location. Within our previous routine, we can add the additional step, so that:
-
-```{r}
-resid <- scaled_impulse(10, 3, 2.5)
-irf(
-  intercept = 0, 
-  x_params = c(2, 1),
-  ar_params = c(0.75, -0.5),
-  residuals = resid
-)
-
-```
-which provides us with the expected response of the specified system to a residual impulse of size `2.5`.
-
-Note that one is not obliged to consider only a single impulse (though we believe this is the easiest way to analyze predictions of a system). Specifically, users can also provide continued impulses to the system as a researcher does in, for example, an experiment. This makes use of the same routine, just with another specification of the impulses:
-
-```{r}
+# Generate data with the irf_generator function
 set.seed(1)
-
-resid <- rnorm(10)
-irf(
+data <- irf_generator(
   intercept = 0, 
   x_params = c(2, 1),
-  ar_params = c(0.75, -0.5),
-  residuals = resid
+  ar_params = c(0.75, -0.1),
+  x = rnorm(100),
+  residuals = rnorm(100)
+)
+
+# Change the dataset to only contain two columns with dependent variable and covariate
+data <- data[, c("irf", "x")]
+colnames(data) <- c("dependent", "independent")
+
+```
+
+one can estimate an ADL(2, 2) and investigate its impulse response through the following call:
+
+```{r}
+irf_generator(
+  data = data, 
+  cols = c("dependent", "independent"),
+  x_lags = 2, 
+  y_lags = 2,
+  x = c(1, 0, 0, 0, 0),
+  residuals = c(-1, 0, 0, 0, 0)
+)
+```
+
+A few things deserve note. First, one should specify the `cols` argument so that it defines under which columns to find the dependent variable and the covariate in that order. If one leaves this undefined, `irf_generator` will assume that the column names are `"y"` and `"x"` for the dependent variable and the covariate respectively. If those columns are not found, the call will result in an error:
+
+```{r, error = TRUE}
+irf_generator(
+  data = data, 
+  cols = c("column_1", "column_2"),
+  x_lags = 2, 
+  y_lags = 2,
+  x = c(1, 0, 0, 0, 0),
+  residuals = c(-1, 0, 0, 0, 0)
+)
+```
+
+Second, the minimum value of `x_lags` and `y_lags` is different, so that `x_lags` can minimally be $0$ while `y_lags` can minimally be $1$, both of which are imposed through the equation above. When one specifies lags lower than these ones, `irf_generator` will automatically correct them to non-specified lags and provide you with a warning.
+
+```{r, warning = TRUE}
+irf_generator(
+  data = data, 
+  cols = c("dependent", "independent"),
+  x_lags = -2, 
+  y_lags = -2,
+  x = c(1, 0, 0, 0, 0),
+  residuals = c(-1, 0, 0, 0, 0)
 )
 ```
 
 
 
-### Starting from data
+### Case 3: Data-based Impulses and Pre-specified Parameters
 
-TO DO
+In the third case, a researcher seeks to investigate the response of a pre-specified model on a set of impulses that are based on their own data. This is, for example, useful when investigating the behavior of a given, theory-inspired, model on a set of relevant data. To achieve this, one has to specify the parameters of the model (`intercept`, `x_params`, and `ar_params`) and provide the `irf_generator` function with a data set to base its cumulative impulses on (through `data`). For example:
+
+```{r}
+result <- irf_generator(
+  data = data[1:10, ], 
+  cols = c("dependent", "independent"),
+  intercept = 0, 
+  x_params = c(2, 1),
+  ar_params = c(0.75, -0.1)
+)
+result
+```
+
+Behind the scenes, the function will use the parameters and provided data to compute the values of `x` and `residuals`, based on which it then computes the response functions. Note that the values of the `dependent` column in `data` correspond to the values of the `irf` column in the output:
+
+```{r}
+cbind(result$irf, data$dependent[1:10])
+```
+
+This is always the case, no matter which parameters one specifies. The correspondence between these two should therefore not be taken as evidence for the model; Rather, this type of analysis shows how the observed scores can be decomposed into a part due to the covariate and a part due to the residuals _according to the specified model_.
+
+
+
+### Case 4: Data-based Impulses and Estimated Parameters
+
+Finally, one may wish to both estimate the parameters of a model _and_ get the cumulative response functions based on their data. To achieve this, all one has to do is provide the data to use and the assumed lags in their model as follows:
+
+```{r}
+irf_generator(
+  data = data[1:10, ],
+  cols = c("dependent", "independent"), 
+  x_lags = 1, 
+  y_lags = 2
+)
+```
+
+This is useful when one wants to draw inference from a set of data.
 
 
 
@@ -194,7 +250,7 @@ This function can be used in two ways. First, one can provide the output of the 
 #| fig.cap: > 
 #|   _Visualization of an impulse response function for an ADL(3, 3) with parameters $\alpha = 0$, $\beta_i = \{ 2, -1, 0.25 \}$, and $\gamma_i = \{ 0.75, 0.5, -0.1 \}$. 
 #|   Impulses consist of a singular unit impulse in the covariate $x$ (positive) and the residuals $\epsilon$ (negative) at the start of the simulation._
-results <- irf(
+results <- irf_generator(
   intercept = 0,
   x_params = c(2, -1, 0.25),
   ar_params = c(0.75, 0.5, -0.1),
@@ -224,6 +280,51 @@ irf_plot(
 As can be seen, the figure is the same in both cases. The first case is useful when inspecting the results of a given model, where one still needs to have the numerical values of the responses for analysis purposes. The second case is mostly useful in situations where one wants to explore the range of responses of a (set of) model(s) without a need to have the numerical values of the impulse-responses.
 
 The plots that come out of the `irf_plot` function are customizable, as shown in the section on [Plotting](plotting.html)
+
+
+
+
+
+## Single impulses 
+
+Typically, one will want to examine what the model expects will happen after a single impulse. For this, we provide some helper functions `impulse` and `scaled_impulse` for a singular unit impulse and an impulse scaled by a given value, for example the standard deviation of the variable x or of the residuals. Using this requires specifying the number of datapoints one wants to simulate and at which location one want the impulse to happen, for example:
+
+```{r}
+impulse(5, 1)
+```
+
+In this example, we retrieve a vector of length 5 with a `1` at the first location, with all other values being `0`. Similarly, we can scale such a vector by using `scaled_impulse` so that:
+
+```{r}
+scaled_impulse(5, 2, 10)
+```
+which consists of a vector of length 5 with a `10` at the second location. Within our previous routine, we can add the additional step, so that:
+
+```{r}
+resid <- scaled_impulse(10, 3, 2.5)
+irf_generator(
+  intercept = 0, 
+  x_params = c(2, 1),
+  ar_params = c(0.75, -0.5),
+  residuals = resid
+)
+
+```
+which provides us with the expected response of the specified system to a residual impulse of size `2.5`.
+
+Note that one is not obliged to consider only a single impulse (though we believe this is the easiest way to analyze predictions of a system). Specifically, users can also provide continued impulses to the system as a researcher does in, for example, an experiment. This makes use of the same routine, just with another specification of the impulses:
+
+```{r}
+set.seed(1)
+
+resid <- rnorm(10)
+irf_generator(
+  intercept = 0, 
+  x_params = c(2, 1),
+  ar_params = c(0.75, -0.5),
+  residuals = resid
+)
+```
 
 
 
