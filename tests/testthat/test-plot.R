@@ -15,7 +15,7 @@ testthat::test_that(
       ar_params = c(0.75, 0.25),
       x = impulseR::impulse(10, 1),
       residuals = impulseR::scaled_impulse(10, 1, -1)
-    )
+    )$irf
     tst <- impulseR::irf_plot(results)
 
     testthat::expect_equal(tst, ref)

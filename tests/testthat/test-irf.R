@@ -24,7 +24,7 @@ testthat::test_that(
           x,
           residuals,
           TRUE
-        )
+        )$irf
       )
     }
 
@@ -70,7 +70,7 @@ testthat::test_that(
           x_params = c(2, 2),
           x = x, 
           residuals = residuals
-        )
+        )$irf
       )
     }
 
@@ -113,7 +113,7 @@ testthat::test_that(
         ar_params = 0.75,
         x_params = c(2, 1),
         x = impulseR::impulse(10)
-      )
+      )$irf
     )
     testthat::expect_true(all(tst$irf_intercept < 0))
 
@@ -123,7 +123,7 @@ testthat::test_that(
         ar_params = 0.75,
         x_params = c(2, 1),
         x = impulseR::impulse(10)
-      )
+      )$irf
     )
     testthat::expect_true(all(tst$irf_intercept > 0))
   }
@@ -142,7 +142,7 @@ testthat::test_that(
       x = vals, 
       residuals = rep(0, 10),
       burnin = TRUE
-    )
+    )$irf
 
     testthat::expect_true(is.data.frame(tst))
     testthat::expect_equal(
@@ -162,7 +162,7 @@ testthat::test_that(
       x = rep(0, 10), 
       residuals = vals,
       burnin = TRUE
-    )
+    )$irf
 
     testthat::expect_equal(tst$x, rep(0, 10))
     testthat::expect_equal(tst$residuals, vals)
@@ -177,7 +177,7 @@ testthat::test_that(
       x = vals_x, 
       residuals = vals_eps,
       burnin = TRUE
-    )
+    )$irf
 
     testthat::expect_equal(tst$x, vals_x)
     testthat::expect_equal(tst$residuals, vals_eps)
@@ -195,7 +195,7 @@ testthat::test_that(
       parameters[[50]]$eps,
       parameters[[50]]$x,
       x = rep(1, 10)
-    )
+    )$irf
 
     testthat::expect_equal(tst$residuals, rep(0, 10))
 
@@ -205,7 +205,7 @@ testthat::test_that(
       parameters[[50]]$eps,
       parameters[[50]]$x,
       residuals = rep(1, 10)
-    )
+    )$irf
 
     testthat::expect_equal(tst$x, rep(0, 10))
   }
@@ -221,7 +221,7 @@ testthat::test_that(
       1,
       x = rep(1, 10),
       burnin = TRUE
-    )$irf_intercept
+    )$irf$irf_intercept
 
     not_burned <- impulseR::irf(
       1, 
@@ -229,7 +229,7 @@ testthat::test_that(
       1,
       x = rep(1, 10),
       burnin = FALSE
-    )$irf_intercept
+    )$irf$irf_intercept
 
     # Compare the values of `irf_intercept` based on analytic values of the 
     # non-zero intercept
@@ -262,7 +262,7 @@ testthat::test_that(
         vals, 
         rep(0, 10),
         TRUE
-      )[, c("time", "irf")] |> 
+      )$irf[, c("time", "irf")] |> 
         as.matrix() |> 
         `rownames<-` (NULL) |> 
         `colnames<-` (NULL)
@@ -288,7 +288,7 @@ testthat::test_that(
         vals, 
         rep(0, 10),
         TRUE
-      )[, c("time", "irf")] |> 
+      )$irf[, c("time", "irf")] |> 
         as.matrix() |> 
         `rownames<-` (NULL) |> 
         `colnames<-` (NULL)
@@ -314,7 +314,7 @@ testthat::test_that(
         vals, 
         rep(0, 10),
         TRUE
-      )[, c("time", "irf")] |> 
+      )$irf[, c("time", "irf")] |> 
         as.matrix() |> 
         `rownames<-` (NULL) |> 
         `colnames<-` (NULL)
@@ -343,7 +343,7 @@ testthat::test_that(
         rep(0, 10), 
         vals,
         TRUE
-      )[, c("time", "irf")] |> 
+      )$irf[, c("time", "irf")] |> 
         as.matrix() |> 
         `rownames<-` (NULL) |> 
         `colnames<-` (NULL)
@@ -368,7 +368,7 @@ testthat::test_that(
         rep(0, 10), 
         vals,
         TRUE
-      )[, c("time", "irf")] |> 
+      )$irf[, c("time", "irf")] |> 
         as.matrix() |> 
         `rownames<-` (NULL) |> 
         `colnames<-` (NULL)
@@ -413,7 +413,7 @@ testthat::test_that(
         ar_params = parameters[[i]]$eps,
         x = rnorm(100),
         residuals = rnorm(100)
-      )
+      )$irf
 
       # Loop over all possibilities of the lags
       for(j in seq_len(nrow(lags))) {
@@ -423,7 +423,7 @@ testthat::test_that(
           cols = c("irf", "x"),
           y_lags = lags$y_lags[j],
           x_lags = ifelse(is.na(lags$x_lags[j]), NA, lags$x_lags[j] - 1)
-        )
+        )$irf
 
         # Check whether `irf` corresponds to `y`, and whether `x` corresponds to
         # `x`
@@ -470,7 +470,7 @@ testthat::test_that(
         ar_params = parameters[[i]]$eps,
         x = rnorm(100),
         residuals = rnorm(100)
-      )
+      )$irf
 
       # Loop over all possibilities of the lags
       for(j in seq_len(nrow(lags))) {
@@ -487,7 +487,7 @@ testthat::test_that(
           x_lags = ifelse(is.na(lags$x_lags[j]), NA, lags$x_lags[j] - 1),
           x = impulses,
           residuals = impulses
-        )
+        )$irf
 
         # Check whether `x` and `residuals` are correctly passed on
         tst_y[i, j] <- all(results$x == impulses)

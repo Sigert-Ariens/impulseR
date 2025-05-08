@@ -276,7 +276,7 @@ testthat::test_that(
         ar_params = parameters[[i]]$eps,
         x = rnorm(1000),
         residuals = rnorm(1000)
-      )
+      )$irf
 
       # Estimate the parameters
       results <- impulseR::estimate(
@@ -294,7 +294,7 @@ testthat::test_that(
         parameters[[i]]$ar_params - results$ar_params
       )
 
-      tst[i] <- all(params <= 10^(-1))
+      tst[i] <- all(abs(params) <= 10^(-1))
     }
 
     # Do the actual check
@@ -333,7 +333,7 @@ testthat::test_that(
         ar_params = parameters[[i]]$eps,
         x = rnorm(100),
         residuals = rnorm(100)
-      )
+      )$irf
 
       # Loop over all possibilities of the lags
       for(j in seq_len(nrow(lags))) {
@@ -353,7 +353,7 @@ testthat::test_that(
           x = results$x,
           residuals = results$residuals,
           burnin = FALSE
-        )
+        )$irf
 
         # Check whether `irf` corresponds to `y`, and whether `x` corresponds to
         # `x`
@@ -399,7 +399,7 @@ testthat::test_that(
         ar_params = parameters[[i]]$eps,
         x = rnorm(100),
         residuals = rnorm(100)
-      )
+      )$irf
 
       # Loop over all possibilities of the lags
       for(j in seq_len(nrow(lags))) {
