@@ -18,7 +18,7 @@ library(impulseR)
 
 ## Functionality
 
-This package allows users to compute and visualize the model-expected response to a given impulse. For a detailed explanation on how to use the package, we refer the reader to the [Documentation](https://ppw-okpiv.pages.gitlab.kuleuven.be/u0133721/impulseR/reference/index.html). In the documentation, one can find the [theoretical background](https://ppw-okpiv.pages.gitlab.kuleuven.be/u0133721/impulseR/reference/impulse_response.html) of the package, the way in which [impulse responses should be computed](https://ppw-okpiv.pages.gitlab.kuleuven.be/u0133721/impulseR/reference/getting_started.html), and the way in which [they should be visualized](https://ppw-okpiv.pages.gitlab.kuleuven.be/u0133721/impulseR/reference/plotting.html).
+This package allows users to compute and visualize the model-expected response to a given impulse. For a detailed explanation on how to use the package, we refer the reader to the [Documentation](https://impulser-5cae6f.pages.gitlab.kuleuven.be/reference/index.html). In the documentation, one can find the [theoretical background](https://impulser-5cae6f.pages.gitlab.kuleuven.be/articles/impulse_response.html) of the package, the way in which [impulse responses should be computed](https://impulser-5cae6f.pages.gitlab.kuleuven.be/articles/getting_started.html), and the way in which [they should be visualized](https://impulser-5cae6f.pages.gitlab.kuleuven.be/articles/plotting.html).
 
 ## Getting help
 
