@@ -18,21 +18,21 @@
 #' @examples 
 #' # Using predefined parameters
 #' irf_plot(
-#'   1, 
-#'   c(0.5, 0.25), 
-#'   c(2, 0.5),
+#'   intercept = 1, 
+#'   ar_params = c(0.5, 0.25), 
+#'   x_params = c(2, 0.5),
 #'   x = c(1, rep(0, 9))
 #' )
 #' 
 #' # Using the output of irf
 #' output <- irf(
-#'   1, 
-#'   c(0.5, 0.25), 
-#'   c(2, 0.5),
+#'   intercept = 1, 
+#'   ar_params = c(0.5, 0.25), 
+#'   x_params = c(2, 0.5),
 #'   x = c(1, rep(0, 9))
 #' )
 #' 
-#' irf_plot(output)
+#' irf_plot(output$irf)
 #' 
 #' @rdname irf_plot
 #' 

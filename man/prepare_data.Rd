@@ -44,7 +44,7 @@ data <- data.frame(
 )
 
 # For these data, prepare the data for estimation for an ADL(2, 2)
-prepared_data <- prepared_data(
+prepared_data <- prepare_data(
   data, 
   cols = c("DV", "IV"),
   y_lags = 2, 
