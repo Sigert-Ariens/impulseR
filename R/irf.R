@@ -25,6 +25,8 @@
 #' \code{x_lags = 0, y_lags = NA}, while a lag-1 autoregressive model is defined 
 #' as \code{x_lags = NA, y_lags = 1}.
 #' 
+#' @param ... Arguments specific to different \code{irf} methods.
+#' 
 #' @return List containing the fit of the model (under \code{"fit"}), the 
 #' parameters that were used for the generation of the responses (under 
 #' \code{"intercept"}, \code{"x_params"}, and \code{"ar_params"}, and a dataframe 

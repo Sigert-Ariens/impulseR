@@ -39,6 +39,8 @@ irf(object, ...)
 \arguments{
 \item{object}{Dataframe containing the variables of interest}
 
+\item{...}{Arguments specific to different \code{irf} methods.}
+
 \item{cols}{Character vector denoting the columns containing the variables of
 interest. First character should denote the dependent variable, the second 
 one the covariate of interest. Defaults to \code{c("y", "x")}}
