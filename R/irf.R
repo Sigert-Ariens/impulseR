@@ -210,6 +210,12 @@ setMethod("irf", signature(), function(intercept = 0,
                                        residuals = NULL,
                                        burnin = TRUE){  
   
+    # Check whether only a single intercept is provided.
+    if(length(intercept) > 1) {
+      warning("More than one intercept provided. Using the first value in this vector.")
+      intercept <- intercept[1]
+    }
+
     # Check whether x or residuals (or both) are provided. If not, then we have to 
     # throw an error. 
     #

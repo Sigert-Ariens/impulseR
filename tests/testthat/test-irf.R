@@ -9,7 +9,7 @@ testthat::test_that(
   }
 )
 
-# Test expected warnings
+# Test expected warnings 1
 testthat::test_that(
   "Testing expected warning: Deviations in length of x and residuals",
   {
@@ -50,7 +50,7 @@ testthat::test_that(
   }
 )
 
-# Test expected warnings
+# Test expected warnings 2
 testthat::test_that(
   "Testing expected warning: NAs in x and/or residuals",
   {
@@ -91,6 +91,41 @@ testthat::test_that(
     tst <- suppressWarnings(fx(x = x, residuals = residuals))
     testthat::expect_equal(tst$x, x[-c(1:6)])
     testthat::expect_equal(tst$residuals, residuals[-c(1:6)])
+  }
+)
+
+# Test expected warnings 3
+testthat::test_that(
+  "Testing expected warning: More than one intercept",
+  {
+    testthat::expect_warning(
+      impulseR::irf(
+        intercept = c(1, 2),
+        ar_params = c(0.75, 0.5),
+        x_params = c(2, 1),
+        x = impulseR::impulse(10)
+      )
+    )
+
+    tst <- suppressWarnings(
+      impulseR::irf(
+        intercept = c(-10, 10),
+        ar_params = 0.75,
+        x_params = c(2, 1),
+        x = impulseR::impulse(10)
+      )
+    )
+    testthat::expect_true(all(tst$irf_intercept < 0))
+
+    tst <- suppressWarnings(
+      impulseR::irf(
+        intercept = c(10, -10),
+        ar_params = 0.75,
+        x_params = c(2, 1),
+        x = impulseR::impulse(10)
+      )
+    )
+    testthat::expect_true(all(tst$irf_intercept > 0))
   }
 )
 
