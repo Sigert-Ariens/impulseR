@@ -241,6 +241,16 @@ setMethod("irf", signature(), function(intercept = 0,
       warning("Length of `residuals` is smaller than length of `x`. Imputing zeros in `residuals`.")
     }
 
+    # Check for NAs
+    if(any(is.na(residuals)) | any(is.na(x))) {
+      warning("NAs found in the provided `x` and/or `residuals`. Deleting them in a listwise fashion.")
+
+      idx <- !is.na(residuals) & !is.na(x)
+      residuals <- residuals[idx]
+      x <- x[idx]
+    }
+
+    # After all these manipulations, you can proceed.
     N <- length(x)
 
 

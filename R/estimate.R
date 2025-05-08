@@ -53,6 +53,15 @@ estimate <- function(data,
     stop("Columns specified in `cols` cannot be found in the supplied dataframe.")
   }
 
+  # Check for NAs
+  if(any(is.na(data))) {
+    warning("NAs found in the data. Deleting them in a listwise fashion.")
+    
+    idx <- !is.na(rowSums(data))
+    data <- data[idx, ]
+  }
+
+  # Change column names for easier handling
   data <- data[, cols] |>
     `colnames<-` (c("y", "x"))
 
@@ -200,7 +209,16 @@ compute_residuals <- function(data,
   if(!all(cols %in% colnames(data))) {
     stop("Columns specified in `cols` cannot be found in the supplied dataframe.")
   }
+
+  # Check for NAs
+  if(any(is.na(data))) {
+    warning("NAs found in the data. Deleting them in a listwise fashion.")
+    
+    idx <- !is.na(rowSums(data))
+    data <- data[idx, ]
+  }
   
+  # Change column names for easier handling
   data <- data[, cols] |>
     `colnames<-` (c("y", "x"))
 
@@ -375,16 +393,10 @@ prepare_data <- function(data,
                          x_lags = NULL,
                          y_lags = NULL) {
 
-  # Extract the number of data-points.  
-  N <- nrow(data)
-
   # Check whether columns are contained in the data
   if(!all(cols %in% colnames(data))) {
     stop("Columns specified in `cols` cannot be found in the supplied dataframe.")
   }
-
-  data <- data[, cols] |>
-    `colnames<-` (c("y", "x"))
 
   # Check whether the number of lags are defined for either one of the variables.
   # If not, then we cannot prepare the data, provide a warning, and return the 
@@ -395,6 +407,21 @@ prepare_data <- function(data,
     warning("No lags specified for `y` or `x`. Returning original data.frame.")
     return(data)
   }
+
+  # Check for NAs
+  if(any(is.na(data))) {
+    warning("NAs found in the data. Deleting them in a listwise fashion.")
+    
+    idx <- !is.na(rowSums(data))
+    data <- data[idx, ]
+  }
+
+  # Change column names for easy handling
+  data <- data[, cols] |>
+    `colnames<-` (c("y", "x"))
+
+  # Extract the number of data-points.  
+  N <- nrow(data)
 
   # If some lags in y are specified, create a variable X1 that contains the data
   # across each of those lags.
