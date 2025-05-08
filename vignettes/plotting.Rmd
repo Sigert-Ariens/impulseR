@@ -23,13 +23,13 @@ library(impulseR)
 #|   Impulses consist of a singular unit impulse in the covariate $x$ (positive) and the residuals $\epsilon$ (negative) at the start of the simulation._
 
 # Compute impulse responses
-results <- irf(
+results <- irf_generator(
   intercept = 1, 
   x_params = c(1, 0.5),
   ar_params = c(0.75, -0.25),
   x = impulse(10, 1),
   residuals = scaled_impulse(10, 1, -1)
-)
+)$irf
 
 # Plot the results
 irf_plot(results)
@@ -56,11 +56,11 @@ Imagine a model in which you do not specify the `ar_params`, but only some lagge
 #|   A single unit impulse is given by the covariate at time $t = 0$._
 
 # Compute impulse responses
-results <- irf(
+results <- irf_generator(
   intercept = 1, 
   x_params = c(1, 0.5),
   x = impulse(10, 1)
-)
+)$irf
 
 # Plot the results
 irf_plot(results)
@@ -107,13 +107,13 @@ The main subject of the figures are the lines that display the total response, t
 To see the effect of the arguments, consider the impulse responses derived from an ADL(2, 2) again:
 
 ```{r}
-results <- irf(
+results <- irf_generator(
   intercept = 1, 
   x_params = c(1, 0.5),
   ar_params = c(0.75, -0.25),
   x = impulse(10, 1),
   residuals = scaled_impulse(10, 1, -1)
-)
+)$irf
 ```
 
 Changing the colors of the different components, we run the following code:

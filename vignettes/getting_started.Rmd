@@ -78,7 +78,7 @@ irf_generator(
   x = c(1, 0, 0, 0, 0)
 )
 ```
-which outputs the following `data.frame`:
+which outputs a list containing the fit of the model (`fit`, see later), the parameters of the model (`intercept`, `x_params`, and `ar_params`), and a `data.frame` with the impulse or cumulative responses (`irf`):
 
 ```{r, echo = FALSE}
 irf_generator(
@@ -89,9 +89,9 @@ irf_generator(
 )
 ```
 
-This `data.frame` contains the information of interest, namely the simulated iteration (`time`), the total impulse response (`irf`), its constituent components coming from a specific source (intercept, `irf_intercept`; covariate, `irf_x`; residuals, `irf_eps`), and the impulses themselves (covariate, `x`; residuals, `residuals`). 
+It is the `data.frame` that contains the information of interest, namely the simulated iteration (`time`), the total impulse response (`irf`), its constituent components coming from a specific source (intercept, `irf_intercept`; covariate, `irf_x`; residuals, `irf_eps`), and the impulses themselves (covariate, `x`; residuals, `residuals`). 
 
-So how do we interpret this output? For this, we look at the source of the impulse `x` and how the system reacts. At time `0`, we see that the value of `x` is `1`, which goes together with a change in the system of `2` (see `irf`). After time `0`, however, no other impulses of `x` are given and, likewise, the system remains at `0`. Imagine, however, that we change `x` so that there is a stream of impulses, then we get the following results:
+So how do we interpret this output? For this, we look at the source of the impulse `x` and how the system reacts. At time `0`, we see that the value of `x` is `1`, which goes together with a change in the system of `2` (see `irf`). After time `0`, however, no other impulses of `x` are given and, likewise, the system remains at `0`. Imagine, however, that we change `x` so that there is a stream of impulses, then we get the following results (note that we select only the `irf` slot of the output):
 
 ```{r}
 irf_generator(
@@ -99,7 +99,7 @@ irf_generator(
   x_params = 2,
   ar_params = 0,
   x = c(1, 0, 3, 0, 5)
-)
+)$irf
 ```
 
 Notice that whenever the value of `x` is not `0`, the system responds, which is as expected for a linear regression model.
@@ -112,7 +112,7 @@ irf_generator(
   x_params = 2,
   ar_params = 0.75,
   x = c(1, 0, 0, 0, 0)
-)
+)$irf
 ```
 
 Similarly, we can play around with yet more complicated models with multiple lags in both the exogeneous variables and the residuals, for example: 
@@ -123,7 +123,7 @@ irf_generator(
   x_params = c(2, -1, 0.25),
   ar_params = c(0.75, 0.5, -0.1),
   x = c(1, 0, 0, 0, 0)
-)
+)$irf
 ```
 
 In these cases, impulse response functions really pay off: One can see how the total response `irf` depends on the system's response to the impulses in `x` and to the impulses in the `residuals` separately, easing interpretation of the model as a whole.
@@ -145,7 +145,7 @@ data <- irf_generator(
   ar_params = c(0.75, -0.1),
   x = rnorm(100),
   residuals = rnorm(100)
-)
+)$irf
 
 # Change the dataset to only contain two columns with dependent variable and covariate
 data <- data[, c("irf", "x")]
@@ -156,7 +156,7 @@ colnames(data) <- c("dependent", "independent")
 one can estimate an ADL(2, 2) and investigate its impulse response through the following call:
 
 ```{r}
-irf_generator(
+results <- irf_generator(
   data = data, 
   cols = c("dependent", "independent"),
   x_lags = 2, 
@@ -164,9 +164,18 @@ irf_generator(
   x = c(1, 0, 0, 0, 0),
   residuals = c(-1, 0, 0, 0, 0)
 )
+results
 ```
 
-A few things deserve note. First, one should specify the `cols` argument so that it defines under which columns to find the dependent variable and the covariate in that order. If one leaves this undefined, `irf_generator` will assume that the column names are `"y"` and `"x"` for the dependent variable and the covariate respectively. If those columns are not found, the call will result in an error:
+A few things deserve note. First, one may notice that the `fit` slot in the output is not empty anymore. Given that we estimated the parameters of the specified model, we provide users with the output of the `lm` function. This allows researchers to check the fit of the model to the data, for example, through using the build-in `summary` function of R:
+
+```{r}
+summary(results$fit)
+```
+
+To ease interpretation, we gave informative names to the lagged variables, reserving `x` for the covariate and `y` for the lagged dependent variable, and specifying the lag of these variables through `lag_X` (e.g., `lag_0` denotes contemporaneous effects, `lag_1` the immediate predecessor at time $t - 1$, and so on).
+
+Second, one should specify the `cols` argument so that it defines under which columns to find the dependent variable and the covariate in that order. If one leaves this undefined, `irf_generator` will assume that the column names are `"y"` and `"x"` for the dependent variable and the covariate respectively. If those columns are not found, the call will result in an error:
 
 ```{r, error = TRUE}
 irf_generator(
@@ -176,10 +185,10 @@ irf_generator(
   y_lags = 2,
   x = c(1, 0, 0, 0, 0),
   residuals = c(-1, 0, 0, 0, 0)
-)
+)$irf
 ```
 
-Second, the minimum value of `x_lags` and `y_lags` is different, so that `x_lags` can minimally be $0$ while `y_lags` can minimally be $1$, both of which are imposed through the equation above. When one specifies lags lower than these ones, `irf_generator` will automatically correct them to non-specified lags and provide you with a warning.
+Finally, the minimum value of `x_lags` and `y_lags` is different, so that `x_lags` can minimally be $0$ while `y_lags` can minimally be $1$, both of which are imposed through the equation above. When one specifies lags lower than these ones, `irf_generator` will automatically correct them to non-specified lags and provide you with a warning.
 
 ```{r, warning = TRUE}
 irf_generator(
@@ -189,7 +198,7 @@ irf_generator(
   y_lags = -2,
   x = c(1, 0, 0, 0, 0),
   residuals = c(-1, 0, 0, 0, 0)
-)
+)$irf
 ```
 
 
@@ -205,7 +214,7 @@ result <- irf_generator(
   intercept = 0, 
   x_params = c(2, 1),
   ar_params = c(0.75, -0.1)
-)
+)$irf
 result
 ```
 
@@ -229,7 +238,7 @@ irf_generator(
   cols = c("dependent", "independent"), 
   x_lags = 1, 
   y_lags = 2
-)
+)$irf
 ```
 
 This is useful when one wants to draw inference from a set of data.
@@ -256,7 +265,7 @@ results <- irf_generator(
   ar_params = c(0.75, 0.5, -0.1),
   x = c(1, 0, 0, 0, 0),
   residuals = c(-1, 0, 0, 0, 0)
-)
+)$irf
 
 irf_plot(results)
 ```
@@ -307,7 +316,7 @@ irf_generator(
   x_params = c(2, 1),
   ar_params = c(0.75, -0.5),
   residuals = resid
-)
+)$irf
 
 ```
 which provides us with the expected response of the specified system to a residual impulse of size `2.5`.
@@ -323,7 +332,7 @@ irf_generator(
   x_params = c(2, 1),
   ar_params = c(0.75, -0.5),
   residuals = resid
-)
+)$irf
 ```
 
 
