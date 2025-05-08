@@ -82,13 +82,16 @@ argument to \code{FALSE} when you provide a vector of regression residuals
 to the argument \code{residuals}. Defaults to \code{TRUE}.}
 }
 \value{
-Dataframe containing the impulse responses. The column \code{"time"} 
-contains the time step starting at 0. The columns \code{"irf_intercept"}, 
-\code{"irf_x"}, \code{"irf_eps"} contain the expected impulse responses 
-for the intercept, the exogeneous variables, and the residuals respectively
-and sum up to the total impulse response under column \code{"irf"}. Finally,
-the columns \code{"x"} and \code{"residuals"} contain the provided values 
-for those arguments.
+List containing the fit of the model (under \code{"fit"}), the 
+parameters that were used for the generation of the responses (under 
+\code{"intercept"}, \code{"x_params"}, and \code{"ar_params"}, and a dataframe 
+containing the impulse responses (under \code{"irf"}). Within the dataframe, 
+column \code{"time"} contains the time step starting at 0. The columns 
+\code{"irf_intercept"}, \code{"irf_x"}, \code{"irf_eps"} contain the expected 
+impulse responses for the intercept, the exogeneous variables, and the 
+residuals respectively and sum up to the total impulse response under column 
+\code{"irf"}. Finally, the columns \code{"x"} and \code{"residuals"} contain 
+the provided values for those arguments.
 }
 \description{
 Create impulse response functions based on either a specific set of parameters
@@ -128,7 +131,7 @@ data <- irf(
   ar_params = c(0.9, -0.1, 0.25),
   x = rnorm(100),
   residuals = rnorm(100)
-)
+)$irf
 
 # Decompose based on an ADL(2, 2)
 irf(
