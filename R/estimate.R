@@ -48,6 +48,18 @@ estimate <- function(data,
                      y_lags = NULL, 
                      x_lags = NULL) {
 
+  # Check whether only a single column is provided in the data.frame, and whether
+  # the person specified no use of x_lags. In this case, we make a pass and allow
+  # the user to continue (otherwise, they will get an error)
+  if((ncol(data) == 1) & is.null(x_lags)) {
+    colnames(data) <- "y"
+    data$x <- numeric(nrow(data))
+    cols <- c("y", "x")
+
+  } else if(ncol(data) == 1) {
+    stop("Only a single column provided, but lags in the covariate specified. Please provide a data.frame with at least two columns.")
+  }
+
   # Check whether the columns specified can be found in the dataset
   if(!all(cols %in% colnames(data))) {
     stop("Columns specified in `cols` cannot be found in the supplied dataframe.")
@@ -205,6 +217,30 @@ compute_residuals <- function(data,
                               x_params = 0, 
                               residuals = NULL) {
 
+  # Define the lags in x and y based on the parameters that are provided.
+  x_lags <- ifelse(
+    (x_params[1] != 0),
+    length(x_params) - 1,
+    NA
+  )
+  y_lags <- ifelse(
+    (ar_params[1] != 0),
+    length(ar_params),
+    NA
+  )
+
+  # Check whether only a single column is provided in the data.frame, and whether
+  # the person specified no use of x_lags. In this case, we make a pass and allow
+  # the user to continue (otherwise, they will get an error)
+  if((ncol(data) == 1) & is.na(x_lags)) {
+    colnames(data) <- "y"
+    data$x <- numeric(nrow(data))
+    cols <- c("y", "x")
+
+  } else if(ncol(data) == 1) {
+    stop("Only a single column provided, but lags in the covariate specified. Please provide a data.frame with at least two columns.")
+  }
+
   # Check whether columns are contained in the data
   if(!all(cols %in% colnames(data))) {
     stop("Columns specified in `cols` cannot be found in the supplied dataframe.")
@@ -221,18 +257,6 @@ compute_residuals <- function(data,
   # Change column names for easier handling
   data <- data[, cols] |>
     `colnames<-` (c("y", "x"))
-
-  # Define the lags in x and y based on the parameters that are provided.
-  x_lags <- ifelse(
-    (x_params[1] != 0),
-    length(x_params) - 1,
-    NA
-  )
-  y_lags <- ifelse(
-    (ar_params[1] != 0),
-    length(ar_params),
-    NA
-  )
 
   # Compute the number of datapoints
   N <- nrow(data)
@@ -392,6 +416,18 @@ prepare_data <- function(data,
                          cols = c("y", "x"),
                          x_lags = NULL,
                          y_lags = NULL) {
+
+  # Check whether only a single column is provided in the data.frame, and whether
+  # the person specified no use of x_lags. In this case, we make a pass and allow
+  # the user to continue (otherwise, they will get an error)
+  if((ncol(data) == 1) & is.null(x_lags)) {
+    colnames(data) <- "y"
+    data$x <- numeric(nrow(data))
+    cols <- c("y", "x")
+
+  } else if(ncol(data) == 1) {
+    stop("Only a single column provided, but lags in the covariate specified. Please provide a data.frame with at least two columns.")
+  }
 
   # Check whether columns are contained in the data
   if(!all(cols %in% colnames(data))) {

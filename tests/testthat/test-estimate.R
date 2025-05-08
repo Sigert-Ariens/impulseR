@@ -4,7 +4,7 @@ testthat::test_that(
     # Wrong columns in estimate
     testthat::expect_error(
       impulseR::estimate(
-        object = data.frame(Y = numeric(100), X = numeric(100)),
+        data.frame(Y = numeric(100), X = numeric(100)),
         cols = c("y", "x"),
         x_lags = 2,
         y_lags = 2
@@ -14,51 +14,112 @@ testthat::test_that(
     # Wrong columns in compute_residuals
     testthat::expect_error(
       impulseR::compute_residuals(
-        data.frame(Y = numeric(100), X = numeric(100),
-        cols = c("y", "x"))
+        data.frame(Y = numeric(100), X = numeric(100)),
+        cols = c("y", "x")
       )
     )
 
     # Wrong columns in prepare_data
     testthat::expect_error(
       impulseR::prepare_data(
-        data.frame(Y = numeric(100), X = numeric(100),
-        cols = c("y", "x"))
+        data.frame(Y = numeric(100), X = numeric(100)),
+        cols = c("y", "x")
+      )
+    )
+
+    # Single column specified, but only if x_lags specified in estimate
+    testthat::expect_error(
+      impulseR::estimate(
+        data.frame(Y = numeric(100)),
+        cols = c("y", "x"),
+        x_lags = 2, 
+        y_lags = 2
+      )
+    )
+
+    testthat::expect_no_error(
+      impulseR::estimate(
+        data.frame(Y = numeric(100)),
+        cols = c("y", "x"),
+        y_lags = 2
+      )
+    )
+
+    # Single column specified, but only if x_lags specified in estimate
+    testthat::expect_error(
+      impulseR::compute_residuals(
+        data.frame(Y = numeric(100)),
+        cols = c("y", "x"),
+        intercept = 2, 
+        ar_params = c(0.75, 0.5),
+        x_params = c(2, 1)
+      )
+    )
+
+    testthat::expect_no_error(
+      impulseR::compute_residuals(
+        data.frame(Y = numeric(100)),
+        cols = c("y", "x"),
+        intercept = 2, 
+        ar_params = c(0.75, 0.5)
+      )
+    )
+
+    # Single column specified, but only if x_lags in estimate
+    testthat::expect_error(
+      impulseR::prepare_data(
+        data.frame(Y = numeric(100)),
+        cols = c("y", "x"),
+        x_lags = 2, 
+        y_lags = 2
+      )
+    )
+
+    testthat::expect_no_error(
+      impulseR::prepare_data(
+        data.frame(Y = numeric(100)),
+        cols = c("y", "x"),
+        y_lags = 2
       )
     )
   }
 )
 
 testthat::test_that(
-  "Testing known warnings",
+  "Testing known warnings: No lags specified",
   {
-    # Create data to be used in this test
     data <- data.frame(y = rnorm(100), x = rnorm(100))
-
-    na_data <- data 
-    na_data$y[1:3] <- NA 
-    na_data$x[4:6] <- NA 
 
     # No lags specified. Also testing output
     testthat::expect_warning(impulseR::prepare_data(data))
 
     tst <- suppressWarnings(impulseR::prepare_data(data))
     testthat::expect_equal(tst, data)
+  }
+)
 
+testthat::test_that(
+  "Testing known warnings: NAs in the data",
+  {
+    # Create data to be used in this test
+    data <- data.frame(y = rnorm(100), x = rnorm(100))
+    data$y[1:3] <- NA 
+    data$x[4:6] <- NA 
+    
     # NAs in data in `estimate`. Also testing output
-    testthat::expect_warning(impulseR::estimate(na_data))
+    testthat::expect_warning(impulseR::estimate(data))
 
-    tst <- suppressWarnings(impulseR::estimate(na_data))
-    testthat::expect_equal(tst$x, na_data$x[-c(1:6)])
+    tst <- suppressWarnings(impulseR::estimate(data))
+    testthat::expect_equal(tst$x, data$x[-c(1:6)])
     testthat::expect_equal(
       tst$residuals + tst$intercept, 
-      na_data$y[-c(1:6)]
+      data$y[-c(1:6)]
     )
 
     # NAs in data in `compute_residuals`. Also testing output
     testthat::expect_warning(
       impulseR::compute_residuals(
-        na_data,
+        data,
         ar_params = c(0.5, 0.25),
         x_params = c(2, 2)
       )
@@ -66,7 +127,7 @@ testthat::test_that(
 
     tst <- suppressWarnings(
       impulseR::compute_residuals(
-        na_data, 
+        data, 
         ar_params = c(0.5, 0.25),
         x_params = c(2, 2)
       )
@@ -76,7 +137,7 @@ testthat::test_that(
     # NAs in data in `prepare_data`. Also testing output
     testthat::expect_warning(
       impulseR::prepare_data(
-        na_data, 
+        data, 
         x_lags = 2, 
         y_lags = 2
       )
@@ -84,7 +145,7 @@ testthat::test_that(
 
     tst <- suppressWarnings(
       impulseR::prepare_data(
-        na_data, 
+        data, 
         x_lags = 2, 
         y_lags = 2
       )
