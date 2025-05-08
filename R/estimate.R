@@ -160,7 +160,7 @@ estimate <- function(data,
   # Now that this has been done, return a list containing all of this information
   return(
     list(
-      "model" = results,
+      "fit" = results,
       "intercept" = intercept,
       "ar_params" = ar_params,
       "x_params" = x_params,

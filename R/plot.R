@@ -89,7 +89,7 @@ setMethod("irf_plot", signature(), function(intercept = 0,
     # Execute the other `irf_plot` method to create and return the plot
     return(
       irf_plot(
-        data, 
+        data$irf, 
         ...
       )
     )

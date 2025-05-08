@@ -25,13 +25,16 @@
 #' \code{x_lags = 0, y_lags = NA}, while a lag-1 autoregressive model is defined 
 #' as \code{x_lags = NA, y_lags = 1}.
 #' 
-#' @return Dataframe containing the impulse responses. The column \code{"time"} 
-#' contains the time step starting at 0. The columns \code{"irf_intercept"}, 
-#' \code{"irf_x"}, \code{"irf_eps"} contain the expected impulse responses 
-#' for the intercept, the exogeneous variables, and the residuals respectively
-#' and sum up to the total impulse response under column \code{"irf"}. Finally,
-#' the columns \code{"x"} and \code{"residuals"} contain the provided values 
-#' for those arguments.
+#' @return List containing the fit of the model (under \code{"fit"}), the 
+#' parameters that were used for the generation of the responses (under 
+#' \code{"intercept"}, \code{"x_params"}, and \code{"ar_params"}, and a dataframe 
+#' containing the impulse responses (under \code{"irf"}). Within the dataframe, 
+#' column \code{"time"} contains the time step starting at 0. The columns 
+#' \code{"irf_intercept"}, \code{"irf_x"}, \code{"irf_eps"} contain the expected 
+#' impulse responses for the intercept, the exogeneous variables, and the 
+#' residuals respectively and sum up to the total impulse response under column 
+#' \code{"irf"}. Finally, the columns \code{"x"} and \code{"residuals"} contain 
+#' the provided values for those arguments.
 #' 
 #' @examples 
 #' #########################
@@ -45,7 +48,7 @@
 #'   ar_params = c(0.9, -0.1, 0.25),
 #'   x = rnorm(100),
 #'   residuals = rnorm(100)
-#' )
+#' )$irf
 #' 
 #' # Decompose based on an ADL(2, 2)
 #' irf(
@@ -151,28 +154,28 @@ setMethod("irf", signature(object = "data.frame"), function(object,
     # Differentiate between provided residuals and/or covariate impulses, or 
     # the ones that have been computed in the estimation function.
     if(is.null(x) & is.null(residuals)) {
-      return(
-        irf(
-          intercept = params$intercept,
-          x_params = params$x_params,
-          ar_params = params$ar_params,
-          x = params$x, 
-          residuals = params$residuals,
-          burnin = FALSE
-        )
+      output <- irf(
+        intercept = params$intercept,
+        x_params = params$x_params,
+        ar_params = params$ar_params,
+        x = params$x, 
+        residuals = params$residuals,
+        burnin = FALSE
       )
+
     } else {
-      return(
-        irf(
-          intercept = params$intercept, 
-          x_params = params$x_params, 
-          ar_params = params$ar_params,
-          x = x, 
-          residuals = residuals, 
-          burnin = TRUE
-        )
+      output <- irf(
+        intercept = params$intercept, 
+        x_params = params$x_params, 
+        ar_params = params$ar_params,
+        x = x, 
+        residuals = residuals, 
+        burnin = TRUE
       )
     }
+
+    output$fit <- params$fit 
+    return(output)
   }
 )
 
@@ -383,7 +386,15 @@ setMethod("irf", signature(), function(intercept = 0,
       "residuals" = residuals    
     ) 
     
-    return(output)  
+    return(
+      list(
+        "fit" = NULL, 
+        "intercept" = intercept, 
+        "x_params" = x_params, 
+        "ar_params" = ar_params,
+        "irf" = output
+      )
+    )  
   }
 )
 
