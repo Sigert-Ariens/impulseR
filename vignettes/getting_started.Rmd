@@ -15,10 +15,6 @@ To install the package, you can use the `remotes` package:
 remotes::install_gitlab("u0133721/impulseR", host = "gitlab.kuleuven.be/")
 ```
 
-```{r, echo = FALSE, include = FALSE}
-devtools::install()
-```
-
 To use the package, use `library` 
 
 ```{r}

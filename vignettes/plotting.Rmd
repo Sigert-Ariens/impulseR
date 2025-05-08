@@ -10,7 +10,6 @@ vignette: >
 One of the main devices one can use to make sense of impulse responses is visualization. In `impulseR`, visualization is achieved through the `irf_plot` function, to which you provide the results of the `irf` function:
 
 ```{r, echo = FALSE}
-devtools::install()
 library(impulseR)
 ```
 
