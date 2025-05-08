@@ -73,6 +73,24 @@ estimate <- function(data,
     data <- data[idx, ]
   }
 
+  # Check for impossible lags
+  y_lags <- ifelse(is.null(y_lags), NA, y_lags)
+  x_lags <- ifelse(is.null(x_lags), NA, x_lags)
+
+  if(!is.na(x_lags)) {
+    if(x_lags < 0) {
+      warning("Specified lags in `x` are below its minimal value (0). Assuming no involvement of the covariate.")
+      x_lags <- NA
+    }
+  }
+
+  if(!is.na(y_lags)) {
+    if(y_lags < 1) {
+      warning("Specified lags in `y` are below its minimal value (1). Assuming no autoregression.")
+      y_lags <- NA
+    }
+  }
+
   # Change column names for easier handling
   data <- data[, cols] |>
     `colnames<-` (c("y", "x"))
@@ -80,8 +98,6 @@ estimate <- function(data,
   # Check whether any lags have been provided. If not, then we have to estimate
   # an empty model, that is one in which only the mean is estimated and all other
   # parameters are 0. This is the immediate result.
-  y_lags <- ifelse(is.null(y_lags), NA, y_lags)
-  x_lags <- ifelse(is.null(x_lags), NA, x_lags)
   if(is.na(y_lags) & is.na(x_lags)) {
     return(
       list(
@@ -434,11 +450,27 @@ prepare_data <- function(data,
     stop("Columns specified in `cols` cannot be found in the supplied dataframe.")
   }
 
+  # Check for impossible lags
+  y_lags <- ifelse(is.null(y_lags), NA, y_lags)
+  x_lags <- ifelse(is.null(x_lags), NA, x_lags)
+
+  if(!is.na(x_lags)) {
+    if(x_lags < 0) {
+      warning("Specified lags in `x` are below its minimal value (0). Assuming no involvement of the covariate.")
+      x_lags <- NA
+    }
+  }
+
+  if(!is.na(y_lags)) {
+    if(y_lags < 1) {
+      warning("Specified lags in `y` are below its minimal value (1). Assuming no autoregression.")
+      y_lags <- NA
+    }
+  }
+
   # Check whether the number of lags are defined for either one of the variables.
   # If not, then we cannot prepare the data, provide a warning, and return the 
   # whole thing.
-  y_lags <- ifelse(is.null(y_lags), NA, y_lags)
-  x_lags <- ifelse(is.null(x_lags), NA, x_lags)
   if(is.na(y_lags) & is.na(x_lags)) {
     warning("No lags specified for `y` or `x`. Returning original data.frame.")
     return(data)

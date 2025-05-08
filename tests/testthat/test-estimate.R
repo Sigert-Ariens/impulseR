@@ -99,6 +99,113 @@ testthat::test_that(
 )
 
 testthat::test_that(
+  "Testing known warnings: Lags wrongly specified",
+  {
+    data <- data.frame(y = rnorm(100), x = rnorm(100))
+
+    # Lags wrongly specified in `prepare_data`. Also testing output (but only 
+    # for single option)
+    #
+    # Multiple warnings are sometimes expect, which leads to the nested calls
+    testthat::expect_warning(
+      testthat::expect_warning(
+        testthat::expect_warning(
+          impulseR::prepare_data(
+            data,
+            x_lags = -2, 
+            y_lags = -2
+          )
+        )
+      )
+    )
+
+    testthat::expect_warning(
+      impulseR::prepare_data(
+        data,
+        x_lags = -2,
+        y_lags = 1
+      )
+    )
+
+    testthat::expect_warning(
+      impulseR::prepare_data(
+        data,
+        x_lags = 1, 
+        y_lags = -2
+      )
+    )
+
+    tst <- suppressWarnings(
+      impulseR::prepare_data(
+        data,
+        x_lags = -2, 
+        y_lags = -2
+      )
+    )
+    testthat::expect_equal(tst, data)
+
+    # Lags wrongly specified in `estimate`. Also testing output
+    #
+    # Multiple warnings are sometimes expect, which leads to the nested calls
+    testthat::expect_warning(
+      testthat::expect_warning(
+        impulseR::estimate(
+          data,
+          x_lags = -2, 
+          y_lags = -2
+        )
+      )
+    )
+
+    testthat::expect_warning(
+      impulseR::estimate(
+        data,
+        x_lags = -2,
+        y_lags = 1
+      )
+    )
+
+    testthat::expect_warning(
+      impulseR::estimate(
+        data,
+        x_lags = 1, 
+        y_lags = -2
+      )
+    )
+
+    tst <- suppressWarnings(
+      impulseR::estimate(
+        data, 
+        x_lags = -2, 
+        y_lags = -2
+      )
+    )
+    testthat::expect_equal(tst$x_params, 0)
+    testthat::expect_equal(tst$ar_params, 0)
+
+    tst <- suppressWarnings(
+      impulseR::estimate(
+        data, 
+        x_lags = 1, 
+        y_lags = -2
+      )
+    )
+    testthat::expect_equal(length(tst$x_params), 2)
+    testthat::expect_equal(tst$ar_params, 0)
+
+    tst <- suppressWarnings(
+      impulseR::estimate(
+        data, 
+        x_lags = -2, 
+        y_lags = 2
+      )
+    )
+    testthat::expect_equal(tst$x_params, 0)
+    testthat::expect_equal(length(tst$ar_params), 2)
+  }
+)
+
+testthat::test_that(
   "Testing known warnings: NAs in the data",
   {
     # Create data to be used in this test
