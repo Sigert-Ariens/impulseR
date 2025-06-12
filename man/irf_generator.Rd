@@ -10,8 +10,6 @@ irf_generator(
   x_params = 0,
   data = NULL,
   cols = c("y", "x"),
-  y_lags = NA,
-  x_lags = NA,
   x = NULL,
   residuals = NULL
 )
@@ -36,15 +34,6 @@ lag (i.e., first element for t, second element for t - 1,...). Defaults to
 interest. First character should denote the dependent variable, the second 
 one the covariate of interest. Defaults to \code{c("y", "x")}}
 
-\item{y_lags}{Integer denoting the number of lags to include for the 
-dependent variable. Starts at the value \code{1}. Defaults to \code{NA}, 
-communicating that you don't want to use any lagged values of the dependent 
-variable}
-
-\item{x_lags}{Integer denoting the number of lags to include for the 
-covariate. Starts at the value \code{0}. Defaults to \code{NA}, communicating 
-that you don't want to use any lagged values of the dependent variable}
-
 \item{x}{Numeric vector denoting the values of the exogenous variables 
 X at each time t. These values serve as one type of impulses to the system to 
 be simulated. Defaults to \code{NULL}, which means an empty vector of the same
@@ -68,59 +57,39 @@ residuals respectively and sum up to the total impulse response under column
 the provided values for those arguments.
 }
 \description{
-Overhead function that allows users to define impulse-response functions, 
-either to explore the qualitative behavior of a user-specified model or to 
-exploration or to decompose their data into a part due to the residuals and a  
-part due to the covariate. Relies heavily on the \code{\link[impulseR]{irf}}
-method.
+Overhead function that allows users to define impulse-response functions based
+on parameters estimated on the provided data. This is useful for exploring 
+the qualitative behavior of a user-specified model. Relies heavily on the 
+\code{\link[impulseR]{irf}} method and is complimentary to the 
+\code{\link[impulseR]{irf_estimator}} function, which estimates a set of 
+parameters for the creation of its impulse response functions.
 }
 \details{
-Through its argument, this function distinguishes between four use-cases based
-on two dimensions. First, the user can decide to either use a pre-specified 
-parameter set, or to estimate the parameters based on a provided data set.
-Second, the user can decide to investigate the model's response to a pre-
-specified impulse in the residuals and/or covariate, or to investigate the 
-model's cumulative response based on a provided data set. Each of the four
-use-cases serves its own purpose and can be called in the way specified 
-below.
+This function allows for the creation of impulse response functions based on
+a pre-specified set of parameters. There are two use-cases for this function:
 
-*Case 1 - Estimate parameters / Data-based impulses:* To compute the 
-cumulative response of an estimated model, one should provide a 
-\code{data.frame} to the argument \code{data}, together with an indication of 
-how many lags in the residuals (\code{y_lags}) and the covariates 
-(\code{x_lags}) one wants to include in the model. If the column names of the 
-dependent and independent variables within the data set are not equal to 
-\code{"y"} and \code{"x"} respectively, one should also change the value of 
-the \code{cols} argument, providing it with a vector of two strings denoting 
-the dependent variable and independent variable in that order. 
-
-Based on this input, the function will estimate the parameters of the 
-specified model using the \code{lm} function. The parameters will then be 
-extracted, the values of the covariate and residual impulses computed, and 
-the cumulative impulse responses will then be computed.
-
-*Case 2 - Estimate parameters / Pre-specified impulses:* In this case, 
-one still provides a \code{data.frame} to the argument \code{data} and some 
-values for the \code{y_lags} and \code{x_lags} arguments. Additionally, one 
-should provide (scaled) impulses through the \code{residuals} and/or \code{x} 
-arguments, which will serve as the input for the computations. Note that one 
-can define their own vector, or that they can use the 
-\code{\link[impulseR]{impulse}} or \code{\link[impulseR]{scaled_impulse}} 
-functions to create such a vector.
-
-*Case 3 - Pre-specified parameters / Data-based impulses:* In this 
-case, one still provides a \code{data.frame} to the argument \code{data}, but 
-doesn't specify the \code{y_lags} and \code{x_lags} arguments. Instead, one 
-should provide the pre-specified parameters of the model through the arguments
+*Case 1 - Pre-specified parameters / Data-based impulses:* In this 
+case, one provides a \code{data.frame} to the argument \code{data} and a set
+of pre-specified parameters of the model through the arguments
 \code{intercept} (the intercept of the model), \code{ar_params} (the dynamic
 parameters of the model), and \code{x_params} (the slopes of the covariates).
 Note that you should not provide any values for the \code{residuals} and 
-\code{x} arguments: Otherwise the function will execute Case 4.
+\code{x} arguments: Otherwise the function will execute the second case.
 
-*Case 4 - Pre-specified parameters / Pre-specified impulses:* Finally, 
-this case requires the definition of the parameters (\code{intercept}, 
+*Case 2 - Pre-specified parameters / Pre-specified impulses:* This case 
+requires the definition of the parameters (\code{intercept}, 
 \code{ar_params}, \code{x_params}) and the impulses (\code{residuals} and/or
-\code{x}).
+\code{x}). 
+
+Together with the \code{\link[impulseR]{irf_estimator}} function, this 
+makes the user able to create impulse responses for four different scenarios,
+each distinguished based on two dimensions. First, the user can decide to 
+either use a pre-specified parameter set, or to estimate the parameters based 
+on a provided data set. Second, the user can decide to investigate the model's 
+response to a pre-specified impulse in the residuals and/or covariate, or to 
+investigate the model's cumulative response based on a provided data set.  
+This function is responsible for the two cases in which parameters are 
+pre-specified.
 }
 \examples{
 # Generate data
@@ -134,25 +103,7 @@ data <- irf(
 )$irf
 colnames(data) <- c("dependent", "independent")
 
-# Case 1: Estimated parameters / Data-based impulses
-irf_generator(
-  data = data, 
-  cols = c("dependent", "independent"),
-  y_lags = 2,
-  x_lags = 2
-)
-
-# Case 2: Estimated parameters / Pre-specified impulses
-irf_generator(
-  data = data, 
-  cols = c("dependent", "independent"),
-  y_lags = 2,
-  x_lags = 2,
-  residuals = impulse(10),
-  x = impulse(10)
-)
-
-# Case 3: Pre-specified parameters / Data-based impulses
+# Case 1: Pre-specified parameters / Data-based impulses
 irf_generator(
   data = data, 
   cols = c("dependent", "independent"),
@@ -161,7 +112,7 @@ irf_generator(
   x_params = c(2, 1)
 )
 
-# Case 4: Pre-specified parameters / Pre-specified impulses
+# Case 2: Pre-specified parameters / Pre-specified impulses
 irf_generator(
   intercept = 1,
   ar_params = c(0.7, 0.2),
