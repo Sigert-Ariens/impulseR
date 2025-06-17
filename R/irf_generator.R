@@ -190,29 +190,3 @@ irf_generator <- function(intercept = 0,
     
 }
 
-
- data <- irf_generator(
-   intercept = 1, 
-   x_params = c(1, 2, -0.5),
-   ar_params = c(0.5, -0.1, 0.25),
-   x = rnorm(1000),
-   innovations = rnorm(1000),
-   burnin = FALSE
- )
- 
-dat <- data[,c(2,4)]
-
-colnames(dat) <-  c("y","x")
- 
- # Fit a lag-2 ADL model to the data and calculate the cumulative responses over the study period:
- 
- out_empirical <- irf_empirical(
-   data = dat, 
-   cols = c("y", "x"),
-   y_lags = 3,
-   x_lags = 2
- )
-
-estimate(dat)
-
-
