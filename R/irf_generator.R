@@ -88,6 +88,16 @@ irf_generator <- function(intercept = 0,
     innovations <- innovations[idx]
     x <- x[idx]
   }
+
+  # Finally, check if the roots of $\phi(L)$ are all outside the complex unit circle. If so, provide a warning. 
+  
+  phiL <- c(1,-ar_params)
+  
+  mod <- abs(polyroot(phiL)) # Calculate the moduli of the roots
+  
+  if(min(mod)<1){
+    warning("The AR parameters supplied imply a nonstationary process, some of the roots of phi(L) are inside the complex unit circle")
+  }
   
   # After all these manipulations, you can proceed with the algebra.
   nt <- length(x)
