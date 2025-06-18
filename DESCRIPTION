@@ -41,7 +41,7 @@ Collate:
     'irf_generator.R'
     'irf_empirical.R'
     'impulse.R'
-    'plot.R'
+    'irf_plot.R'
 Suggests: 
     fs,
     knitr,

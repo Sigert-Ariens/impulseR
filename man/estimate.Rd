@@ -2,7 +2,7 @@
 % Please edit documentation in R/estimate.R
 \name{estimate}
 \alias{estimate}
-\title{Estimate a one-dimensional ADL}
+\title{Estimate the parameters of an $ADL(p,q)$ model and prepare the output for the calculation of system responses. An intercept will always be estimated.}
 \usage{
 estimate(data, cols = c("y", "x"), y_lags = NULL, x_lags = NULL)
 }
@@ -13,30 +13,25 @@ estimate(data, cols = c("y", "x"), y_lags = NULL, x_lags = NULL)
 interest. First character should denote the dependent variable, the second 
 one the covariate of interest. Defaults to \code{c("y", "x")}}
 
-\item{y_lags}{Integer denoting the number of lags to include for the 
-dependent variable. Starts at the value \code{1}. Defaults to \code{NA}, 
-communicating that you don't want to use any lagged values of the dependent 
-variable}
+\item{y_lags}{Integer denoting the number of AR effects to estimate freely. Starts at the value \code{1}, allowing for an AR(1) structure. Defaults to \code{NA}, 
+communicating that you don't want to allow for any AR effects.}
 
-\item{x_lags}{Integer denoting the number of lags to include for the 
-covariate. Starts at the value \code{0}. Defaults to \code{NA}, communicating 
-that you don't want to use any lagged values of the dependent variable}
+\item{x_lags}{Integer denoting the number of lagged covariate effects. Starts at the value \code{0}, implying that only the contemporaneous effect, $\beta_{x}$, is estimated freely. Defaults to \code{NA}, communicating 
+that you don't want to estimate any covariate parameters}
 }
 \value{
 Named list containing the estimated model (\code{model}), the 
-parameters that were estimated as used by the \code{\link[impulseR]{irf}} 
-function (\code{intercept}, \code{x_params}, \code{ar_params}), and the 
-impulses obtained from the data (\code{x}, \code{residuals})
+parameter estimates (\code{intercept}, \code{x_params}, \code{ar_params}), the observed covariate values (\code{x}) and the estimated innovations \code{innovations}
 }
 \description{
-Estimate a one-dimensional ADL
+Estimate the parameters of an $ADL(p,q)$ model and prepare the output for the calculation of system responses. An intercept will always be estimated.
 }
 \details{
-Estimate the parameters of an $ADL(p, k)$, where $p$ represents the number of
-lags in the dependent variable $y$ and $k$ represents the number of lags in 
-the covariate $x$. Relating this to the mathematics, we get:
+Estimate the parameters of an $ADL(p, q)$, where $p$ represents the number of
+autoregressive effects (effects of lags of the dependent variable $y_{t}$) and $q$ represents 
+the number of lagged covariate effects. The ADL(p,q) is formalized as: 
 
-\eqn{y_t = \alpha + \sum_{i = 0}^k \beta_i x_{t - i} + \sum_{i = 1}^p \gamma_i y_{t - i} + \epsilon_t}
+\eqn{y_t = \alpha + \sum_{i = 1}^p \phi_{i}y_{t-i} + \beta_{x} x_{t} + \sum_{i = 1}^q \beta_{L^{j}x} x_{t - j} + v_{t}}
 }
 \examples{
 # Define a dataset

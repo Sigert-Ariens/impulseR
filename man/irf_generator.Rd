@@ -2,123 +2,54 @@
 % Please edit documentation in R/irf_generator.R
 \name{irf_generator}
 \alias{irf_generator}
-\title{Generate impulse response functions}
+\title{Core function to calculate system responses}
 \usage{
 irf_generator(
   intercept = 0,
   ar_params = 0,
   x_params = 0,
-  data = NULL,
-  cols = c("y", "x"),
   x = NULL,
-  residuals = NULL
+  innovations = NULL,
+  burnin = TRUE
 )
 }
 \arguments{
-\item{intercept}{Numeric denoting the intercept to use for the impulse response 
-function. Defaults to \code{0}}
+\item{intercept}{Numeric denoting the intercept, $\alpha$. Defaults to \code{0}}
 
-\item{ar_params}{Numeric vector denoting the autoregressive parameters to be
-used for the impulse response function. Parameters need to be given in order
-of increased lag (i.e., first element for t - 1, second element for t - 2,...).
+\item{ar_params}{Numeric vector denoting the autoregressive parameters (the $\phi$) parameters of the model.
+Parameters need to be given in order of increasing lags (i.e., first element for $\phi_{1}$, second element for $\phi_{2}$,...).
 Defaults to \code{0}}
 
-\item{x_params}{Numeric vector denoting the values of the slopes for the 
-exogenous variables. Parameters again need to be given in order of increased
-lag (i.e., first element for t, second element for t - 1,...). Defaults to 
-\code{0}}
+\item{x_params}{Numeric vector denoting the covariate parameters of the model (the $\beta$ parameters). 
+Parameters again need to be given in order of increasing lags(i.e., first element for $\beta_{x}$, second element for $\beta_{Lx}$,...). Defaults to 
+\code{0}, indicating that there are no covariate parameters.}
 
-\item{data}{Dataframe containing the variables of interest}
+\item{x}{Numeric vector denoting the values of covariate at each time point. 
+Depending on the input vectors supplied, different system responses will be returned (see vignette X). 
+Defaults to \code{NULL}, which returns an empty vector of the same
+length as \code{innovations} (if provided).}
 
-\item{cols}{Character vector denoting the columns containing the variables of
-interest. First character should denote the dependent variable, the second 
-one the covariate of interest. Defaults to \code{c("y", "x")}}
-
-\item{x}{Numeric vector denoting the values of the exogenous variables 
-X at each time t. These values serve as one type of impulses to the system to 
-be simulated. Defaults to \code{NULL}, which means an empty vector of the same
-length as \code{residuals} (if provided).}
-
-\item{residuals}{Numeric vector denoting the values of the residuals at each 
-time t. These values serve as one type of impulses to the system to be 
-simulated. Defaults to \code{NULL}, which means an empty vector of the same
+\item{innovations}{Numeric vector denoting the values of the innovations at each 
+time point. Depending on the input vectors supplied, different system responses will be returned (see vignette X).
+Defaults to \code{NULL}, which returns an empty vector of the same
 length as \code{x} (if provided).}
+
+\item{burnin}{Logical (True/False) specifying if the part of the system response due to the intercept should be burned in analytically. Defaults to \code{TRUE}, the system responses 
+responses will be displayed relative to the hypothetical equilibrium state of the system. If set to \code{FALSE}, initial value dependent behavior will be present.}
 }
 \value{
-List containing the fit of the model (under \code{"fit"}), the 
-parameters that were used for the generation of the responses (under 
-\code{"intercept"}, \code{"x_params"}, and \code{"ar_params"}, and a dataframe 
-containing the impulse responses (under \code{"irf"}). Within the dataframe, 
-column \code{"time"} contains the time step starting at 0. The columns 
-\code{"irf_intercept"}, \code{"irf_x"}, \code{"irf_eps"} contain the expected 
-impulse responses for the intercept, the exogeneous variables, and the 
-residuals respectively and sum up to the total impulse response under column 
-\code{"irf"}. Finally, the columns \code{"x"} and \code{"residuals"} contain 
-the provided values for those arguments.
+A dataframe containing the system responses. Within the dataframe, 
+column \code{"time"} contains the time index starting at 0. The columns 
+\code{"irf_intercept"}, \code{"irf_x"}, \code{"irf_v"} contain the model implied
+system responses for the intercept, the covariate, and the innovations, respectively. 
+The total response is also provided under the column \code{"y"}. 
+Finally, the columns \code{"x"} and \code{"innovations"} contain 
+the provided input vectors.
 }
 \description{
-Overhead function that allows users to define impulse-response functions based
-on parameters estimated on the provided data. This is useful for exploring 
-the qualitative behavior of a user-specified model. Relies heavily on the 
-\code{\link[impulseR]{irf}} method and is complimentary to the 
-\code{\link[impulseR]{irf_estimator}} function, which estimates a set of 
-parameters for the creation of its impulse response functions.
+#' @details 
+This function calculates system responses for an ADL(p,q) model, formalized as:
 }
 \details{
-This function allows for the creation of impulse response functions based on
-a pre-specified set of parameters. There are two use-cases for this function:
-
-*Case 1 - Pre-specified parameters / Data-based impulses:* In this 
-case, one provides a \code{data.frame} to the argument \code{data} and a set
-of pre-specified parameters of the model through the arguments
-\code{intercept} (the intercept of the model), \code{ar_params} (the dynamic
-parameters of the model), and \code{x_params} (the slopes of the covariates).
-Note that you should not provide any values for the \code{residuals} and 
-\code{x} arguments: Otherwise the function will execute the second case.
-
-*Case 2 - Pre-specified parameters / Pre-specified impulses:* This case 
-requires the definition of the parameters (\code{intercept}, 
-\code{ar_params}, \code{x_params}) and the impulses (\code{residuals} and/or
-\code{x}). 
-
-Together with the \code{\link[impulseR]{irf_estimator}} function, this 
-makes the user able to create impulse responses for four different scenarios,
-each distinguished based on two dimensions. First, the user can decide to 
-either use a pre-specified parameter set, or to estimate the parameters based 
-on a provided data set. Second, the user can decide to investigate the model's 
-response to a pre-specified impulse in the residuals and/or covariate, or to 
-investigate the model's cumulative response based on a provided data set.  
-This function is responsible for the two cases in which parameters are 
-pre-specified.
-}
-\examples{
-# Generate data
-set.seed(1)
-data <- irf(
-  intercept = 1, 
-  x_params = c(1, 2, -0.5),
-  ar_params = c(0.9, -0.1, 0.25),
-  x = rnorm(100),
-  residuals = rnorm(100)
-)$irf
-colnames(data) <- c("dependent", "independent")
-
-# Case 1: Pre-specified parameters / Data-based impulses
-irf_generator(
-  data = data, 
-  cols = c("dependent", "independent"),
-  intercept = 1,
-  ar_params = c(0.7, 0.2),
-  x_params = c(2, 1)
-)
-
-# Case 2: Pre-specified parameters / Pre-specified impulses
-irf_generator(
-  intercept = 1,
-  ar_params = c(0.7, 0.2),
-  x_params = c(2, 1),
-  residuals = impulse(10),
-  x = impulse(10)
-)
-
+\eqn{y_t = \alpha + \sum_{i = 1}^p \phi_{i}y_{t-i} + \beta_{x} x_{t} + \sum_{i = 1}^q \beta_{L^{j}x} x_{t - j} + v_{t}}.
 }
