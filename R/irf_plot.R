@@ -1,7 +1,6 @@
-
-#' Plot impulse responses
+#' Plot system responses
 #' 
-#' Plots the impulse response functions based on the provided input. This input 
+#' Plots the system responses based on the provided input. This input 
 #' should be the output of the \code{\link[impulseR]{irf_generator}} or the 
 #' \code{\link[impulseR]{irf_empirical}} functions.
 #' 
@@ -9,7 +8,7 @@
 #' \code{\link[impulseR]{irf_empirical}} function
 #' @param cols Character vector denoting the impulse responses you would like 
 #' to plot. The values in this vector should be columns in \code{data} and are 
-#' thus typically limited to \code{"irf"}, \code{"irf_x"}, \code{"irf_eps"},
+#' thus typically limited to \code{"irf"}, \code{"irf_x"}, \code{"irf_v"},
 #' or \code{"irf_intercept"}, or any combination of those. Defaults to all 
 #' impulse responses
 #' @param title Character denoting the title of the plot. Defaults to \code{NULL},
@@ -34,34 +33,34 @@
 #' @param legend.text.size Integer denoting the size of the legend text. 
 #' Defaults to a relative size of \code{1} as defined by the 
 #' \code{\link[ggplot2]{rel}} function
-#' @param irf.color,x.color,eps.color,intercept.color Character denoting the 
+#' @param irf.color,x.color,v.color,intercept.color Character denoting the 
 #' colors to use to visualize the total response (\code{irf.}), the response to 
-#' impulses of the variable x (\code{x.}), the response to the residuals 
-#' (\code{eps.}), and the intercept responses (\code{intercept.}) respectively. 
+#' impulses of the variable x (\code{x.}), the response to the innovations 
+#' (\code{v.}), and the intercept responses (\code{intercept.}) respectively. 
 #' Defaults are \code{"black"}, \code{"red4"}, \code{"green4"}, and \code{"gray"} 
 #' respectively
-#' @param irf.linetype,x.linetype,eps.linetype,intercept.linetype Character 
+#' @param irf.linetype,x.linetype,v.linetype,intercept.linetype Character 
 #' denoting the linetype to use to visualize the total response (\code{irf.}), 
 #' the response to impulses of the variable x (\code{x.}), the response to the 
-#' residuals (\code{eps.}), and the intercept responses (\code{intercept.}) 
+#' innovations (\code{v.}), and the intercept responses (\code{intercept.}) 
 #' respectively. Defaults are \code{"dashed"}, \code{"solid"}, \code{"solid"}, 
 #' and \code{"solid"} respectively
-#' @param irf.linewidth,x.linewidth,eps.linewidth,intercept.linewidth Numeric 
+#' @param irf.linewidth,x.linewidth,v.linewidth,intercept.linewidth Numeric 
 #' denoting the linewidth to use to visualize the total response (\code{irf.}), 
 #' the response to impulses of the variable x (\code{x.}), the response to the 
-#' residuals (\code{eps.}), and the intercept responses (\code{intercept.}) 
+#' innovations (\code{v.}), and the intercept responses (\code{intercept.}) 
 #' respectively. Defaults to \code{1} for all variables
-#' @param irf.label,x.label,eps.label,intercept.label Character denoting the 
+#' @param irf.label,x.label,v.label,intercept.label Character denoting the 
 #' legend label to give to the the total response (\code{irf.}), the response to 
-#' impulses of the variable x (\code{x.}), the response to the residuals 
-#' (\code{eps.}), and the intercept responses (\code{intercept.}) respectively.
+#' impulses of the variable x (\code{x.}), the response to the innovations 
+#' (\code{v.}), and the intercept responses (\code{intercept.}) respectively.
 #' Defaults to the mathematical labels for each specific part
 #' @param impulse.size Numeric denoting the size of the point that indicates an 
 #' impulse has been given. Defaults to \code{2}
-#' @param impulse.shape,impulse.x.shape,impulse.eps.shape Integer or character 
+#' @param impulse.shape,impulse.x.shape,impulse.v.shape Integer or character 
 #' denoting the shape of the point that indicates an impulse has been given. 
 #' You can give impulses of variable x (\code{.x.}) and impulses of the 
-#' residuals (\code{.eps.}) different shapes if desired. Defaults to \code{19}.
+#' innovations (\code{.v.}) different shapes if desired. Defaults to \code{19}.
 #' @param impulse.linetype Character denoting the linetype of the line connecting 
 #' the impulses to a given time on the x-axis. Defaults to \code{"dotted"}
 #' @param impulse.linewidth Numeric denoting the linewidth of the line connecting
@@ -102,16 +101,16 @@ irf_plot <- function(data,
                      title.hjust = 0.5,
                      label.size = ggplot2::rel(1),
                      axis.text.size = ggplot2::rel(0.75),
-                     legend.title.size = ggplot2::rel(1.25),
+                     legend.title.size = ggplot2::rel(1),
                      legend.text.size = ggplot2::rel(1),
                      x.color = "red4",
                      x.linetype = "solid",
                      x.linewidth = 1,
-                     x.label = latex2exp::TeX("$h_x * x$"),
-                     eps.color = "green4",
-                     eps.linetype = "solid",
-                     eps.linewidth = 1,
-                     eps.label = latex2exp::TeX("$h_v * v$"),
+                     x.label = NULL,
+                     v.color = "green4",
+                     v.linetype = "solid",
+                     v.linewidth = 1,
+                     v.label = NULL,
                      irf.color = "black",
                      irf.linetype = "dashed",
                      irf.linewidth = 1,
@@ -123,27 +122,27 @@ irf_plot <- function(data,
                      impulse.size = 2,
                      impulse.shape = 19,
                      impulse.x.shape = impulse.shape,
-                     impulse.eps.shape = impulse.shape,
+                     impulse.v.shape = impulse.shape,
                      impulse.linetype = "dotted",
                      impulse.linewidth = 1,
                      impulse.alpha = 0.95,
                      legend = TRUE,
                      legend.title = NULL,
                      legend.position = "right") {
-    
+  
   # Convert dataframe to long format, making the call to ggplot2 somewhat 
   # easier.
   data <- tidyr::pivot_longer(
     data,
-    cols = c("irf", "irf_x", "irf_eps", "irf_intercept")
+    cols = c("irf", "irf_x", "irf_v", "irf_intercept")
   )
-
+  
   # Determine which IRFs to plot, based on the `cols` argument. If NULL, then 
   # it will use the default of all columns.
   if(is.null(cols)) {
     cols <- unique(data$name) 
   }
-
+  
   # Filter out all of the IRFs that you don't want to plot.
   #
   # TO DO: Sigert has an additional filter here looking for whether X or Eps 
@@ -186,60 +185,78 @@ irf_plot <- function(data,
   colors <- c(
     "irf" = irf.color,
     "irf_x" = x.color,
-    "irf_eps" = eps.color,
+    "irf_v" = v.color,
     "irf_intercept" = intercept.color
   )
-
+  
   linetypes <- c(
     "irf" = irf.linetype,
     "irf_x" = x.linetype,
-    "irf_eps" = eps.linetype,
+    "irf_v" = v.linetype,
     "irf_intercept" = intercept.linetype
   )
-
+  
   linewidths <- c(
     "irf" = irf.linewidth,
     "irf_x" = x.linewidth,
-    "irf_eps" = eps.linewidth,
+    "irf_v" = v.linewidth,
     "irf_intercept" = intercept.linewidth
   )
-
-  labels <- c(
-    "irf" = irf.label,
-    "irf_x" = x.label,
-    "irf_eps" = eps.label,
-    "irf_intercept" = intercept.label
-  )
-
+  
+  
   # Some other plotting characteristics to take care of
   if(is.null(legend.title)) {
-    # Differentiate between cumulative responses and single impulses
-    legend.title <- ifelse(
-      (sum(object$x != 0) == 1) | (sum(object$residuals != 0) == 1),
-      "Impulse response",
-      "Cumulative response"
-    )
+    
+    legend.title <- "System response"
   }
-
-  if(is.null(xlabel)) {
-    # Differentiate between cumulative responses and single impulses
-    xlabel <- ifelse(
-      (sum(object$x != 0) == 1) | (sum(object$residuals != 0) == 1),
-      "s (time since input)",
-      "t (time)"
-    )
-  }
-
-  impulses <- object[, c("time", "x", "residuals")]
   
-
-
+  if(is.null(xlabel)) {
+    xlabel <- ifelse(
+      sum(data$x[-c(1)] == 0) | sum(data$innovations[-c(1)] == 0), "s (time step since input)", "t (time)"
+    )
+    
+  }
+    
+  ### Fix legends
+  
+  if(is.null(x.label)){
+    
+    x.label <- ifelse(
+      sum(data$x[-c(1)] == 0) | sum(data$innovations[-c(1)] == 0),
+      ifelse(data$x[1] == 1 | data$innovations[1] == 1, latex2exp::TeX("$h_x(s)$") ,latex2exp::TeX("$h_x(s)x_{0}$")
+    ),latex2exp::TeX("$(h_x * x)_{t}$") 
+    )
+  }
+  
+    if(is.null(v.label)){
+    
+    v.label <- ifelse(
+      sum(data$x[-c(1)] == 0) | sum(data$innovations[-c(1)] == 0),
+      ifelse(data$x[1] == 1 | data$innovations[1] == 1, latex2exp::TeX("$h_v(s)$") ,latex2exp::TeX("$h_v(s)v_{0}$")
+    ),latex2exp::TeX("$(h_v * v)_{t}$") 
+    )
+    }
+  
+  
+    labels <- c(
+    "irf" = irf.label,
+    "irf_x" = x.label,
+    "irf_v" = v.label,
+    "irf_intercept" = intercept.label
+  )
+  
+  
+  
+  impulses <- data[, c("time", "x", "innovations")]
+  
+  
+  
   # Create the actual plot.
   data$name <- factor(data$name)
   x_impulse <- impulses[impulses$x != 0, ]
-  eps_impulse <- impulses[impulses$residuals != 0, ]
+  v_impulse <- impulses[impulses$innovations != 0, ]
   axis.breaks <- 1:max(data$time)
-
+  
   plt <- ggplot2::ggplot(
     data = data, 
     ggplot2::aes(
@@ -252,7 +269,7 @@ irf_plot <- function(data,
   ) +
     # Content
     ggplot2::geom_line() +  
-
+    
     ggplot2::annotate(
       "segment",
       x = x_impulse$time, 
@@ -274,26 +291,26 @@ irf_plot <- function(data,
       shape = impulse.x.shape,
       alpha = impulse.alpha
     ) +
-
+    
     ggplot2::annotate(
       "segment",
-      x = eps_impulse$time, 
-      xend = eps_impulse$time, 
+      x = v_impulse$time, 
+      xend = v_impulse$time, 
       y = 0,
-      yend = eps_impulse$residuals,
-      color = eps.color,
+      yend = v_impulse$innovations,
+      color = v.color,
       linewidth = impulse.linewidth,
       linetype = impulse.linetype,
       alpha = impulse.alpha
     ) +
     ggplot2::annotate(
       "point",
-      x = eps_impulse$time, 
-      y = eps_impulse$residuals, 
-      fill = eps.color,
-      color = eps.color,
+      x = v_impulse$time, 
+      y = v_impulse$innovations, 
+      fill = v.color,
+      color = v.color,
       size = impulse.size,
-      shape = impulse.eps.shape,
+      shape = impulse.v.shape,
       alpha = impulse.alpha
     ) + 
     
@@ -338,9 +355,8 @@ irf_plot <- function(data,
       color = ggplot2::guide_legend(title = legend.title), 
       linetype = "none",
       linewidth = "none"
-    )
+    ) + 
+    ggplot2::scale_x_continuous(breaks = seq(floor(min(data$time)), ceiling(max(data$time)), by = 1)) # ensure integer steps in plot
   
   return(plt)
 }
-
-  
