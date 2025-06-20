@@ -19,7 +19,7 @@
 #' @param ylabel Character denoting the label of the y-axis. Defaults to 
 #' \code{NULL}, that is no such label
 #' @param title.size Integer denoting the size of the title. Defaults to a 
-#' relative size of \code{1.5} as defined by the \code{\link[ggplot2]{rel}} function
+#' relative size of \code{1} as defined by the \code{\link[ggplot2]{rel}} function
 #' @param title.hjust Numeric denoting the justification of the title. Defaults 
 #' to \code{0.5}, or centered justification
 #' @param label.size Integer denoting the size of the axis labels. Defaults to a 
@@ -97,7 +97,7 @@ irf_plot <- function(data,
                      title = NULL,
                      xlabel = NULL,
                      ylabel = NULL,
-                     title.size = ggplot2::rel(1.5),
+                     title.size = ggplot2::rel(1),
                      title.hjust = 0.5,
                      label.size = ggplot2::rel(1),
                      axis.text.size = ggplot2::rel(0.75),
