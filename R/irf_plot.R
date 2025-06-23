@@ -123,7 +123,8 @@ irf_plot <- function(data,
                      impulse.shape = 19,
                      impulse.x.shape = impulse.shape,
                      impulse.v.shape = impulse.shape,
-                     impulse.linetype = "dotted",
+                     impulse.x.linetype = "dotted",
+                     impulse.v.linetype = "dotted",
                      impulse.linewidth = 1,
                      impulse.alpha = 0.95,
                      legend = TRUE,
@@ -278,7 +279,7 @@ irf_plot <- function(data,
       yend = x_impulse$x,
       color = x.color,
       linewidth = impulse.linewidth,
-      linetype = impulse.linetype,
+      linetype = impulse.x.linetype,
       alpha = impulse.alpha
     ) +
     ggplot2::annotate(
@@ -300,7 +301,18 @@ irf_plot <- function(data,
       yend = v_impulse$innovations,
       color = v.color,
       linewidth = impulse.linewidth,
-      linetype = impulse.linetype,
+      linetype = impulse.v.linetype,
+      alpha = impulse.alpha
+    ) +
+  ggplot2::annotate(
+      "segment",
+      x = x_impulse$time, 
+      xend = x_impulse$time, 
+      y = 0,
+      yend = x_impulse$x,
+      color = x.color,
+      linewidth = impulse.linewidth,
+      linetype = impulse.x.linetype,
       alpha = impulse.alpha
     ) +
     ggplot2::annotate(
