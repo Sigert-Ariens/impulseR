@@ -15,330 +15,259 @@ To install the package, you can use the `remotes` package:
 remotes::install_gitlab("u0133721/impulseR", host = "gitlab.kuleuven.be/")
 ```
 
-To use the package, use `library` 
+To load the package, use `library` 
 
 ```{r}
 library(impulseR)
 ```
 
 
+## Overview of the package
 
+The ImpulseR package is designed to provide researchers with a user friendly way of visualizing and understanding the behavior implied by a dynamic regression model, by serving as a tool for the calculation and visualization of the system responses implied by the model. The ImpulseR package can be used to study the behavior of any dynamic regression model of the form:
 
+$$\begin{equation}
+y_{t} = \alpha + \sum_{i=1}^{p}\phi_{i}y_{t-i} + \beta_{x}x_{t} + \sum_{j=1}^{q}\beta_{L^{j}x}x_{t-j} + v_{t}.
+\end{equation}$$
 
+$\alpha$ is an intercept parameter, and we allow for $p$ AR effects $\phi_{i}$, a contemporaneous effect of the covariate $\beta_{x}$, and $q$ lagged covariate effects, $\beta_{L^{j}x}$. The models also contain \emph{input vectors} which are indexed by $t \in \mathbb{N}_{0}$. For technical reasons, we start the time index at $0$. For instance, $x_{5}$ is the value of the covariate at the 6th measurement occasion. Currently the package only supports models with a single time varying covariate. Many models employed in the literature, such as an AR(p) model or a dynamic structural equation model are special cases of this ADL model, so the materials can be used to investigate the behavior of these models too.
 
-## Analyzing impulse responses
+The package allows one to calculate different types of \emph{system responses} (impulse responses, scaled impulse responses, cumulative responses, and total responses). In each case, parameter values (hypothetical or estimated) are supplied to the package functions. Depending on which input vectors one supplies, one of these system responses will be returned. The different types of system responses all rely on the derivation of the \emph{impulse response function} of the model. The core function -- namely \code{\link[impulseR]{irf_generator}} --, derives the impulse response functions for a dynamic regression model using the analytic techniques discussed in Appendix 1 of Ariens, Vanhasbroeck, Lafit, & Ceulemans (submitted to Psychological Methods). The function will return different types of system responses depending on the input vectors supplied.  
 
-While there is only one primary function to be used -- namely `irf_generator` --, there are multiple ways to use the function for investigating a model's behavior. We distinguish between four cases, based on the distinctions between _Pre-specified Impulses_ vs. _Data-based Impulses_ and between _Pre-specified Parameters_ vs. _Estimated parameters_. In this section, we describe the workflow for these different use-cases and refer the interested reader to the section on [Impulse Response Functions](impulse_response.html) for technical information on the derivation of impulse and cumulative responses.
+A second feature of the package is that it allows for the construction of empirical trajectory plots (see manuscript, figure X). By calculating cumulative responses towards observed covariate values and estimated innovations, we can decompose the empirical data into latent system responses. The \code{\link[impulseR]{irf_empirical}} function performs estimation and processing steps necessary to construct empirical trajectory plots. A plotting function \code{\link[impulseR]{irf_plot}} can be used for visualization.
 
+In this vignette, we discuss how the \code{\link[impulseR]{irf_generator}} function can be used to generate the different types of system responses discussed in the manuscript. In X, we discuss how the \code{\link[impulseR]{irf_empirical}} function can be used to construct empirical trajectory plots. We also show how to use the \code{\link[impulseR]{irf_generator}} to further supplement an empirical analysis. 
 
+## The irf_generator function 
 
-### Case 1: Pre-specified Impulses and Pre-specified Parameters
+### Arguments
 
-In the first case, a researcher uses a pre-specified set of impulses and parameters to explore the predictions of different models, for example exploring the difference in predictions between a linear regression and an autoregressive model, or between a given model and a nested, restricted variant (e.g., Ariens et al., 2023). To achieve this, one specifies the parameters through the `intercept`, `x_params`, and `ar_params` arguments and impulses through the `x` and/or `residuals` arguments. Regarding the parameters, one has to specify:
+The \code{\link[impulseR]{irf_generator}} has two main sets of arguments. The first set are the model parameters. The second set are the input vectors we supply the system with. Different system responses will be returned depending on which input vectors are supplied. The burnin option is discussed in section X.  
+
+#### Parameters
+
+The different types of system responses can be calculated by supplying parameter values and input vectors to the \code{\link[impulseR]{irf_generator}} function. We distinguish the AR parameters $\phi_{1}, \phi_{2},...$ from covariate parameters, $\beta_{x}, \beta_{Lx},\beta_{L^{2}x},..$, and the intercept parameter $\alpha$. Note that the values of the parameters can be hypothetical or estimated. They are supplied using the following arguments:
 
 - `intercept`: A single numeric value that denotes the value of the intercept of the model;
-- `x_params`: One or more numeric values that define a set of slopes for the covariate $x$. If multiple values are provided, the first value determines the influence of the exogeneous impulses at lag 1, the second value at lag 2, and so on;
-- `ar_params`: One or more numeric values that define a set of autoregressive effects. If multiple values are provided, the first value determines the influence of the residual impulses at lag 1, the second value at lag 2, and so on.
+- `x_params`: A length $1+q$ list containing the values of the covariate parameters $\beta_{x}, \beta_{Lx},\beta_{L^{2}x},\dots,\beta_{L^{q}x}$. Importantly, $q$ is the number of free lagged covariate effects, the first element of the list is the contemporaneous effect of the covariate, $\beta_{x}$.;
+- `ar_params`: A length $p$ list containing the values of the AR parameters, $\phi_{1}, \phi_{2},\dots,\phi_{p}$.
 
-To make these arguments more concrete, consider the following general equation that defines the values of $y_t$:
+Although one can supply arbitrary parameter values, certain restrictions on the values of the AR parameters are required for stability. If one sees exploding system responses, some of the roots of the lag polynomial $\phi(L): 1 - \sum_{i=1}^{p}\phi_{i}L^{i}$ will be inside the complex unit circle. A warning will be returned if this is the case. We advise against using the materials for the study of systems which are not stable, since stability is assumed in the derivations (in particular from equation 22 onward). 
 
-\begin{equation} \label{eq: ADL}
-  y_t = \alpha + \sum_{i = 0}^t \beta_i x_{t - i} + \sum_{i = 1}^t \gamma_i y_{t - i} + \epsilon_t
-\end{equation}
-In this equation, $\alpha$ represents the intercept controlled through the argument `intercept`, $\beta_i$ represents the slopes for lags $i$ controlled through the argument `x_params`, and $\gamma_i$ represents the autoregressive effects for lags $i$ controlled through the argument `ar_params`. 
+#### Input vectors
 
-With this formalization, the package allows for a great deal of potential models, including empty models, linear regressions (LR), autoregressive models (AR), and any combination of the other models that we refer to as the autoregressive distributed lag model (ADL), as evidenced by the following table:
+The values of the covariate, $x_{0}, x_{1},...,x_{t}$, and the values of the innovations, $v_{0}, v_{1},...,v_{t}$ are supplied as vector arguments. The input vector for the intercept is a unit vector which is supplied automatically. Different system responses will be returned depending on which input vectors are supplied. To make this concrete, let us consider the following LCV model with two AR parameters:
 
- **model**   | **$\alpha$ (`intercept`)** | **$\beta$ (`x_params`)** | **$\gamma$ (`ar_params`)** 
--------------|----------------------------|--------------------------|----------------------------
- empty model | `0`                        | `0`                      | `0`                        
- LR          | `0`                        | `1`                      | `0`                        
- AR(1)       | `0`                        | `0`                      | `0.75`                     
- ADL(1, 1)   | `0`                        | `1`                      | `0.75`                     
- ADL(2, 1)   | `0`                        | `c(1, 1)`                | `0.75`                     
- ADL(2, 2)   | `0`                        | `c(1, 1)`                | `c(0.75, 0.5)`  
-Note that all nonzero values in this table are arbitrary and can take on any value. Furthermore note that the values for the intercept can also become `0` without creating another type of model
-
-Besides the specification of the parameters, one also needs to provide values for the impulses. This is achieved through the arguments:
-
-- `x`: A numeric vector defining the impulses that come from the covariate;
-- `residuals`: A numeric vector defining the impulses that come from the residuals. 
-
-Note that one does not need to define both types of impulses: One can opt for only investigating impulses that come from one source (covariates or residuals), rather than having to specify both at all times.
-
-Let's put this to practice. Consider an example where we want to investigate the behavior of a linear regression model regard to an impulse in `x`. For simplicity, we set the intercept $\alpha$ of this model to $0$ and fix the slope of the contemporaneous effect $\beta_0$ of $x$ on $y$ to $2$. Additionally, we consider a single impulse coming from $x$ at time $s = 0$. 
-
-With these specifications, we use the following call to compute the impulse response of this model:
-
-```{r, eval = FALSE}
-irf_generator(
-  intercept = 0,
-  x_params = 2,
-  ar_params = 0,
-  x = c(1, 0, 0, 0, 0)
-)
-```
-which outputs a list containing the fit of the model (`fit`, see later), the parameters of the model (`intercept`, `x_params`, and `ar_params`), and a `data.frame` with the impulse or cumulative responses (`irf`):
-
-```{r, echo = FALSE}
-irf_generator(
-  intercept = 0,
-  x_params = 2,
-  ar_params = 0,
-  x = c(1, 0, 0, 0, 0)
-)
-```
-
-It is the `data.frame` that contains the information of interest, namely the simulated iteration (`time`), the total impulse response (`irf`), its constituent components coming from a specific source (intercept, `irf_intercept`; covariate, `irf_x`; residuals, `irf_eps`), and the impulses themselves (covariate, `x`; residuals, `residuals`). 
-
-So how do we interpret this output? For this, we look at the source of the impulse `x` and how the system reacts. At time `0`, we see that the value of `x` is `1`, which goes together with a change in the system of `2` (see `irf`). After time `0`, however, no other impulses of `x` are given and, likewise, the system remains at `0`. Imagine, however, that we change `x` so that there is a stream of impulses, then we get the following results (note that we select only the `irf` slot of the output):
-
-```{r}
-irf_generator(
-  intercept = 0,
-  x_params = 2,
-  ar_params = 0,
-  x = c(1, 0, 3, 0, 5)
-)$irf
-```
-
-Notice that whenever the value of `x` is not `0`, the system responds, which is as expected for a linear regression model.
-
-For more complex models, things become a bit more complicated. Compare the results of the linear regression model with an ADL(1, 1) model, for example:
-
-```{r}
-irf_generator(
-  intercept = 0,
-  x_params = 2,
-  ar_params = 0.75,
-  x = c(1, 0, 0, 0, 0)
-)$irf
-```
-
-Similarly, we can play around with yet more complicated models with multiple lags in both the exogeneous variables and the residuals, for example: 
-
-```{r}
-irf_generator(
-  intercept = 0,
-  x_params = c(2, -1, 0.25),
-  ar_params = c(0.75, 0.5, -0.1),
-  x = c(1, 0, 0, 0, 0)
-)$irf
-```
-
-In these cases, impulse response functions really pay off: One can see how the total response `irf` depends on the system's response to the impulses in `x` and to the impulses in the `residuals` separately, easing interpretation of the model as a whole.
+$$y_{t} = 2 + 0.7 y_{t-1} -0.5 y_{t-2} + 2 x_{t} + v_{t}$$
 
 
+##### impulse response 
 
-### Case 2: Pre-specified Impulses and Estimated Parameters
+Say we want to perturb the covariate by a unit, and trace the effect of this perturbation over time. An impulse response will be returned if a vector of the form $\{1,0,0,...,0\}$ is supplied as input vector. To only retrieve this impulse response, we set the intercept to 0 (or eqully leave the intercept argument unspecified), and all other input vectors to zero vectors. We call the \code{\link[impulseR]{irf_generator}} function as follows:
 
-In the second case, a researcher seeks to investigate the response of a pre-specified model on a set of impulses, but now using estimated (rather than pre-specified) parameters of this model. This use-case may be useful when one wants to investigate the behavior of a given model while requiring its parameters to be ``realistic''.
-
-To achieve this goal, one has to provide the `irf_generator` function with a set of impulses through the arguments `x` and `residuals`, as well as with a data set through the argument `data` and the assumed number of lags for the model to be estimated through the arguments `y_lags` and `x_lags`. For example, using the following dataset:
-
-```{r}
-# Generate data with the irf_generator function
-set.seed(1)
+```{r generate data a, eval = FALSE}
 data <- irf_generator(
-  intercept = 0, 
-  x_params = c(2, 1),
-  ar_params = c(0.75, -0.1),
-  x = rnorm(100),
-  residuals = rnorm(100)
-)$irf
-
-# Change the dataset to only contain two columns with dependent variable and covariate
-data <- data[, c("irf", "x")]
-colnames(data) <- c("dependent", "independent")
-
-```
-
-one can estimate an ADL(2, 2) and investigate its impulse response through the following call:
-
-```{r}
-results <- irf_generator(
-  data = data, 
-  cols = c("dependent", "independent"),
-  x_lags = 2, 
-  y_lags = 2,
-  x = c(1, 0, 0, 0, 0),
-  residuals = c(-1, 0, 0, 0, 0)
-)
-results
-```
-
-A few things deserve note. First, one may notice that the `fit` slot in the output is not empty anymore. Given that we estimated the parameters of the specified model, we provide users with the output of the `lm` function. This allows researchers to check the fit of the model to the data, for example, through using the build-in `summary` function of R:
-
-```{r}
-summary(results$fit)
-```
-
-To ease interpretation, we gave informative names to the lagged variables, reserving `x` for the covariate and `y` for the lagged dependent variable, and specifying the lag of these variables through `lag_X` (e.g., `lag_0` denotes contemporaneous effects, `lag_1` the immediate predecessor at time $t - 1$, and so on).
-
-Second, one should specify the `cols` argument so that it defines under which columns to find the dependent variable and the covariate in that order. If one leaves this undefined, `irf_generator` will assume that the column names are `"y"` and `"x"` for the dependent variable and the covariate respectively. If those columns are not found, the call will result in an error:
-
-```{r, error = TRUE}
-irf_generator(
-  data = data, 
-  cols = c("column_1", "column_2"),
-  x_lags = 2, 
-  y_lags = 2,
-  x = c(1, 0, 0, 0, 0),
-  residuals = c(-1, 0, 0, 0, 0)
-)$irf
-```
-
-Finally, the minimum value of `x_lags` and `y_lags` is different, so that `x_lags` can minimally be $0$ while `y_lags` can minimally be $1$, both of which are imposed through the equation above. When one specifies lags lower than these ones, `irf_generator` will automatically correct them to non-specified lags and provide you with a warning.
-
-```{r, warning = TRUE}
-irf_generator(
-  data = data, 
-  cols = c("dependent", "independent"),
-  x_lags = -2, 
-  y_lags = -2,
-  x = c(1, 0, 0, 0, 0),
-  residuals = c(-1, 0, 0, 0, 0)
-)$irf
-```
-
-
-
-### Case 3: Data-based Impulses and Pre-specified Parameters
-
-In the third case, a researcher seeks to investigate the response of a pre-specified model on a set of impulses that are based on their own data. This is, for example, useful when investigating the behavior of a given, theory-inspired, model on a set of relevant data. To achieve this, one has to specify the parameters of the model (`intercept`, `x_params`, and `ar_params`) and provide the `irf_generator` function with a data set to base its cumulative impulses on (through `data`). For example:
-
-```{r}
-result <- irf_generator(
-  data = data[1:10, ], 
-  cols = c("dependent", "independent"),
-  intercept = 0, 
-  x_params = c(2, 1),
-  ar_params = c(0.75, -0.1)
-)$irf
-result
-```
-
-Behind the scenes, the function will use the parameters and provided data to compute the values of `x` and `residuals`, based on which it then computes the response functions. Note that the values of the `dependent` column in `data` correspond to the values of the `irf` column in the output:
-
-```{r}
-cbind(result$irf, data$dependent[1:10])
-```
-
-This is always the case, no matter which parameters one specifies. The correspondence between these two should therefore not be taken as evidence for the model; Rather, this type of analysis shows how the observed scores can be decomposed into a part due to the covariate and a part due to the residuals _according to the specified model_.
-
-
-
-### Case 4: Data-based Impulses and Estimated Parameters
-
-Finally, one may wish to both estimate the parameters of a model _and_ get the cumulative response functions based on their data. To achieve this, all one has to do is provide the data to use and the assumed lags in their model as follows:
-
-```{r}
-irf_generator(
-  data = data[1:10, ],
-  cols = c("dependent", "independent"), 
-  x_lags = 1, 
-  y_lags = 2
-)$irf
-```
-
-This is useful when one wants to draw inference from a set of data.
-
-
-
-## Plotting
-
-While all needed information is contained within the output of `irf`, it is useful to visualize all parts that contribute to a given response. For this, one can use the `irf_plot` function. 
-
-This function can be used in two ways. First, one can provide the output of the `irf` function as follows:
-
-```{r, warning = FALSE}
-#| fig.alt: >
-#|   One sees four lines; (a) A horizontal gray line that describes the intercept, (b) a red solid wavy line that describes the reaction of the system to the impulse from the covariate, (c) a green solid wavy line that describes the reaction of the system to the impulse from the residuals, and (d) a black dashed line that describes the total response of the system.
-#|   Additionally, there are two vertical lines and two points that represent the impulse of the covariate and the impulse of the residual. 
-#|   Importantly, the black line can be obtained through summing the gray, red, and green lines.
-#| fig.cap: > 
-#|   _Visualization of an impulse response function for an ADL(3, 3) with parameters $\alpha = 0$, $\beta_i = \{ 2, -1, 0.25 \}$, and $\gamma_i = \{ 0.75, 0.5, -0.1 \}$. 
-#|   Impulses consist of a singular unit impulse in the covariate $x$ (positive) and the residuals $\epsilon$ (negative) at the start of the simulation._
-results <- irf_generator(
-  intercept = 0,
-  x_params = c(2, -1, 0.25),
-  ar_params = c(0.75, 0.5, -0.1),
-  x = c(1, 0, 0, 0, 0),
-  residuals = c(-1, 0, 0, 0, 0)
-)$irf
-
-irf_plot(results)
-```
-
-Alternatively, one can provide the parameters and impulses to `irf_plot` immediately:
-
-```{r, warning = FALSE}
-#| fig.alt: >
-#|   One sees the same plot as before.
-#| fig.cap: > 
-#|   _Visualization of an impulse response function for the same ADL(3, 3) model as before, but now computed and visualized in a single step._
-irf_plot(
-  intercept = 0,
-  x_params = c(2, -1, 0.25),
-  ar_params = c(0.75, 0.5, -0.1),
-  x = c(1, 0, 0, 0, 0),
-  residuals = c(-1, 0, 0, 0, 0)
+  x_params = 2,
+  ar_params = c(0.7,-0.5),
+  x = c(1, 0, 0, 0, 0, 0, 0, 0, 0)
 )
 ```
 
-As can be seen, the figure is the same in both cases. The first case is useful when inspecting the results of a given model, where one still needs to have the numerical values of the responses for analysis purposes. The second case is mostly useful in situations where one wants to explore the range of responses of a (set of) model(s) without a need to have the numerical values of the impulse-responses.
+The output is a data frame containing the following columns:
 
-The plots that come out of the `irf_plot` function are customizable, as shown in the section on [Plotting](plotting.html)
+- The time index, starting at t = 0, in the column "time";
+- the total response, under the column "irf". By default, \code{\link[impulseR]{irf_generator}} will always calculate the total response;
+- The cumulative response towards the unit vector, under the column "irf_intercept"; 
+- The response towards the covariate in the column "irf_x". Since the input is of the form $\{1,0,0,0,...,0 \}$, this is equal to the impulse response function ($h_{x}(s)$); 
+- The covariate input vector, in the column "x". 
+- The innovation input vector, in the column "innovations". 
 
-
-
-
-
-## Single impulses 
-
-Typically, one will want to examine what the model expects will happen after a single impulse. For this, we provide some helper functions `impulse` and `scaled_impulse` for a singular unit impulse and an impulse scaled by a given value, for example the standard deviation of the variable x or of the residuals. Using this requires specifying the number of datapoints one wants to simulate and at which location one want the impulse to happen, for example:
-
-```{r}
-impulse(5, 1)
-```
-
-In this example, we retrieve a vector of length 5 with a `1` at the first location, with all other values being `0`. Similarly, we can scale such a vector by using `scaled_impulse` so that:
-
-```{r}
-scaled_impulse(5, 2, 10)
-```
-which consists of a vector of length 5 with a `10` at the second location. Within our previous routine, we can add the additional step, so that:
-
-```{r}
-resid <- scaled_impulse(10, 3, 2.5)
-irf_generator(
-  intercept = 0, 
-  x_params = c(2, 1),
-  ar_params = c(0.75, -0.5),
-  residuals = resid
-)$irf
-
-```
-which provides us with the expected response of the specified system to a residual impulse of size `2.5`.
-
-Note that one is not obliged to consider only a single impulse (though we believe this is the easiest way to analyze predictions of a system). Specifically, users can also provide continued impulses to the system as a researcher does in, for example, an experiment. This makes use of the same routine, just with another specification of the impulses:
-
-```{r}
-set.seed(1)
-
-resid <- rnorm(10)
-irf_generator(
-  intercept = 0, 
-  x_params = c(2, 1),
-  ar_params = c(0.75, -0.5),
-  residuals = resid
-)$irf
+```{r present data a}
+data 
 ```
 
 
+If we had supplied any other vector \code{x} than $\{1,0,0,0,...,0 \}$, the column "irf_x" would contain the appropriate system response.
+
+
+To visualize the impulse response $h_{x}(s)$, we can call the \code{\link[impulseR]{irf_plot}} function:
+
+```{r plot the data a, eval = FALSE}
+
+irf_plot(data)
+
+```
+
+We observe the impulse response towards the covariate, $h_{x}(s)$ in red. Note that the plotting function will automatically denote the time index by $s$ and use approrpiate legends if the input vectors are of the form $\{1,0,0,0,...,0 \}$ (impulse responses). The plotting function will also automatically plot the model-implied total response $y_{t}$ as a black dotted line. In this case, since we did not present any innovations, the total response is simply $irf_x$, so the black dotted line and the red line overlap. The plotting function allows one to select which responses to visualize, and customize other features (see plotting function).
+
+
+##### Scaled impulse response 
+
+A scaled impulse response will be returned if a vector of the form $\{a,0,0,...,0\}$ is supplied as input vector, where $a$ is a scalar. A useful scalar can be a scalar indicating a standard, or typical deviation in the input variable. Say $v_{t} \overset{iid}{\sim} N(0, 2^2)$, then it might be insightful to assess the system response towards a standard deviation increase in the innovations. We supply the function with this information by supplying the appropriate input vector:
+
+```{r generate b, eval = FALSE}
+data <- irf_generator(
+  x_params = 2,
+  ar_params = c(0.7,-0.5),
+  innovations = c(2, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+)
+```
+
+The output is again a data frame with the same columns as before. The scaled impulse response $h_{v}(s)\sigma_{v}$ is in the column "irf_v", and now the column "innovations" contains a 2 at $t = 0$:
+
+```{r visualise data b, eval = FALSE}
+data
+)
+```
+
+
+Applying the \code{\link[impulseR]{irf_plot}} function yields a visualization of the scaled impulse response:
+
+
+```{r plot the data b, eval = FALSE}
+
+irf_plot(data)
 
 
 
-## References 
+```
 
-Ariens, S., Adolf, J. K., & Ceulemans, E. (2023). One does not simply correct for serial dependence. _Structural Equation Modeling: A Multidisciplinary Journal, 30_(5), 807-821. doi: <a href="https://www.doi.org/10.1080/10705511.2023.2173203">10.1080/10705511.2023.2173203</a>
+We see that now an innovation of magnitude $2$ was supplied (green lollipop). The scaled impulse response $h_{v}(s)\sigma_{v}$ is drawn as a green line. The legend denotes this response as $h^{*}_{v}(s)$; A star signifies that the the curve no longer represents the impulse response, but the response when supplied by a non-unit input variable. Red will typically be reserved for covariate related objects, and green for innovation related objects (though this can again be customized).
+
+##### Cumulative responses
+
+A cumulative response will be returned if the input vector contains non-zero values for arguments beyond the first argument. Let us supply two consecutive unit innovations, followed by a number of 0 values to show how the system relaxes:
+
+```{r tst, eval = FALSE}
+data <- irf_generator(
+  x_params = 2,
+  ar_params = c(0.7,-0.5),
+  innovations = c(1, 1, 0, 0, 0, 0, 0, 0, 0, 0)
+)
+```
+
+The output has the same structure. The cumulative response towards the innovations $(h_{v} * v)$ is again given under the column "irf_v". We see that the column "irf_v" will always contain the system response towards the innovations. 
+
+```{r visualise data c}
+data
+```
+
+
+Applying the \code{\link[impulseR]{irf_plot}} function yields a trajectory plot:
+
+```{r plot the data c, eval = FALSE}
+
+irf_plot(data)
+
+```
+
+We see that the time index has changed to $t$, and the legend denotes the cumulative response towards the innovations by $(h_{v} * v)$.
+
+##### Total response
+
+As an example of a total response, we will supply a unit covariate input and a unit innovation at the same time. We supply the \code{\link[impulseR]{irf_generator}} function with both input vectors as follows:
+
+```{r tss, eval = FALSE}
+data <- irf_generator(
+  x_params = 2,
+  ar_params = c(0.7,-0.5),
+  x = c(1, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+  innovations = c(1,0, 0, 0, 0, 0, 0, 0, 0, 0)
+)
+```
+
+
+The output is a data frame containing the following columns:
+
+- The time index, starting at t = 0, in the column "time";
+- The total response $y_{t}$ at each time point, in the column "irf";
+- The response towards the covariate in the column "irf_x". Since the input is of the form $\{1,0,0,0,...,0 \}$, this is equal to the impulse response function ($h_{x}(s)$);
+- The response towards the innovations in the column "irf_v". Since the input is of the form $\{1,0,0,0,...,0 \}$, this is equal to the impulse response function ($h_{v}(s)$);
+- The values of the covariate at each time point, in the column "x";
+- The values of the innovations at each time point, in the column "innovations". 
+
+Applying the \code{\link[impulseR]{irf_plot}} function yields a visualization of the trajectory:
+
+FIGURE
+
+
+### Intercept parameters
+
+To include an intercept parameter in the visualization of system responses, one can supply the intercept parameter value to the \code{\link[impulseR]{irf_generator}} function:
+
+```{r qf, eval = FALSE}
+data <- irf_generator(
+  intercept = 2,
+  x_params = 2,
+  ar_params = c(0.7,-0.5),
+  x = c(1, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+  innovations = c(1,0, 0, 0, 0, 0, 0, 0, 0, 0)
+)
+
+
+irf_plot(data)
+
+```
+
+By default, the \code{\link[impulseR]{irf_generator}} will 'burn in' the part of the system response due to the intercept parameter analytically, by fixing it to its model implied time limit. This allows one to interpret the other system responses relative to the hypothetical equilibrium state of the system. The default behavior can be overridden by supplying the argument "burnin = FALSE":
+
+
+```{r sd, eval = FALSE}
+data <- irf_generator(
+  intercept = 2,
+  x_params = 2,
+  ar_params = c(0.7,-0.5),
+  x = c(1, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0),
+  innovations = c(1,0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0),
+  burnin = FALSE
+)
+
+irf_plot(data)
+
+```
+
+By setting the option "burnin = FALSE", initial value dependent behavior is present as the system approaches its equilibrium state. The only time impulseR will not by default conduct an analytic burn in is when constructing empirical trajectory plots.  
+
+### Using impulseR for dynamic regression models with more general lag structures
+
+In the manuscript we focused on lag-1 dynamic regression models for accessibility. Here, we provide some examples of how dynamic regression models with more general lag structures can be investigated using the \code{\link[impulseR]{irf_generator}} function. The following table shows how different parameter settings can be supplied to the\code{\link[impulseR]{irf_generator}} function, together with the associated model: 
+
+ **Abbreviation**   | **$`intercept`** | **`ar_params`** | **`x_params`** | **Model**
+-------------|----------------------------|--------------------------|----------------------|------
+ LR          | `0`                        | `0`                      | `1`                  | $y_{t} = x_{t} + v_{t}$            
+ AR(1)       | `1`                        | `0.7`                    | `0`                  | $y_{t} = 1 + 0.7 y_{t-1} + v_{t}$            
+ LCV(1)      | `0`                        | `0.7`                    | `1`                  | $y_{t} = 0.7 y_{t-1} + x_{t} + v_{t}$ 
+ CF(2)        | `0`                       | `c(0.5, -0.5)`           | `c(2, -1, 1)`        | $y_{t} = 0.5 y_{t-1} - 0.5 y_{t-2} + 2 x_{t} - x_{t-1} + x_{t-2}+ v_{t}$
+ ADL(2, 2)   | `3`                        | `c(0.7, 0.2)`            | `c(2, 0.5, 1)`       | $y_{t} = 3+ 0.7 y_{t-1} + 0.2 y_{t-2} + 2 x_{t} + 0.5 x_{t-1} + x_{t-2}+ v_{t}$
+
+
+Parenthesis indicate the number of AR parameters $p$ and lagged covariate parameters $q$. For example, the ADL(2,2) allows for $p = 2$ AR parameters $\phi_{1}$ and $\phi_{2}$ and $q = 2$ lagged covariate parameters $\beta_{Lx}$ and $\beta_{L^{2}x}$. The CF model only has a single value in parenthesis, because $p$ must equal $q$ for the CF restrictions to hold. The CF restrictions are satisfied if $\beta_{L^{j}x} = - \beta_{x}\phi_{j}$ for all $j$ in $\{1,...,q}$ (see X, appendix X). One can verify that these restrictions hold for the CF(2) model in table X. Similarly, the LCV model only has a single value in parenthesis, because the order of a LCV model is determined by the number of free AR parameters, $p$. Indeed, for the LCV model all lagged covariate parameters are fixed to 0. We could refer to a LCV model as an ADL(p,0) model. The LR model never requires parentheses, because all lagged parameters are fixed to 0. 
+
+To illustrate how the \code{\link[impulseR]{irf_generator}} function can be used to investigate models with more general lag structures, let us visualize the impulse responses of the CF(2) model in table X. We know from the manuscript that for any CF model, the effect of the covariate will be purely contemporaneous. We can verify that this is the case for our CF(2) model in table X by calculating the impulse response functions:
+
+```{r qsd, eval = FALSE}
+data <- irf_generator(
+  intercept = 0
+  x_params = c(2, -1, 1),
+  ar_params = c(0.5, -0.5),
+  x = c(1, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+  innovations = c(1,0, 0, 0, 0, 0, 0, 0, 0, 0)
+)
+```
+
+We call the \code{\link[impulseR]{irf_plot}} function:
+
+```{r qsdd}
+
+irf_plot(data)
+
+```
+
+
+Indeed, the impulse response $h_{x}(s)$ decays immediately following a perturbation. 
+
+
+
+
+
+
