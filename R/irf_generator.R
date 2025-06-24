@@ -157,6 +157,25 @@ irf_generator <- function(intercept = 0,
     warning("More than one intercept provided. Using the first value in this vector.")
     intercept <- intercept[1]
   }
+
+  # Check whether the data are specified. If so, then we will recompute x and 
+  # the innovations
+  if(!is.null(data)) {
+    # Check whether the columns can be found in the data.frame
+    if(!all(cols %in% colnames(data))) {
+      stop("Columns specified in `cols` cannot be found in the supplied dataframe.")
+    }
+
+    # If found, then we extract the covariate x and compute the innovations
+    x <- data[, cols[2]]
+    innovations <- compute_innovations(
+      data,
+      cols = cols,
+      intercept = intercept,
+      ar_params = ar_params,
+      x_params = x_params
+    )
+  }
   
   # Check whether x or innovations (or both) are provided. If not, then we have to 
   # throw an error. 
