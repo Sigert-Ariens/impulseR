@@ -42,7 +42,8 @@ testthat::test_that(
         data.frame(Y = numeric(100)),
         cols = c("y", "x"),
         y_lags = 2
-      )
+      ) |>
+        suppressWarnings()
     )
 
     # Single column specified, but only if x_lags specified in estimate
@@ -270,13 +271,15 @@ testthat::test_that(
     set.seed(1)
     for(i in seq_along(parameters)) {
       # Generate data
-      y <- impulseR::irf(
-        intercept = parameters[[i]]$intercept,
-        x_params = parameters[[i]]$x,
-        ar_params = parameters[[i]]$eps,
-        x = rnorm(1000),
-        innovations = rnorm(1000)
-      )$irf
+      y <- suppressWarnings(
+        impulseR::irf_generator(
+          intercept = parameters[[i]]$intercept,
+          x_params = parameters[[i]]$x,
+          ar_params = parameters[[i]]$eps,
+          x = rnorm(1000),
+          innovations = rnorm(1000)
+        )$irf
+      )
 
       # Estimate the parameters
       results <- impulseR::estimate(
@@ -327,13 +330,15 @@ testthat::test_that(
     # model
     for(i in seq_along(parameters)) {
       # Generate data
-      y <- impulseR::irf(
-        intercept = parameters[[i]]$intercept,
-        x_params = parameters[[i]]$x,
-        ar_params = parameters[[i]]$eps,
-        x = rnorm(100),
-        innovations = rnorm(100)
-      )$irf
+      y <- suppressWarnings(
+        impulseR::irf_generator(
+          intercept = parameters[[i]]$intercept,
+          x_params = parameters[[i]]$x,
+          ar_params = parameters[[i]]$eps,
+          x = rnorm(100),
+          innovations = rnorm(100)
+        )$irf
+      )
 
       # Loop over all possibilities of the lags
       for(j in seq_len(nrow(lags))) {
@@ -346,14 +351,16 @@ testthat::test_that(
         )
 
         # Create the impulse response functions
-        results <- impulseR::irf(
-          intercept = results$intercept,
-          x_params = results$x_params,
-          ar_params = results$ar_params,
-          x = results$x,
-          innovations = results$innovations,
-          burnin = FALSE
-        )$irf
+        results <- suppressWarnings(
+          impulseR::irf_generator(
+            intercept = results$intercept,
+            x_params = results$x_params,
+            ar_params = results$ar_params,
+            x = results$x,
+            innovations = results$innovations,
+            burnin = FALSE
+          )$irf
+        )
 
         # Check whether `irf` corresponds to `y`, and whether `x` corresponds to
         # `x`
@@ -393,13 +400,15 @@ testthat::test_that(
     # model
     for(i in seq_along(parameters)) {
       # Generate data
-      y <- impulseR::irf(
-        intercept = parameters[[i]]$intercept,
-        x_params = parameters[[i]]$x,
-        ar_params = parameters[[i]]$eps,
-        x = rnorm(100),
-        innovations = rnorm(100)
-      )$irf
+      y <- suppressWarnings(
+        impulseR::irf_generator(
+          intercept = parameters[[i]]$intercept,
+          x_params = parameters[[i]]$x,
+          ar_params = parameters[[i]]$eps,
+          x = rnorm(100),
+          innovations = rnorm(100)
+        )$irf
+      )
 
       # Loop over all possibilities of the lags
       for(j in seq_len(nrow(lags))) {
