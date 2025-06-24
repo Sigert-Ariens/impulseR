@@ -61,8 +61,11 @@
 #' denoting the shape of the point that indicates an impulse has been given. 
 #' You can give impulses of variable x (\code{.x.}) and impulses of the 
 #' innovations (\code{.v.}) different shapes if desired. Defaults to \code{19}.
-#' @param impulse.linetype Character denoting the linetype of the line connecting 
-#' the impulses to a given time on the x-axis. Defaults to \code{"dotted"}
+#' @param impulse.linetype,impulse.x.linetype,impulse.v.linetype Character 
+#' denoting the linetype of the line connecting the impulses to a given time on 
+#' the x-axis. You can give impulses of variable x (\code{.x.}) and impulses of the 
+#' innovations (\code{.v.}) different linetypes if desired. Defaults to 
+#' \code{"dotted"}
 #' @param impulse.linewidth Numeric denoting the linewidth of the line connecting
 #' the impulses to a given time on the x-axis. Defaults to \code{1}
 #' @param impulse.alpha Numeric denoting the opacity of the impulses (point and 
@@ -123,7 +126,7 @@ irf_plot <- function(data,
                      impulse.shape = 19,
                      impulse.x.shape = impulse.shape,
                      impulse.v.shape = impulse.shape,
-                     impulse.linetype = "solid",
+                     impulse.linetype = "dotted",
                      impulse.x.linetype = impulse.linetype,
                      impulse.v.linetype = impulse.linetype,
                      impulse.linewidth = 1,
