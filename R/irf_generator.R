@@ -221,9 +221,11 @@ irf_generator <- function(intercept = 0,
   # circle. If at least one root is inside the unit circle, provide a warning.   
   phi <- c(1, -ar_params)  
   moduli <- abs(polyroot(phi))
-  
-  if(min(moduli) < 1) {
-    warning("The AR parameters imply a nonstationary process; Some of the roots of phi(L) are inside the complex unit circle")
+
+  if(length(moduli) >= 1) {
+    if(min(moduli) < 1) {
+      warning("The AR parameters imply a nonstationary process; Some of the roots of phi(L) are inside the complex unit circle")
+    }
   }
   
 
