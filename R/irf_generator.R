@@ -55,7 +55,7 @@
 #' 
 #' @return List containing the parameters that were used for the generation of 
 #' the system responses (under \code{"intercept"}, \code{"x_params"}, and 
-#' \code{"ar_params"}, and a data.frame containing the model implied total 
+#' \code{"ar_params"}, and a data.frame containing the model-implied total 
 #' responses over the observation period (under \code{"irf"}). Within the 
 #' data.frame, column \code{"time"} contains the time index starting at 0. The 
 #' columns \code{"irf_intercept"}, \code{"irf_x"}, and \code{"irf_v"} contain 
