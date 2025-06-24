@@ -331,8 +331,9 @@ compute_innovations <- function(data,
     }    
   }
   
-  # Deduce the implied first $p$ innovations. This allows our cumulative responses to start from the first measurement occasion, i.e. at $t = 0$.
-  # Parameters are vectorized so that you don't have to think about it too much. For details, see X appendix X. 
+  # Deduce the implied first $p$ innovations. This allows our cumulative 
+  # responses to start from the first measurement occasion, i.e. at $t = 0$.
+  # Parameters are vectorized so that you don't have to think about it too much. 
   n_inx <- N - length(innovations)
   
   # Fixing the first $p$ innovations is only needed whenever $p \neq 0$,
@@ -360,7 +361,8 @@ compute_innovations <- function(data,
     }
     
     for(i in seq_along(inx)) {
-      # Supply the first $p$ values of the outcome variable (set as the vector y0 above), and use the estimates to fix part of the innovations
+      # Supply the first $p$ values of the outcome variable (set as the vector 
+      # y0 above), and use the estimates to fix part of the innovations
       if(!is.na(y_lags)) {
         if(i == 1) {
           inx[i] <- inx[i] - 0
@@ -371,7 +373,8 @@ compute_innovations <- function(data,
         }
       }
       
-      # Supply the first $p$ values of the covariate variable (set as the vector x0 above), and use the estimates to fix another part of the innovations
+      # Supply the first $p$ values of the covariate variable (set as the vector 
+      # x0 above), and use the estimates to fix another part of the innovations
       if(!is.na(x_lags)) {
         if(i <= x_lags) {
           inx[i] <- inx[i] - sum(beta[i, 1:i] * x0[i:1])
@@ -543,12 +546,3 @@ prepare_data <- function(data,
   
   return(X)
 }
-
-
-
-
-
-
-
-
-
