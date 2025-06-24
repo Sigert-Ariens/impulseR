@@ -1,13 +1,13 @@
 ---
-title: "Plots"
+title: "Plotting"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Plots}
+  %\VignetteIndexEntry{Plotting}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-One of the main devices one can use to make sense of impulse responses is visualization. In `impulseR`, visualization is achieved through the `irf_plot` function, to which you provide the results of the `irf` function:
+One of the main devices one can use to make sense of impulse responses is visualization. In `impulseR`, visualization is achieved through the `irf_plot` function, to which you provide the results of the `irf_generator` or `irf_empirical` functions:
 
 ```{r, echo = FALSE}
 library(impulseR)
@@ -20,7 +20,7 @@ library(impulseR)
 #|   Importantly, the black line can be obtained through summing the gray, red, and green lines.
 #| fig.cap: > 
 #|   _Visualization of an impulse response function for an ADL(2, 2) with parameters $\alpha = 1$, $\beta_i = \{ 1, 0.5 \}$, and $\gamma_i = \{ 0.75, -0.25 \}$. 
-#|   Impulses consist of a singular unit impulse in the covariate $x$ (positive) and the innovations $\epsilon$ (negative) at the start of the simulation._
+#|   Impulses consist of a singular unit impulse in the covariate $x$ (positive) and the innovations $v$ (negative) at the start of the simulation._
 
 # Compute impulse responses
 results <- irf_generator(
@@ -68,7 +68,7 @@ irf_plot(results)
 
 As one can see, the plot includes a green line at 0, indicating that the impulse from the innovations amount to nothing or does not play a role in the total response. This information may not seem relevant for the current model and the specified impulse, both of which do not include these innovations. Hence, one may want to leave the impulse response of the innovations (the green line) out of the figure.
 
-To do this, one can specify the `cols` argument, which takes in a character vector of the column names in `results` that one wants to account for. In our case, we want to leave `irf_eps` out of the figure, so we specify:
+To do this, one can specify the `cols` argument, which takes in a character vector of the column names in `results` that one wants to account for. In our case, we want to leave `irf_v` out of the figure, so we specify:
 
 ```{r, warning = FALSE}
 #| fig.alt: >
@@ -102,7 +102,7 @@ Through the specification of `cols`, one can thus control which impulse response
 
 ## Changing lines
 
-The main subject of the figures are the lines that display the total response, the covariate-related response, the residual-related response, and the intercept-related response to the impulses that are provided to the system. Some aspects of these lines are modifiable, specifically their `color`, `linewidth`, and `linetype`. These aspects can be changed for all four responses separately through adding the prefix `irf.`, `x.`, `eps.`, and `intercept.`. 
+The main subject of the figures are the lines that display the total response, the covariate-related response, the residual-related response, and the intercept-related response to the impulses that are provided to the system. Some aspects of these lines are modifiable, specifically their `color`, `linewidth`, and `linetype`. These aspects can be changed for all four responses separately through adding the prefix `irf.`, `x.`, `v.`, and `intercept.`. 
 
 To see the effect of the arguments, consider the impulse responses derived from an ADL(2, 2) again:
 
@@ -128,7 +128,7 @@ irf_plot(
   results, 
   irf.color = "cornflowerblue",
   x.color = "salmon",
-  eps.color = "darkolivegreen",
+  v.color = "darkolivegreen",
   intercept.color = "black"
 )
 ```
@@ -146,7 +146,7 @@ irf_plot(
   results, 
   irf.linewidth = 3,
   x.linewidth = 1, 
-  eps.linewidth = 2,
+  v.linewidth = 2,
   intercept.linewidth = 0.5
 )
 ```
@@ -163,7 +163,7 @@ irf_plot(
   results, 
   irf.linetype = "solid",
   x.linetype = "dashed",
-  eps.linetype = "dotted",
+  v.linetype = "dotted",
   intercept.linetype = "solid"
 )
 ```
@@ -189,9 +189,9 @@ irf_plot(
   x.linetype = "dashed",
 
   # Changes for the residual-related response
-  eps.color = "darkolivegreen",
-  eps.linewidth = 2,
-  eps.linetype = "dotted",
+  v.color = "darkolivegreen",
+  v.linewidth = 2,
+  v.linetype = "dotted",
 
   # Changes for the intercept
   intercept.color = "black",
@@ -204,7 +204,7 @@ irf_plot(
 
 ## Changing impulses 
 
-Another key component in the figures are the impulses, that is the vertical lines and points that show at what time an impulse is given through the covariates and/or the innovations. While they receive their colors through the `x.color` and `eps.color` arguments, you can still influence their opacity, the linetype and linewidth of the vertical line, and the shape and size of the points that show the value of the impulse.
+Another key component in the figures are the impulses, that is the vertical lines and points that show at what time an impulse is given through the covariates and/or the innovations. While they receive their colors through the `x.color` and `v.color` arguments, you can still influence their opacity, the linetype and linewidth of the vertical line, and the shape and size of the points that show the value of the impulse.
 
 Focusing on opacity first, one can control the opacity of the impulses through the `impulse.alpha` argument:
 
@@ -247,7 +247,7 @@ irf_plot(
 )
 ```
 
-Note that the shape of the covariate- and residual-impulses can be controlled separately if wanted. For this, one uses the `impulse.x.shape` and `impulse.eps.shape` arguments:
+Note that the shape of the covariate- and residual-impulses can be controlled separately if wanted. For this, one uses the `impulse.x.shape` and `impulse.v.shape` arguments:
 
 ```{r}
 #| fig.alt: >
@@ -260,7 +260,7 @@ irf_plot(
   results, 
   impulse.size = 4,
   impulse.x.shape = 15,
-  impulse.eps.shape = 17
+  impulse.v.shape = 17
 )
 ```
 
@@ -286,7 +286,7 @@ irf_plot(
 )
 ```
 
-Text can also be provided for the legend, where the title can be changed through `legend.title` and the labels of the total response, the covariate-related response, the residual-related response, and the intercept-related response can be provided through the arguments `irf.label`, `x.label`, `eps.label`, and `intercept.label`. For example:
+Text can also be provided for the legend, where the title can be changed through `legend.title` and the labels of the total response, the covariate-related response, the residual-related response, and the intercept-related response can be provided through the arguments `irf.label`, `x.label`, `v.label`, and `intercept.label`. For example:
 
 ```{r, warning = FALSE}
 #| fig.alt: >
@@ -300,7 +300,7 @@ irf_plot(
   legend.title = "Impulse components",
   irf.label = "Total",
   x.label = "Covariate",
-  eps.label = "Residual",
+  v.label = "Residual",
   intercept.label = "Intercept"
 )
 ```
@@ -324,7 +324,7 @@ irf_plot(
   legend.title = "Impulse components",
   irf.label = "Total",
   x.label = "Covariate",
-  eps.label = "Residual",
+  v.label = "Residual",
   intercept.label = "Intercept",
 
   # Sizes and justification

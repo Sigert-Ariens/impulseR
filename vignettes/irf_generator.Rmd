@@ -46,26 +46,30 @@ data <- irf_generator(
 )
 ```
 
-The output is a data frame containing the following columns:
+The output is a list containing the following entries:
+- `intercept`, `ar_params`, `x_params`: The values for the parameters of the model;
+- `irf`: A data.frame containing the computed system responses. 
 
-- The time index, starting at t = 0, in the column "time";
-- the total response, under the column "irf". By default, \code{\link[impulseR]{irf_generator}} will always calculate the total response;
-- The cumulative response towards the unit vector, under the column "irf_intercept"; 
-- The response towards the covariate in the column "irf_x". Since the input is of the form $\{1,0,0,0,...,0 \}$, this is equal to the impulse response function ($h_{x}(s)$); 
-- The covariate input vector, in the column "x". 
-- The innovation input vector, in the column "innovations". 
+The data.frame contains the results we are interested in, and itself contains the following columns:
+
+- `time`: The time index, starting at t = 0;
+- `irf`: The total response;
+- `irf_intercept`: The cumulative response towards the unit vector; 
+- `irf_x`: The response towards the covariate, which in this case is of the form $\{1,0,0,0,...,0 \}$ and therefore equal to the impulse response function ($h_{x}(s)$); 
+- `irf_v`: The response towards the innovations, which in this case is 0;
+- `x`: The covariate input vector; 
+- `innovations`: The innovation input vector. 
 
 ```{r}
-data 
+data$irf
 ```
 
+If we had supplied any other vector \code{x} than $\{1,0,0,0,...,0 \}$, the column `irf_x` would contain the appropriate system response.
 
-If we had supplied any other vector \code{x} than $\{1,0,0,0,...,0 \}$, the column "irf_x" would contain the appropriate system response.
-
-To visualize the impulse response $h_{x}(s)$, we can call the \code{\link[impulseR]{irf_plot}} function:
+To visualize the impulse response $h_{x}(s)$, we can provide the \code{\link[impulseR]{irf_plot}} function with the data.frame of system responses:
 
 ```{r}
-irf_plot(data)
+irf_plot(data$irf)
 ```
 
 We observe the impulse response towards the covariate, $h_{x}(s)$ in red. Note that the plotting function will automatically denote the time index by $s$ and use approrpiate legends if the input vectors are of the form $\{1,0,0,0,...,0 \}$ (impulse responses). The plotting function will also automatically plot the model-implied total response $y_{t}$ as a black dotted line. In this case, since we did not present any innovations, the total response is simply $irf_x$, so the black dotted line and the red line overlap. The plotting function allows one to select which responses to visualize, and customize other features (see plotting function).
@@ -80,18 +84,16 @@ data <- irf_generator(
   x_params = 2,
   ar_params = c(0.7,-0.5),
   innovations = c(2, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-)
+)$irf
 ```
 
-The output is again a data frame with the same columns as before. The scaled impulse response $h_{v}(s)\sigma_{v}$ is in the column "irf_v", and now the column "innovations" contains a 2 at $t = 0$:
+The output is again a data frame with the same columns as before. The scaled impulse response $h_{v}(s)\sigma_{v}$ is in the column `irf_v`, and now the column `innovations` contains a 2 at $t = 0$:
 
 ```{r}
 data
 ```
 
-
 Applying the \code{\link[impulseR]{irf_plot}} function yields a visualization of the scaled impulse response:
-
 
 ```{r}
 irf_plot(data)
@@ -108,7 +110,7 @@ data <- irf_generator(
   x_params = 2,
   ar_params = c(0.7,-0.5),
   innovations = c(1, 1, 0, 0, 0, 0, 0, 0, 0, 0)
-)
+)$irf
 ```
 
 The output has the same structure. The cumulative response towards the innovations $(h_{v} * v)$ is again given under the column "irf_v". We see that the column "irf_v" will always contain the system response towards the innovations. 
@@ -116,7 +118,6 @@ The output has the same structure. The cumulative response towards the innovatio
 ```{r}
 data
 ```
-
 
 Applying the \code{\link[impulseR]{irf_plot}} function yields a trajectory plot:
 
@@ -128,7 +129,7 @@ We see that the time index has changed to $t$, and the legend denotes the cumula
 
 #### Total response
 
-As an example of a total response, we will supply a unit covariate input and a unit innovation at the same time. We supply the \code{\link[impulseR]{irf_generator}} function with both input vectors as follows:
+As an example of a total response, we will supply a unit covariate input and a unit innovation at the same time. We supply the \code{\link[impulseR]{irf_generator}} function with both input vectors and visualize the trajectory:
 
 ```{r, eval = FALSE}
 data <- irf_generator(
@@ -136,22 +137,8 @@ data <- irf_generator(
   ar_params = c(0.7,-0.5),
   x = c(1, 0, 0, 0, 0, 0, 0, 0, 0, 0),
   innovations = c(1,0, 0, 0, 0, 0, 0, 0, 0, 0)
-)
-```
+)$irf
 
-
-The output is a data frame containing the following columns:
-
-- The time index, starting at t = 0, in the column "time";
-- The total response $y_{t}$ at each time point, in the column "irf";
-- The response towards the covariate in the column "irf_x". Since the input is of the form $\{1,0,0,0,...,0 \}$, this is equal to the impulse response function ($h_{x}(s)$);
-- The response towards the innovations in the column "irf_v". Since the input is of the form $\{1,0,0,0,...,0 \}$, this is equal to the impulse response function ($h_{v}(s)$);
-- The values of the covariate at each time point, in the column "x";
-- The values of the innovations at each time point, in the column "innovations". 
-
-Applying the \code{\link[impulseR]{irf_plot}} function yields a visualization of the trajectory:
-
-```{r}
 irf_plot(data)
 ```
 
@@ -167,13 +154,12 @@ data <- irf_generator(
   ar_params = c(0.7,-0.5),
   x = c(1, 0, 0, 0, 0, 0, 0, 0, 0, 0),
   innovations = c(1,0, 0, 0, 0, 0, 0, 0, 0, 0)
-)
-
+)$irf
 
 irf_plot(data)
 ```
 
-By default, the \code{\link[impulseR]{irf_generator}} will 'burn in' the part of the system response due to the intercept parameter analytically, by fixing it to its model implied time limit. This allows one to interpret the other system responses relative to the hypothetical equilibrium state of the system. The default behavior can be overridden by supplying the argument "burnin = FALSE":
+By default, the \code{\link[impulseR]{irf_generator}} will 'burn in' the part of the system response due to the intercept parameter analytically, by fixing it to its model implied time limit. This allows one to interpret the other system responses relative to the hypothetical equilibrium state of the system. The default behavior can be overridden by supplying the argument `burnin = FALSE`:
 
 
 ```{r, eval = FALSE}
@@ -184,7 +170,7 @@ data <- irf_generator(
   x = c(1, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0),
   innovations = c(1,0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0),
   burnin = FALSE
-)
+)$irf
 
 irf_plot(data)
 ```
@@ -215,7 +201,7 @@ data <- irf_generator(
   ar_params = c(0.5, -0.5),
   x = c(1, 0, 0, 0, 0, 0, 0, 0, 0, 0),
   innovations = c(1,0, 0, 0, 0, 0, 0, 0, 0, 0)
-)
+)$irf
 ```
 
 We call the \code{\link[impulseR]{irf_plot}} function:

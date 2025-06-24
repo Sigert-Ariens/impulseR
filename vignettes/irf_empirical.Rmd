@@ -34,18 +34,18 @@ We simulate the data as conventional simulation studies would simulate data, i.e
 
 ```{r}
 # Generate covariate and innovation values from a normal distribution
-x <- rnorm(50,-1,1) 
-v <- rnorm(50,0,0.6) 
+x <- rnorm(50, -1, 1) 
+v <- rnorm(50, 0, 0.6) 
 
 # Use irf_generator to generate some data for the specified ADL(2, 2) model
 toy_data <- irf_generator(
   intercept = 1, 
-  ar_params = c(0.5,-0.2), 
-  x_params = c(-2,0.5,1), 
+  ar_params = c(0.5, -0.2), 
+  x_params = c(-2, 0.5, 1), 
   x = x, 
   innovations = v, 
   burnin = TRUE
-) 
+)$irf
 ```
 
 The column `"irf"` contains the model implied values for the dependent variable, $y_{t}$. The covariate values are provided in the column `"x"`. These are the only two columns we have available by measuring the criterion variable and the covariate in practice. For illustrative purposes, we create a new dataframe called "observed data" containing the time index and these two columns. We rename the dependent variable to `"Y"` and the independent variable to `"X"`:
@@ -84,11 +84,11 @@ estimated_responses <- irf_empirical(
 
 The estimated_responses object is a list containing 5 elements. 
 
-- A fit object named `fit`. This is the raw output of the lm() fit object. Note that estimates of the first $p$ innovations will not be returned by this fit object, because the initial values $y_{0}, y_{1}$ and $x_{0},x_{1}$ were conditioned on for estimation;
-- A data.frame named `irf`, containing the estimated cumulative responses towards the input variables over the observation period. This output has the same format as the output of the \code{\link[impulseR]{irf_generator}} function. The column estimated_responses\$irf\$innovations contains the first $p$ innovations needed to construct the empirical trajectory plots;
-- A numeric containing the estimate of the intercept parameter under `intercept`;
-- A numeric vector containing the estimates of the covariate parameters under `x_params`. The first element will be $\hat{\beta}_{x}$, the second element will be $\hat{\beta}_{Lx}$, and so on. The list will be of dimension $q+1$ if $q$ lagged covariate parameters are allowed for and a contemporaneous effect is estimated;
-- A numeric vector containing the estimates of the AR parameters under `ar_params`, again in order of increasing lag.  
+- `fit`: The raw output of the lm() fit object. Note that estimates of the first $p$ innovations will not be returned by this fit object, because the initial values $y_{0}, y_{1}$ and $x_{0},x_{1}$ were conditioned on for estimation;
+- `irf`: A data.frame containing the estimated cumulative responses towards the input variables over the observation period. This output has the same format as the output of the \code{\link[impulseR]{irf_generator}} function. The column estimated_responses\$irf\$innovations contains the first $p$ innovations needed to construct the empirical trajectory plots;
+- `intercept`: A numeric containing the estimate of the intercept parameter;
+- `x_params`: A numeric vector containing the estimates of the covariate parameters. The first element will be $\hat{\beta}_{x}$, the second element will be $\hat{\beta}_{Lx}$, and so on. The list will be of dimension $q+1$ if $q$ lagged covariate parameters are allowed for and a contemporaneous effect is estimated;
+- `ar_params`: A numeric vector containing the estimates of the AR parameters, again in order of increasing lag.  
 
 To construct an empirical trajectory plot, we simply call the \code{\link[impulseR]{irf_plot}} function:
 
@@ -114,14 +114,30 @@ We call the \code{\link[impulseR]{irf_empirical}} function to our empirical data
 
 ```{r whynotburn}
 # Fit the data and do not burn in the intercept response (default behavior)
-est_raw <- irf_empirical(empirical_data, cols = c("Y", "X"), y_lags = 2, x_lags = 2)
+est_raw <- irf_empirical(
+  observed_data, 
+  cols = c("Y", "X"), 
+  y_lags = 2, 
+  x_lags = 2
+)
 
 # Fit the data and burn in the intercept response (not recommended for empirical trajectory plots)
-est_burned <- irf_empirical(empirical_data, cols = c("Y", "X"), y_lags = 2, x_lags = 2, burnin = TRUE)
+est_burned <- irf_empirical(
+  observed_data, 
+  cols = c("Y", "X"), 
+  y_lags = 2, 
+  x_lags = 2, 
+  burnin = TRUE
+)
 
-head(observed_data,n=10)
-head(est_raw$irf,n=10)
-head(est_burned$irf,n=10)
+# Observed data
+head(observed_data, n = 10)
+
+# System responses when burnin = FALSE
+head(est_raw$irf, n = 10)
+
+# System responses when burnin = TRUE
+head(est_burned$irf, n = 10)
 ```
 
 The column `"Y"` in the data.frame `"observed data"` contains the observed values for the criterion variable, $y_{t}^{obs}$. The column `"irf"` in `est_raw` contains the model implied values $y_{t}$ if the intercept response is not burned in. The column `"irf"` in `est_burned` contains the model implied values $y_{t}$ if the intercept response is burned in. 
