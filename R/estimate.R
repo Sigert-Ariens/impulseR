@@ -1,23 +1,34 @@
-#' Estimate the parameters of an $ADL(p,q)$ model and prepare the output for the calculation of system responses. An intercept will always be estimated. 
+#' Estimate the parameters of an $ADL(p, q)$ model
+#' 
+#' This function estimates the parameters of an $ADL(p, q)$ and prepares the 
+#' output for the calculation of system responses in other functions of the 
+#' package. Always estimates an intercept. 
 #' 
 #' @details
 #' Estimate the parameters of an $ADL(p, q)$, where $p$ represents the number of
-#' autoregressive effects (effects of lags of the dependent variable $y_{t}$) and $q$ represents 
-#' the number of lagged covariate effects. The ADL(p,q) is formalized as: 
+#' autoregressive effects (effects of lags of the dependent variable $y_{t}$) 
+#' and $q$ represents the number of lagged covariate effects. The $ADL(p, q)$ is 
+#' formalized as: 
 #' 
-#' \eqn{y_t = \alpha + \sum_{i = 1}^p \phi_{i}y_{t-i} + \beta_{x} x_{t} + \sum_{i = 1}^q \beta_{L^{j}x} x_{t - j} + v_{t}}
+#' \eqn{y_t = \alpha + \sum_{i = 1}^p \phi_{i}y_{t-i} + \beta_{x} x_{t} + 
+#' \sum_{i = 1}^q \beta_{L^{j}x} x_{t - j} + v_{t}}
 #' 
 #' @param data Dataframe containing the variables of interest
 #' @param cols Character vector denoting the columns containing the variables of
 #' interest. First character should denote the dependent variable, the second 
 #' one the covariate of interest. Defaults to \code{c("y", "x")}
-#' @param y_lags Integer denoting the number of AR effects to estimate freely. Starts at the value \code{1}, allowing for an AR(1) structure. Defaults to \code{NA}, 
-#' communicating that you don't want to allow for any AR effects.
-#' @param x_lags Integer denoting the number of lagged covariate effects. Starts at the value \code{0}, implying that only the contemporaneous effect, $\beta_{x}$, is estimated freely. Defaults to \code{NA}, communicating 
+#' @param y_lags Integer denoting the number of AR effects to estimate freely. 
+#' Starts at the value \code{1}, allowing for an AR(1) structure. Defaults to 
+#' \code{NA}, communicating that you don't want to allow for any AR effects.
+#' @param x_lags Integer denoting the number of lagged covariate effects. Starts 
+#' at the value \code{0}, implying that only the contemporaneous effect, 
+#' $\beta_{x}$, is estimated freely. Defaults to \code{NA}, communicating 
 #' that you don't want to estimate any covariate parameters 
 #' 
-#' @return Named list containing the estimated model (\code{model}), the 
-#' parameter estimates (\code{intercept}, \code{x_params}, \code{ar_params}), the observed covariate values (\code{x}) and the estimated innovations \code{innovations}
+#' @return Named list containing the estimated model (\code{fit}), the 
+#' parameter estimates (\code{intercept}, \code{x_params}, \code{ar_params}), 
+#' the observed covariate values (\code{x}) and the estimated innovations 
+#' \code{innovations}
 #' 
 #' @examples 
 #' # Define a dataset
@@ -96,7 +107,7 @@ estimate <- function(data,
   if(is.na(y_lags) & is.na(x_lags)) {
     return(
       list(
-        "model" = list(),
+        "fit" = list(),
         "intercept" = mean(data$y),
         "x_params" = 0,
         "ar_params" = 0,
@@ -172,14 +183,23 @@ estimate <- function(data,
   )
 }
 
-#' Compute estimated innovations of an ADL(p,q) model, and fix initial innovations in order to construct empirical trajectory plots. 
+#' Compute estimated innovations of an $ADL(p,q)$ model
+#' 
+#' This function computes the innovations of an $ADL(p, q)$ model, fixing initial 
+#' innovations in order to construct empirical trajectory plots. 
 #' 
 #' @details
-#' If there are $p$ AR effects, the fit object will only return innovations for the last \code{N- p} datapoints. Least squares treats the initial values, $y_{0},...,y_{p}$ and $x_{0},...,x_{p}$ as known for parameter estimation. 
-#' To generate empirical trajectory plots starting from the first measurement occasion (t = 0), we can fix the 'missing' innovations by using knowledge of the initial values and the parameter estimates (see appendix X).
-#' The following function fixes the initial innovations appropriately for the user, and returns a list containing all \code{N} innovations. 
+#' If there are $p$ AR effects, the fit object will only return innovations for 
+#' the last \code{N- p} datapoints. Least squares treats the initial values, 
+#' $y_{0},...,y_{p}$ and $x_{0},...,x_{p}$ as known for parameter estimation. 
+#' To generate empirical trajectory plots starting from the first measurement 
+#' occasion (t = 0), we can fix the 'missing' innovations by using knowledge of 
+#' the initial values and the parameter estimates (see appendix X). The following 
+#' function fixes the initial innovations appropriately for the user, and 
+#' returns a list containing all \code{N} innovations. 
 #' 
-#' Used under the hood in the \code{\link[impulseR]{estimate}} function. 
+#' Used under the hood in the \code{\link[impulseR]{estimate}} and 
+#' \code{\link[impulseR]{irf_generator}} function. 
 #' 
 #' @param data Dataframe containing the variables of interest
 #' @param cols Character vector denoting the columns containing the variables of
@@ -187,16 +207,20 @@ estimate <- function(data,
 #' one the covariate of interest. Defaults to \code{c("y", "x")}
 #' @param intercept Numeric denoting the intercept to use for the impulse response 
 #' function. Defaults to \code{0}
-#' @param ar_params Numeric vector denoting the estimated AR parameters. Parameters need to be given in order
-#' of increased lag (i.e., first element for $\phi_{1}$, second element for $\phi_{2}$,...).
-#' Defaults to \code{0}
-#' @param x_params Numeric vector denoting the estimated covariate parameters. Parameters again need to be given in order of increased
-#' lag (i.e., first element for $\beta_{x}$, second element for $\beta_{Lx}$,...). Defaults to 
+#' @param ar_params Numeric vector denoting the estimated AR parameters. 
+#' Parameters need to be given in order of increased lag (i.e., first element 
+#' for $\phi_{1}$, second element for $\phi_{2}$,...). Defaults to \code{0}
+#' @param x_params Numeric vector denoting the estimated covariate parameters. 
+#' Parameters again need to be given in order of increased lag (i.e., first 
+#' element for $\beta_{x}$, second element for $\beta_{Lx}$,...). Defaults to 
 #' \code{0}, implying no covariate parameters.
-#' @param innovations Numeric vector denoting the values of estimated innovations up to time point t (e.g., those acquired through the \code{lm} 
-#' function). Defaults to \code{NULL}, signalling the estimated innovations are first calculated from the parameter estimates and observed data values $y$ and $x$. 
+#' @param innovations Numeric vector denoting the values of estimated innovations 
+#' up to time point t (e.g., those acquired through the \code{lm} function). 
+#' Defaults to \code{NULL}, signalling the estimated innovations are first 
+#' calculated from the parameter estimates and observed data values $y$ and $x$. 
 #' 
-#' @return t-dimensional vector of innovations.
+#' @return Numeric vector of the same length as the data containing the 
+#' innovations for the provided model
 #' 
 #' @examples 
 #' # Define a dataset
