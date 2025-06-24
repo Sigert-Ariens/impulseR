@@ -10,11 +10,13 @@ navbar:
   structure:
   components:
     articles:
-      text: How to use
+      text: Usage
       menu:
-      - text: Impulse response functions
-        href: articles/impulse_response.html
-      - text: Analysis
+      - text: Getting started
         href: articles/getting_started.html
-      - text: Plots
+      - text: Analysis
+        href: articles/irf_generator.html
+      - text: Estimation
+        href: articles/irf_empirical.html
+      - text: Plotting
         href: articles/plotting.html

@@ -18,7 +18,7 @@ library(impulseR)
 
 ## Functionality
 
-This package allows users to compute and visualize the model-expected response to a given impulse. For a detailed explanation on how to use the package, we refer the reader to the [Documentation](https://impulser-5cae6f.pages.gitlab.kuleuven.be/reference/index.html). In the documentation, one can find the [theoretical background](https://impulser-5cae6f.pages.gitlab.kuleuven.be/articles/impulse_response.html) of the package, the way in which [impulse responses should be computed](https://impulser-5cae6f.pages.gitlab.kuleuven.be/articles/getting_started.html), and the way in which [they should be visualized](https://impulser-5cae6f.pages.gitlab.kuleuven.be/articles/plotting.html).
+This package allows users to compute and visualize the model-expected response to a given impulse. For a detailed explanation on how to use the package, we refer the reader to the [Documentation](https://impulser-5cae6f.pages.gitlab.kuleuven.be/reference/index.html). In the documentation, one can find a [Getting started page](https://impulser-5cae6f.pages.gitlab.kuleuven.be/articles/getting_started.html) for the package, as well as detailed documentation on its functionality, specifically about the way in which [impulse responses should be computed](https://impulser-5cae6f.pages.gitlab.kuleuven.be/articles/irf_generator.html), about how one [can estimate parameters and compute the impulse responses in one go](https://impulser-5cae6f.pages.gitlab.kuleuven.be/articles/irf_empirical.html), and how [one can visualize these system responses](https://impulser-5cae6f.pages.gitlab.kuleuven.be/articles/plotting.html).
 
 ## Getting help
 
