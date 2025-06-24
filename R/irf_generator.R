@@ -15,11 +15,13 @@
 #' 
 #' Additionally, one also needs to provide the impulses to the system. One can 
 #' achieve this in two ways. First, one can specify the impulses to the covariates 
-#' through \code{"x"} and/or the impulses to the innovations through 
-#' \code{"innovations"}. Second, one can provide a data set to the argument 
-#' \code{"data"}, which is then used to derive the (cumulative) impulses of 
-#' \code{"x"} and \code{"innovations"} automatically. When both options are 
-#' specified, the data takes precedence.
+#' through \code{x} and/or the impulses to the innovations through 
+#' \code{innovations}. Second, one can provide a data set to the argument 
+#' \code{data}, which is then used to derive the (cumulative) impulses of 
+#' \code{x} and \code{innovations} automatically. In this case, it is 
+#' recommended to put \code{burnin} to \code{FALSE}
+#' 
+#' When both options are specified, the data takes precedence.
 #' 
 #' @param intercept Numeric denoting the intercept, $\alpha$. Defaults to 
 #' \code{0}
@@ -40,7 +42,11 @@
 #' each time point. Depending on the input vectors supplied, different system 
 #' responses will be returned. Defaults to \code{NULL}, which returns an empty 
 #' vector of the same length as \code{x} (if provided).
-#' @param data Dataframe containing 
+#' @param data Dataframe containing the variables of interest. Defaults to 
+#' \code{NULL}, meaning there are no data attached
+#' @param cols Character vector denoting the columns containing the variables of
+#' interest. First character should denote the dependent variable, the second 
+#' one the covariate of interest. Defaults to \code{c("y", "x")}
 #' @param burnin Logical specifying if the part of the system response due to 
 #' the intercept should be burned in analytically. Defaults to \code{TRUE}, the 
 #' system responses responses will be displayed relative to the hypothetical 
@@ -59,17 +65,7 @@
 #' and \code{"innovations"} contain the values of the covariate and the 
 #' innovations.
 #' 
-#' @examples 
-#' # Generate data
-#' set.seed(1)
-#' data <- irf_generator(
-#'   intercept = 1, 
-#'   x_params = c(1, 2, -0.5),
-#'   ar_params = c(0.9, -0.1, 0.25),
-#'   x = rnorm(100),
-#'   residuals = rnorm(100)
-#' )$irf
-#' 
+#' @examples  
 #' # Create parameters of an ADL(2, 1), meaning having two lags in the residuals
 #' # and one lag in the values of x. These will be used for all examples.
 #' params <- list(
@@ -78,8 +74,13 @@
 #'   "slopes" = c(2, 0.5)
 #' )
 #' 
+#' 
+#' 
+#' ########################
+#' # PRE-SPECIFIED IMPULSES
+#' 
 #' # Use with single impulse of x in the beginning of the study, with burnin
-#' irf(
+#' irf_generator(
 #'   params$intercept, 
 #'   params$autoregression,
 #'   params$slopes,
@@ -87,7 +88,7 @@
 #' )
 #' 
 #' # Use with single impulse of x in the beginning of the study, without burnin
-#' irf(
+#' irf_generator(
 #'   params$intercept, 
 #'   params$autoregression,
 #'   params$slopes,
@@ -95,20 +96,48 @@
 #'   burnin = FALSE
 #' )
 #' 
-#' # Use with multiple values for the residuals, with burnin
-#' irf(
+#' # Use with multiple values for the innovations, with burnin
+#' irf_generator(
 #'   params$intercept, 
 #'   params$autoregression,
 #'   params$slopes,
-#'   residuals = rnorm(10)
+#'   innovations = rnorm(10)
 #' )
 #' 
-#' # Use with multiple values for the residuals, without burnin
-#' irf(
+#' # Use with multiple values for the innovations, without burnin
+#' irf_generator(
 #'   params$intercept, 
 #'   params$autoregression,
 #'   params$slopes,
-#'   residuals = rnorm(10),
+#'   innovations = rnorm(10),
+#'   burnin = FALSE
+#' )
+#' 
+#' 
+#'
+#' ########################
+#' # IMPULSES BASED ON DATA
+#' 
+#' # Generate data
+#' set.seed(1)
+#' data <- irf_generator(
+#'   intercept = 1, 
+#'   x_params = c(1, 2, -0.5),
+#'   ar_params = c(0.9, -0.1, 0.25),
+#'   x = rnorm(100),
+#'   innovations = rnorm(100)
+#' )$irf
+#' 
+#' # Use the data to determine the values for x and y. 
+#' #
+#' # Using "irf" as the dependent variable and "x" as the independent variable
+#' # in the original data set.
+#' irf_generator(
+#'   params$intercept, 
+#'   params$autoregression,
+#'   params$slopes,
+#'   data = data,
+#'   cols = c("irf", "x"),
 #'   burnin = FALSE
 #' )
 #' 
@@ -118,6 +147,8 @@ irf_generator <- function(intercept = 0,
                           x_params = 0,
                           x = NULL,
                           innovations = NULL,
+                          data = NULL,
+                          cols = c("y", "x"),
                           burnin = TRUE) {
   
   
