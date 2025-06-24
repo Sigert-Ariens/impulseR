@@ -57,10 +57,10 @@ set.seed(1)
 data <- irf_generator(
   intercept = 1, 
   x_params = c(1, 2, -0.5),
-  ar_params = c(0.9, -0.1, 0.25),
+  ar_params = c(0.75, -0.15, 0.05),
   x = rnorm(100),
   innovations = rnorm(100)
-)
+)$irf
 
 colnames(data) <- c("dependent", "independent")
 
