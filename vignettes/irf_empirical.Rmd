@@ -112,7 +112,7 @@ First, the \code{\link[impulseR]{irf_empirical}} fits the model to data, and onl
 
 We call the \code{\link[impulseR]{irf_empirical}} function to our empirical data twice, once with the default value of the argument `burnin = FALSE`, and one with the default overridden. 
 
-```{r whynotburn}
+```{r}
 # Fit the data and do not burn in the intercept response (default behavior)
 est_raw <- irf_empirical(
   observed_data, 
