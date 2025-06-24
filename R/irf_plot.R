@@ -206,48 +206,50 @@ irf_plot <- function(data,
   
   
   # Some other plotting characteristics to take care of
-  if(is.null(legend.title)) {
-    
+  if(is.null(legend.title)) {    
     legend.title <- "System response"
   }
   
   if(is.null(xlabel)) {
     xlabel <- ifelse(
-      sum(data$x[-c(1)] == 0) | sum(data$innovations[-c(1)] == 0), "s (time step since input)", "t (time)"
+      all(data$x[-1] == 0) & all(data$innovations[-1] == 0), 
+      "s (time step since input)", 
+      "t (time)"
     )
-    
   }
     
-  ### Fix legends
-  
-  if(is.null(x.label)){
-    
+  # Legend labels 
+  if(is.null(x.label)){    
     x.label <- ifelse(
-      sum(data$x[-c(1)] == 0) | sum(data$innovations[-c(1)] == 0),
-      ifelse(data$x[1] == 1 | data$innovations[1] == 1, latex2exp::TeX("$h_x(s)$") ,latex2exp::TeX("$h_x(s)x_{0}$")
-    ),latex2exp::TeX("$(h_x * x)_{t}$") 
+      all(data$x[-1] == 0) & all(data$innovations[-1] == 0),
+      ifelse(
+        data$x[1] == 1, 
+        latex2exp::TeX("$h_x(s)$"),
+        latex2exp::TeX("$h_x(s) x_{0}$")
+      ),
+      latex2exp::TeX("$(h_x * x)_{t}$") 
     )
   }
   
-    if(is.null(v.label)){
-    
+  if(is.null(v.label)){    
     v.label <- ifelse(
-      sum(data$x[-c(1)] == 0) | sum(data$innovations[-c(1)] == 0),
-      ifelse(data$x[1] == 1 | data$innovations[1] == 1, latex2exp::TeX("$h_v(s)$") ,latex2exp::TeX("$h_v(s)v_{0}$")
-    ),latex2exp::TeX("$(h_v * v)_{t}$") 
+      all(data$x[-1] == 0) & all(data$innovations[-1] == 0),
+      ifelse(
+        data$innovations[1] == 1, 
+        latex2exp::TeX("$h_v(s)$"),
+        latex2exp::TeX("$h_v(s) v_{0}$")
+      ),
+      latex2exp::TeX("$(h_v * v)_{t}$") 
     )
-    }
+  }  
   
-  
-    labels <- c(
+  labels <- c(
     "irf" = irf.label,
     "irf_x" = x.label,
     "irf_v" = v.label,
     "irf_intercept" = intercept.label
   )
-  
-  
-  
+
   impulses <- data[, c("time", "x", "innovations")]
   
   
@@ -304,7 +306,7 @@ irf_plot <- function(data,
       linetype = impulse.v.linetype,
       alpha = impulse.alpha
     ) +
-  ggplot2::annotate(
+    ggplot2::annotate(
       "segment",
       x = x_impulse$time, 
       xend = x_impulse$time, 
