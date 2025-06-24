@@ -83,18 +83,7 @@ irf_empirical <- function(data = NULL,
     innovations = params$innovations,
     burnin = burnin #Burnin should be false for constructing empirical trajectory plots. Can be overridden. 
   )
-  
-  return(
-    list(
-      "fit" = params$fit, 
-      "intercept" = params$intercept, 
-      "x_params" = params$x_params, 
-      "ar_params" = params$ar_params,
-      "irf" = output
-    )
-  )  
-  
-  
-  
+  output[["fit"]] <- params$fit 
+
   return(output)
 }

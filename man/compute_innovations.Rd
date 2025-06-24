@@ -41,7 +41,7 @@ t-dimensional vector of innovations.
 Compute estimated innovations of an ADL(p,q) model, and fix initial innovations in order to construct empirical trajectory plots.
 }
 \details{
-If there are $p$ AR effects, the fit object will only return residuals for the last \code{N- p} datapoints. Least squares treats the initial values, $y_{0},...,y_{p}$ and $x_{0},...,x_{p}$ as known for parameter estimation. 
+If there are $p$ AR effects, the fit object will only return innovations for the last \code{N- p} datapoints. Least squares treats the initial values, $y_{0},...,y_{p}$ and $x_{0},...,x_{p}$ as known for parameter estimation. 
 To generate empirical trajectory plots starting from the first measurement occasion (t = 0), we can fix the 'missing' innovations by using knowledge of the initial values and the parameter estimates (see appendix X).
 The following function fixes the initial innovations appropriately for the user, and returns a list containing all \code{N} innovations. 
 

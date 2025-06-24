@@ -186,7 +186,7 @@ irf_generator <- function(intercept = 0,
   
   # Prepare the output data: Add the time index, the individual impulse 
   # response functions cumulative responses, and the total output y_{t}
-  output <- data.frame(
+  irf <- data.frame(
     "time" = 1:nt - 1, 
     "irf" = y,
     "irf_intercept" = irf_intercept,
@@ -195,8 +195,15 @@ irf_generator <- function(intercept = 0,
     "x" = x, 
     "innovations" = innovations    
   ) 
-  
-  return(output)
-    
+
+  return(
+    list(
+      "fit" = NA, 
+      "intercept" = intercept, 
+      "x_params" = x_params, 
+      "ar_params" = ar_params,
+      "irf" = irf
+    )
+  )    
 }
 

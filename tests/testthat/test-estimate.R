@@ -11,9 +11,9 @@ testthat::test_that(
       )
     )
 
-    # Wrong columns in compute_residuals
+    # Wrong columns in compute_innovations
     testthat::expect_error(
-      impulseR::compute_residuals(
+      impulseR::compute_innovations(
         data.frame(Y = numeric(100), X = numeric(100)),
         cols = c("y", "x")
       )
@@ -47,7 +47,7 @@ testthat::test_that(
 
     # Single column specified, but only if x_lags specified in estimate
     testthat::expect_error(
-      impulseR::compute_residuals(
+      impulseR::compute_innovations(
         data.frame(Y = numeric(100)),
         cols = c("y", "x"),
         intercept = 2, 
@@ -57,7 +57,7 @@ testthat::test_that(
     )
 
     testthat::expect_no_error(
-      impulseR::compute_residuals(
+      impulseR::compute_innovations(
         data.frame(Y = numeric(100)),
         cols = c("y", "x"),
         intercept = 2, 
@@ -219,13 +219,13 @@ testthat::test_that(
     tst <- suppressWarnings(impulseR::estimate(data))
     testthat::expect_equal(tst$x, data$x[-c(1:6)])
     testthat::expect_equal(
-      tst$residuals + tst$intercept, 
+      tst$innovations + tst$intercept, 
       data$y[-c(1:6)]
     )
 
-    # NAs in data in `compute_residuals`. Also testing output
+    # NAs in data in `compute_innovations`. Also testing output
     testthat::expect_warning(
-      impulseR::compute_residuals(
+      impulseR::compute_innovations(
         data,
         ar_params = c(0.5, 0.25),
         x_params = c(2, 2)
@@ -233,7 +233,7 @@ testthat::test_that(
     )
 
     tst <- suppressWarnings(
-      impulseR::compute_residuals(
+      impulseR::compute_innovations(
         data, 
         ar_params = c(0.5, 0.25),
         x_params = c(2, 2)
@@ -275,7 +275,7 @@ testthat::test_that(
         x_params = parameters[[i]]$x,
         ar_params = parameters[[i]]$eps,
         x = rnorm(1000),
-        residuals = rnorm(1000)
+        innovations = rnorm(1000)
       )$irf
 
       # Estimate the parameters
@@ -318,7 +318,7 @@ testthat::test_that(
     )
 
     # Idea behind this test: We should be able to exactly replicate the observed
-    # data `y` if we correctly compute the residuals in `estimate`. Residuals 
+    # data `y` if we correctly compute the innovations in `estimate`. innovations 
     # and other impulse response functions may deviate, however, due to nonexact
     # recovery of the parameters.
     #
@@ -332,7 +332,7 @@ testthat::test_that(
         x_params = parameters[[i]]$x,
         ar_params = parameters[[i]]$eps,
         x = rnorm(100),
-        residuals = rnorm(100)
+        innovations = rnorm(100)
       )$irf
 
       # Loop over all possibilities of the lags
@@ -351,7 +351,7 @@ testthat::test_that(
           x_params = results$x_params,
           ar_params = results$ar_params,
           x = results$x,
-          residuals = results$residuals,
+          innovations = results$innovations,
           burnin = FALSE
         )$irf
 
@@ -384,7 +384,7 @@ testthat::test_that(
     )
 
     # Idea behind this test: We should be able to exactly replicate the observed
-    # data `y` if we correctly compute the residuals in `estimate`. Residuals 
+    # data `y` if we correctly compute the innovations in `estimate`. innovations 
     # and other impulse response functions may deviate, however, due to nonexact
     # recovery of the parameters.
     #
@@ -398,7 +398,7 @@ testthat::test_that(
         x_params = parameters[[i]]$x,
         ar_params = parameters[[i]]$eps,
         x = rnorm(100),
-        residuals = rnorm(100)
+        innovations = rnorm(100)
       )$irf
 
       # Loop over all possibilities of the lags
@@ -413,18 +413,18 @@ testthat::test_that(
           suppressWarnings()
 
         # Create the impulse response functions
-        residuals <- impulseR::compute_residuals(
+        innovations <- impulseR::compute_innovations(
           y, 
           cols = c("irf", "x"),
           intercept = results$intercept,
           x_params = results$x_params,
           ar_params = results$ar_params,
-          residuals = NULL
+          innovations = NULL
         ) |>
           suppressWarnings()
 
-        # Check whether the computed residuals are the same in both cases
-        tst[i, j] <- all(round(residuals, 4) == round(results$residuals, 4))
+        # Check whether the computed innovations are the same in both cases
+        tst[i, j] <- all(round(innovations, 4) == round(results$innovations, 4))
       }
     }
 

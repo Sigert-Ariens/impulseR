@@ -87,7 +87,7 @@ Defaults to a relative size of \code{1} as defined by the
 
 \item{irf.color, x.color, eps.color, intercept.color}{Character denoting the 
 colors to use to visualize the total response (\code{irf.}), the response to 
-impulses of the variable x (\code{x.}), the response to the residuals 
+impulses of the variable x (\code{x.}), the response to the innovations 
 (\code{eps.}), and the intercept responses (\code{intercept.}) respectively. 
 Defaults are \code{"black"}, \code{"red4"}, \code{"green4"}, and \code{"gray"} 
 respectively}
@@ -95,19 +95,19 @@ respectively}
 \item{irf.linetype, x.linetype, eps.linetype, intercept.linetype}{Character 
 denoting the linetype to use to visualize the total response (\code{irf.}), 
 the response to impulses of the variable x (\code{x.}), the response to the 
-residuals (\code{eps.}), and the intercept responses (\code{intercept.}) 
+innovations (\code{eps.}), and the intercept responses (\code{intercept.}) 
 respectively. Defaults are \code{"dashed"}, \code{"solid"}, \code{"solid"}, 
 and \code{"solid"} respectively}
 
 \item{irf.linewidth, x.linewidth, eps.linewidth, intercept.linewidth}{Numeric 
 denoting the linewidth to use to visualize the total response (\code{irf.}), 
 the response to impulses of the variable x (\code{x.}), the response to the 
-residuals (\code{eps.}), and the intercept responses (\code{intercept.}) 
+innovations (\code{eps.}), and the intercept responses (\code{intercept.}) 
 respectively. Defaults to \code{1} for all variables}
 
 \item{irf.label, x.label, eps.label, intercept.label}{Character denoting the 
 legend label to give to the the total response (\code{irf.}), the response to 
-impulses of the variable x (\code{x.}), the response to the residuals 
+impulses of the variable x (\code{x.}), the response to the innovations 
 (\code{eps.}), and the intercept responses (\code{intercept.}) respectively.
 Defaults to the mathematical labels for each specific part}
 
@@ -117,7 +117,7 @@ impulse has been given. Defaults to \code{2}}
 \item{impulse.shape, impulse.x.shape, impulse.eps.shape}{Integer or character 
 denoting the shape of the point that indicates an impulse has been given. 
 You can give impulses of variable x (\code{.x.}) and impulses of the 
-residuals (\code{.eps.}) different shapes if desired. Defaults to \code{19}.}
+innovations (\code{.eps.}) different shapes if desired. Defaults to \code{19}.}
 
 \item{impulse.linetype}{Character denoting the linetype of the line connecting 
 the impulses to a given time on the x-axis. Defaults to \code{"dotted"}}

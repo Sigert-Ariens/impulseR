@@ -15,12 +15,12 @@ library(impulseR)
 
 ```{r, warning = FALSE}
 #| fig.alt: >
-#|   One sees four lines; (a) A horizontal gray line that describes the intercept, (b) a red solid line initially increases and then decreases exponentially to reach $y = 0$, describing the reaction of the system to the impulse from the covariate, (c) a green solid line that starts out at point (0, -1) and then increases exponentially to reach $y = 0$, describing the reaction of the system to the impulse from the residuals, and (d) a black dashed line that describes the total response of the system.
+#|   One sees four lines; (a) A horizontal gray line that describes the intercept, (b) a red solid line initially increases and then decreases exponentially to reach $y = 0$, describing the reaction of the system to the impulse from the covariate, (c) a green solid line that starts out at point (0, -1) and then increases exponentially to reach $y = 0$, describing the reaction of the system to the impulse from the innovations, and (d) a black dashed line that describes the total response of the system.
 #|   Additionally, there are two vertical lines and two points that represent the impulse of the covariate and the impulse of the residual. 
 #|   Importantly, the black line can be obtained through summing the gray, red, and green lines.
 #| fig.cap: > 
 #|   _Visualization of an impulse response function for an ADL(2, 2) with parameters $\alpha = 1$, $\beta_i = \{ 1, 0.5 \}$, and $\gamma_i = \{ 0.75, -0.25 \}$. 
-#|   Impulses consist of a singular unit impulse in the covariate $x$ (positive) and the residuals $\epsilon$ (negative) at the start of the simulation._
+#|   Impulses consist of a singular unit impulse in the covariate $x$ (positive) and the innovations $\epsilon$ (negative) at the start of the simulation._
 
 # Compute impulse responses
 results <- irf_generator(
@@ -28,7 +28,7 @@ results <- irf_generator(
   x_params = c(1, 0.5),
   ar_params = c(0.75, -0.25),
   x = impulse(10, 1),
-  residuals = scaled_impulse(10, 1, -1)
+  innovations = scaled_impulse(10, 1, -1)
 )$irf
 
 # Plot the results
@@ -66,7 +66,7 @@ results <- irf_generator(
 irf_plot(results)
 ```
 
-As one can see, the plot includes a green line at 0, indicating that the impulse from the residuals amount to nothing or does not play a role in the total response. This information may not seem relevant for the current model and the specified impulse, both of which do not include these residuals. Hence, one may want to leave the impulse response of the residuals (the green line) out of the figure.
+As one can see, the plot includes a green line at 0, indicating that the impulse from the innovations amount to nothing or does not play a role in the total response. This information may not seem relevant for the current model and the specified impulse, both of which do not include these innovations. Hence, one may want to leave the impulse response of the innovations (the green line) out of the figure.
 
 To do this, one can specify the `cols` argument, which takes in a character vector of the column names in `results` that one wants to account for. In our case, we want to leave `irf_eps` out of the figure, so we specify:
 
@@ -75,7 +75,7 @@ To do this, one can specify the `cols` argument, which takes in a character vect
 #|   The plot looks similar to the previous one, but without the green horizontal line. 
 #|   The vertical line and point indicating the impulse itself is still present.
 #| fig.cap: > 
-#|   _Visualization of the same impulse response function as before, but without including the impulse of the residuals._ 
+#|   _Visualization of the same impulse response function as before, but without including the impulse of the innovations._ 
 irf_plot(
   results, 
   cols = c("irf", "irf_intercept", "irf_x")
@@ -112,7 +112,7 @@ results <- irf_generator(
   x_params = c(1, 0.5),
   ar_params = c(0.75, -0.25),
   x = impulse(10, 1),
-  residuals = scaled_impulse(10, 1, -1)
+  innovations = scaled_impulse(10, 1, -1)
 )$irf
 ```
 
@@ -204,7 +204,7 @@ irf_plot(
 
 ## Changing impulses 
 
-Another key component in the figures are the impulses, that is the vertical lines and points that show at what time an impulse is given through the covariates and/or the residuals. While they receive their colors through the `x.color` and `eps.color` arguments, you can still influence their opacity, the linetype and linewidth of the vertical line, and the shape and size of the points that show the value of the impulse.
+Another key component in the figures are the impulses, that is the vertical lines and points that show at what time an impulse is given through the covariates and/or the innovations. While they receive their colors through the `x.color` and `eps.color` arguments, you can still influence their opacity, the linetype and linewidth of the vertical line, and the shape and size of the points that show the value of the impulse.
 
 Focusing on opacity first, one can control the opacity of the impulses through the `impulse.alpha` argument:
 
@@ -255,7 +255,7 @@ Note that the shape of the covariate- and residual-impulses can be controlled se
 #|   Additionally, the red impulse has a solid square shape while the green impulse has a solid triangular shape.
 #| fig.cap: > 
 #|   _Visualization of the impulse response function for the previously defined ADL(2, 2) and impulses with a change in shape and size of the impulses.
-#|   Shapes of the impulses are specific to the impulse type itself, that is different for the covariates vs the residuals._
+#|   Shapes of the impulses are specific to the impulse type itself, that is different for the covariates vs the innovations._
 irf_plot(
   results, 
   impulse.size = 4,
