@@ -2,12 +2,7 @@
 % Please edit documentation in R/irf_empirical.R
 \name{irf_empirical}
 \alias{irf_empirical}
-\title{This function can be used to construct empirical trajectory plots, as in X, figure X.
-The function first fits an ADL(p,q) model to the data using the estimate function. $p$ is the number of AR parameters, 
-and $q$ the number of lagged covariate effects. The estimate function fits the model using OLS, with the lm() function in R base. 
-It also processes the output and fixes initial innovations (see appendix X). The, cumulative resposnes over the study period are returned, which can be used
-in the construction of empirical trajectory plots, see manuscript, figure X.   
-#'}
+\title{Estimate and compute system responses for an $ADL(p, q)$}
 \usage{
 irf_empirical(
   data = NULL,
@@ -24,36 +19,37 @@ irf_empirical(
 interest. First character should denote the dependent variable, the second 
 one the covariate of interest. Defaults to \code{c("y", "x")}}
 
-\item{y_lags}{Integer denoting the number of AR effects, $p$, to estimate freely. 
-Starts at the value \code{1}, allowing for an AR(1) structure. Defaults to \code{NA}, 
-communicating that you don't want to allow for any AR effects.}
+\item{y_lags}{Integer denoting the number of AR effects, $p$, to estimate. 
+Should start at the value \code{1}, implying a lag of 1 in the dependent 
+variable. Defaults to \code{NA}, communicating that you don't want to allow 
+for any AR effects.}
 
-\item{x_lags}{Integer denoting the number of lagged covariate effects, $q$, to estimate freely. 
-Starts at the value \code{0}, implying that only the contemporaneous effect is estimated freely. 
-Defaults to \code{NA}, communicating that you don't want to estimate any covariate parameters}
+\item{x_lags}{Integer denoting the number of lagged covariate effects, $q$, 
+to estimate. Should starts at the value \code{0}, implying that only the 
+contemporaneous effect is taken into account. Defaults to \code{NA}, 
+communicating that you don't want to estimate any covariate parameters}
 
-\item{burnin}{Logical (True/False) specifying if the part of the system response due to the intercept should be burned in analytically. 
-Defaults to \code{FALSE} in order to generate empirical trajectory plots (see X). If set to \code{True}, there will usually be discrepancies between the
-model implied total response $y_{t}$ and the observed values of the outcome variable $y_{t}^{obs}$ at the start of the time series.}
+\item{burnin}{Logical specifying if the part of the system response due to 
+the intercept should be burned in analytically. Defaults to \code{FALSE}, as 
+expected analytically. If set to \code{TRUE}, there will usually be 
+discrepancies between the model-implied total response $y_{t}$ and the 
+observed values of the outcome variable $y_{t}^{obs}$ at the start of the 
+time series.}
 }
 \value{
-List containing the fit of the model (under \code{"fit"}), the 
-parameters that were used for the generation of the system responses (under 
-\code{"intercept"}, \code{"x_params"}, and \code{"ar_params"}, and a dataframe 
-containing the model implied total responses over the observation period (under \code{"y"}). 
-Within the dataframe, column \code{"time"} contains the time index starting at 0. The columns 
-\code{"irf_intercept"}, \code{"irf_x"}, \code{"irf_v"} contain the cumulative responses towards the unit vector, covariate, and innovations respectively. 
-These partial responses sum up to the total response $y_{t}$, which should equal the observed values $y_{t}^{obs}$. The total response is provided in the
-\code{"y"} column. Finally, the columns \code{"x"} and \code{"innovations"} contain 
-the values of the covariate, \code{"x"}, and the estimated innovations (together with the first p innovations) \code{"innovations"}.
+List containing all information provided by 
+\code{\link[impulseR]{irf_generator}} as well as the fitted model (under 
+\code{"fit"}).
 }
 \description{
-This function can be used to construct empirical trajectory plots, as in X, figure X.
-The function first fits an ADL(p,q) model to the data using the estimate function. $p$ is the number of AR parameters, 
-and $q$ the number of lagged covariate effects. The estimate function fits the model using OLS, with the lm() function in R base. 
-It also processes the output and fixes initial innovations (see appendix X). The, cumulative resposnes over the study period are returned, which can be used
-in the construction of empirical trajectory plots, see manuscript, figure X.   
-#'
+This function can be used to construct empirical trajectory plots. First, an
+$ADL(p, q)$ model is fitted to the data using the \code{\link[impulseR]{estimate}} 
+function, where $p$ is the number of AR parameters and $q$ the number of 
+lagged covariate effects. Then, the function creates cumulative responses 
+through the \code{\link[impulseR]{irf_generator}} function.
+}
+\details{
+Estimation is currently performed through OLS, using the base lm() function.
 }
 \examples{
 # Generate data
@@ -68,18 +64,12 @@ data <- irf_generator(
 
 colnames(data) <- c("dependent", "independent")
 
-# Fit a lag-2 ADL model to the data and calculate the cumulative responses over the study period:
-
-out_empirical <- irf_empirical(
+# Fit a lag-2 ADL model to the data and calculate the cumulative responses
+result <- irf_empirical(
   data = data, 
   cols = c("dependent", "independent"),
   y_lags = 2,
   x_lags = 2
-)
-
-Pass the data to the irf_plot function to visualize the estimated system responses over the study period:
-
-irf_plot(out_empirical)
-
+) 
 
 }
