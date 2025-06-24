@@ -293,7 +293,8 @@ compute_innovations <- function(data,
   
   # Compute the estimated innovations ($\hat{v}_{t} = y_{t} - \hat{y}_{t}) 
   #
-  # Only perform this computation if innovations are not provided yet in the form of a lm() output object.
+  # Only perform this computation if innovations are not provided yet in the form 
+  # of a lm() output object.
   if(is.null(innovations)) {
     # Prepare the data and parameters for the prediction step.
     X <- prepare_data(
