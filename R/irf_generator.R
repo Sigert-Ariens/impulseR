@@ -1,13 +1,13 @@
 #' Calculate system responses
 #' 
 #' Compute system responses based on a particular set of parameters of the general
-#' $ADL(p, q)$ model.
+#' \eqn{ADL(p, q)} model.
 #' 
 #' @details 
-#' This function calculates system responses for an $ADL(p,q)$ model, formalized 
-#' as:
+#' This function calculates system responses for an \eqn{ADL(p, q)} model, 
+#' formalized as:
 #' 
-#' \eqn{y_t = \alpha + \sum_{i = 1}^p \phi_{i}y_{t-i} + \beta_{x} x_{t} + 
+#' \deqn{y_t = \alpha + \sum_{i = 1}^p \phi_{i}y_{t-i} + \beta_{x} x_{t} + 
 #' \sum_{i = 1}^q \beta_{L^{j}x} x_{t - j} + v_{t}}.
 #' 
 #' One should provide an a priori chosen set of parameters through the arguments 
@@ -23,16 +23,16 @@
 #' 
 #' When both options are specified, the data takes precedence.
 #' 
-#' @param intercept Numeric denoting the intercept, $\alpha$. Defaults to 
+#' @param intercept Numeric denoting the intercept, \eqn{\alpha}. Defaults to 
 #' \code{0}
 #' @param ar_params Numeric vector denoting the autoregressive parameters (the 
-#' $\phi$) parameters of the model. Parameters need to be given in order of 
-#' increasing lags (i.e., first element for $\phi_{1}$, second element for 
-#' $\phi_{2}$,...). Defaults to \code{0}
+#' \eqn{\phi}) parameters of the model. Parameters need to be given in order of 
+#' increasing lags (i.e., first element for \eqn{\phi_{1}}, second element for 
+#' \eqn{\phi_{2}},...). Defaults to \code{0}
 #' @param x_params Numeric vector denoting the covariate parameters of the model 
-#' (the $\beta$ parameters). Parameters again need to be given in order of 
-#' increasing lags(i.e., first element for $\beta_{x}$, second element for 
-#' $\beta_{Lx}$,...). Defaults to \code{0}, indicating that there are no 
+#' (the \eqn{\beta} parameters). Parameters again need to be given in order of 
+#' increasing lags(i.e., first element for \eqn{\beta_{x}}, second element for 
+#' \eqn{\beta_{Lx}},...). Defaults to \code{0}, indicating that there are no 
 #' covariate parameters. 
 #' @param x Numeric vector denoting the values of covariate at each time point. 
 #' Depending on the input vectors supplied, different system responses will be 
@@ -60,7 +60,7 @@
 #' data.frame, column \code{"time"} contains the time index starting at 0. The 
 #' columns \code{"irf_intercept"}, \code{"irf_x"}, and \code{"irf_v"} contain 
 #' the cumulative responses towards the unit vector, covariate, and innovations 
-#' respectively. These partial responses sum up to the total response $y_{t}$,
+#' respectively. These partial responses sum up to the total response \eqn{y_{t}},
 #' which is provided in the \code{"irf"} column. Finally, the columns \code{"x"} 
 #' and \code{"innovations"} contain the values of the covariate and the 
 #' innovations.

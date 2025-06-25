@@ -19,7 +19,7 @@ Starts at the value \code{1}, allowing for an AR(1) structure. Defaults to
 
 \item{x_lags}{Integer denoting the number of lagged covariate effects. Starts 
 at the value \code{0}, implying that only the contemporaneous effect, 
-$\beta_{x}$, is estimated freely. Defaults to \code{NA}, communicating 
+\eqn{\beta_{x}}, is estimated freely. Defaults to \code{NA}, communicating 
 that you don't want to estimate any covariate parameters}
 }
 \value{
@@ -34,12 +34,12 @@ output for the calculation of system responses in other functions of the
 package. Always estimates an intercept.
 }
 \details{
-Estimate the parameters of an $ADL(p, q)$, where $p$ represents the number of
-autoregressive effects (effects of lags of the dependent variable $y_{t}$) 
-and $q$ represents the number of lagged covariate effects. The $ADL(p, q)$ is 
-formalized as: 
+Estimate the parameters of an \eqn{ADL(p, q)}, where \eqn{p} represents the 
+number of autoregressive effects (effects of lags of the dependent variable 
+\eqn{y_{t}}) and \eqn{q} represents the number of lagged covariate effects. 
+The \eqn{ADL(p, q)} is formalized as: 
 
-\eqn{y_t = \alpha + \sum_{i = 1}^p \phi_{i}y_{t-i} + \beta_{x} x_{t} + 
+\deqn{y_t = \alpha + \sum_{i = 1}^p \phi_{i}y_{t-i} + \beta_{x} x_{t} + 
 \sum_{i = 1}^q \beta_{L^{j}x} x_{t - j} + v_{t}}
 }
 \examples{

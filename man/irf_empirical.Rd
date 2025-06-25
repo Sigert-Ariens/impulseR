@@ -32,8 +32,8 @@ communicating that you don't want to estimate any covariate parameters}
 \item{burnin}{Logical specifying if the part of the system response due to 
 the intercept should be burned in analytically. Defaults to \code{FALSE}, as 
 expected analytically. If set to \code{TRUE}, there will usually be 
-discrepancies between the model-implied total response $y_{t}$ and the 
-observed values of the outcome variable $y_{t}^{obs}$ at the start of the 
+discrepancies between the model-implied total response \eqn{y_{t}} and the 
+observed values of the outcome variable \eqn{y_{t}^{obs}} at the start of the 
 time series.}
 }
 \value{
@@ -43,13 +43,15 @@ List containing all information provided by
 }
 \description{
 This function can be used to construct empirical trajectory plots. First, an
-$ADL(p, q)$ model is fitted to the data using the \code{\link[impulseR]{estimate}} 
-function, where $p$ is the number of AR parameters and $q$ the number of 
-lagged covariate effects. Then, the function creates cumulative responses 
-through the \code{\link[impulseR]{irf_generator}} function.
+\eqn{ADL(p, q)} model is fitted to the data using the 
+\code{\link[impulseR]{estimate}} function, where \eqn{p} is the number of AR 
+parameters and \eqn{q} the number of lagged covariate effects. Then, the 
+function creates cumulative responses through the 
+\code{\link[impulseR]{irf_generator}} function.
 }
 \details{
-Estimation is currently performed through OLS, using the base lm() function.
+Estimation is currently performed through OLS, using the base \code{lm}
+function.
 }
 \examples{
 # Generate data

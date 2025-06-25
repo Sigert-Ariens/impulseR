@@ -2,7 +2,7 @@
 % Please edit documentation in R/estimate.R
 \name{compute_innovations}
 \alias{compute_innovations}
-\title{Compute estimated innovations of an $ADL(p,q)$ model}
+\title{Compute estimated innovations of an \eqn{ADL(p,q)} model}
 \usage{
 compute_innovations(
   data,
@@ -25,12 +25,12 @@ function. Defaults to \code{0}}
 
 \item{ar_params}{Numeric vector denoting the estimated AR parameters. 
 Parameters need to be given in order of increased lag (i.e., first element 
-for $\phi_{1}$, second element for $\phi_{2}$,...). Defaults to \code{0}}
+for \eqn{\phi_{1}}, second element for \eqn{\phi_{2}},...). Defaults to \code{0}}
 
 \item{x_params}{Numeric vector denoting the estimated covariate parameters. 
 Parameters again need to be given in order of increased lag (i.e., first 
-element for $\beta_{x}$, second element for $\beta_{Lx}$,...). Defaults to 
-\code{0}, implying no covariate parameters.}
+element for \eqn{\beta_{x}}, second element for \eqn{\beta_{Lx}},...). 
+Defaults to \code{0}, implying no covariate parameters.}
 
 \item{innovations}{Numeric vector denoting the values of estimated innovations 
 up to time point t (e.g., those acquired through the \code{lm} function). 
@@ -42,20 +42,20 @@ Numeric vector of the same length as the data containing the
 innovations for the provided model
 }
 \description{
-This function computes the innovations of an $ADL(p, q)$ model, fixing initial 
-innovations in order to construct empirical trajectory plots.
+This function computes the innovations of an \eqn{ADL(p, q)} model, fixing 
+initial innovations in order to construct empirical trajectory plots.
 }
 \details{
-If there are $p$ AR effects, the fit object will only return innovations for 
-the last \code{N- p} datapoints. Least squares treats the initial values, 
-$y_{0},...,y_{p}$ and $x_{0},...,x_{p}$ as known for parameter estimation. 
-To generate empirical trajectory plots starting from the first measurement 
-occasion (t = 0), we can fix the 'missing' innovations by using knowledge of 
-the initial values and the parameter estimates (see appendix X). The following 
-function fixes the initial innovations appropriately for the user, and 
-returns a list containing all \code{N} innovations. 
+If there are \eqn{p} AR effects, the fit object will only return innovations 
+for the last \code{N - p} datapoints. Least squares treats the initial values, 
+\eqn{y_{0},...,y_{p}} and \eqn{x_{0},...,x_{p}} as known for parameter 
+estimation. To generate empirical trajectory plots starting from the first 
+measurement occasion (\eqn{t = 0}), we can fix the 'missing' innovations by 
+using knowledge of the initial values and the parameter estimates. 
 
-Used under the hood in the \code{\link[impulseR]{estimate}} and 
+This function fixes the initial innovations appropriately for the user, and 
+returns a list containing all \code{N} innovations. This function is primarily
+used under the hood of the \code{\link[impulseR]{estimate}} and 
 \code{\link[impulseR]{irf_generator}} function.
 }
 \examples{
