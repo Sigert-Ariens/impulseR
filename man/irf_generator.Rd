@@ -75,7 +75,7 @@ This function calculates system responses for an \eqn{ADL(p, q)} model,
 formalized as:
 
 \deqn{y_t = \alpha + \sum_{i = 1}^p \phi_{i}y_{t-i} + \beta_{x} x_{t} + 
-\sum_{i = 1}^q \beta_{L^{j}x} x_{t - j} + v_{t}}.
+\sum_{j = 1}^q \beta_{L^{j}x} x_{t - j} + v_{t}}.
 
 One should provide an a priori chosen set of parameters through the arguments 
 \code{intercept}, \code{x_params}, and \code{ar_params}. 

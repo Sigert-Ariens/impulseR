@@ -43,7 +43,8 @@ irf_plot(
   impulse.alpha = 0.95,
   legend = TRUE,
   legend.title = NULL,
-  legend.position = "right"
+  legend.position = "right",
+  background.fill = "white"
 )
 }
 \arguments{
@@ -142,6 +143,9 @@ input and to \code{"Cumulative responses"} for multiple inputs}
 
 \item{legend.position}{Character denoting the position of the legend. Ignored
 if \code{legend = FALSE}. Defaults to \code{"right"}}
+
+\item{background.fill}{Character denoting the color of the background of the 
+plot. Defaults to \code{"white"}.}
 }
 \value{
 Plot visualizing the impulse response for the predefined model.
