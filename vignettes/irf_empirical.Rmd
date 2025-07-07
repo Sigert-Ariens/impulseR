@@ -11,9 +11,9 @@ vignette: >
 library(impulseR)
 ```
 
-In this vignette, we discuss how the \code{\link[impulseR]{irf_empirical}} function can be used to estimate a general $ADL(p, q)$ model and then generate the different types of system responses discussed in the manuscript. 
+In this vignette, we discuss how the `irf_empirical` function can be used to estimate a general $ADL(p, q)$ model and then generate the different types of system responses discussed in the manuscript. 
 
-The \code{\link[impulseR]{irf_empirical}} first fits a specific dynamic regression model to the data using the lm() function in R. Then, the observed covariate values, the estimated innovations, and the parameter estimates are passed to the \code{\link[impulseR]{irf_generator}} function to calculate the responses needed for empirical trajectory plots. Some technical details about initial innovations (manuscript appendix X) are handled automatically. To illustrate the use of the \code{\link[impulseR]{irf_empirical}} function, we first use the \code{\link[impulseR]{irf_generator}} to simulate some toy data. 
+The \code{\link[impulseR]{irf_empirical}} first fits a specific dynamic regression model to the data using the lm() function in R. Then, the observed covariate values, the estimated innovations, and the parameter estimates are passed to the `irf_generator` function to calculate the responses needed for empirical trajectory plots. Some technical details about initial innovations (manuscript appendix A.5) are handled automatically. To illustrate the use of the `irf_empirical` function, we first use the `irf_generator` to simulate some toy data. 
 
 ## Simulate some toy data
 
@@ -59,7 +59,7 @@ colnames(observed_data) <- c("Y", "X")
 
 ## Arguments
 
-The \code{\link[impulseR]{irf_empirical}} function has two main sets of arguments. The first have to do with the data frame and the columns containing the time series of interest. The second have to do with the order of the ADL model you would like to fit to your data. 
+The `irf_empirical` function has two main sets of arguments. The first have to do with the data frame and the columns containing the time series of interest. The second have to do with the order of the ADL model you would like to fit to your data. 
 
 ### Data
 
@@ -67,11 +67,11 @@ To fit an ADL model to data and calculate the system responses, one first provid
 
 ### Model specification
 
-The ADL(p,q) notation is used to specify the model. The argument `y_lags` is used to specify how many AR effects are allowed for. The argument `"x_lags"` is used to specify how many lagged covariate effects are allowed for. By default, a contemporaneous covariate effect $\beta_{x}$ will be estimated. To estimate dead start dynamics, the optional argument "contemporaneous" should be set to FALSE. By setting `x_lags = 0`, one therefore fits an LCV model to the data. An intercept parameter will always be estimated.
+The ADL(p,q) notation is used to specify the model. The argument `y_lags` is used to specify how many AR effects are allowed for. The argument `"x_lags"` is used to specify how many lagged covariate effects are allowed for. By default, a contemporaneous covariate effect $\beta_{x}$ will be estimated. By setting `x_lags = 0`, one therefore fits an LCV model to the data. An intercept parameter will always be estimated.
 
 ## Example
 
-To fit the data generating model back to the data, we supply the \code{\link[impulseR]{irf_empirical}} function with the following arguments:
+To fit the data generating model back to the data, we supply the `irf_empirical` function with the following arguments:
 
 ```{r}
 estimated_responses <- irf_empirical(
@@ -90,7 +90,7 @@ The estimated_responses object is a list containing 5 elements.
 - `x_params`: A numeric vector containing the estimates of the covariate parameters. The first element will be $\hat{\beta}_{x}$, the second element will be $\hat{\beta}_{Lx}$, and so on. The list will be of dimension $q+1$ if $q$ lagged covariate parameters are allowed for and a contemporaneous effect is estimated;
 - `ar_params`: A numeric vector containing the estimates of the AR parameters, again in order of increasing lag.  
 
-To construct an empirical trajectory plot, we simply call the \code{\link[impulseR]{irf_plot}} function:
+To construct an empirical trajectory plot, we simply call the `irf_plot` function:
 
 ```{r}
 irf_plot(estimated_responses$irf)
@@ -99,18 +99,16 @@ irf_plot(estimated_responses$irf)
 
 ## Estimated parameter values, hypothetical input vectors
 
-The output of the \code{\link[impulseR]{irf_empirical}} function contains the cumulative responses over the study period. Given that we have parameter estimates available, it is straightforward to use the \code{\link[impulseR]{irf_generator}} function, as described in vignette X, to construct meaningful scaled impulse responses. For example, we can calculate the standard deviation of the estimated innovations, and of the covaraite, and use these construct scaled impulse response plots. 
+The output of the `irf_empirical` function contains the cumulative responses over the study period. Given that we have parameter estimates available, it is straightforward to use the `irf_generator` function, as described in vignette [Estimation](https://impulser-5cae6f.pages.gitlab.kuleuven.be/articles/irf_empirical.html). A plotting function `irf_plot` can be used for visualization, as detailed in the [Vignette](https://impulser-5cae6f.pages.gitlab.kuleuven.be/articles/irf_generator.html), to construct meaningful scaled impulse responses. For example, we can calculate the standard deviation of the estimated innovations, and of the covaraite, and use these construct scaled impulse response plots. 
 
 ## Missing values
 
-The \code{\link[impulseR]{irf_empirical}} function handles missing values through listwise deletion. If other methods of estimation are used, the parameter estimates and estimated innovations can be supplied to the \code{\link[impulseR]{irf_generator}} function to produce empirical trajectory plots. If the estimator conditions on initial values, the user would have to fix the first unobserved innovations manually (see Appendix 2 in the manuscript).
-
-
+The `irf_empirical` function handles missing values through listwise deletion. If other methods of estimation are used, the parameter estimates and estimated innovations can be supplied to the `irf_generator` function to produce empirical trajectory plots (see Manuscript, Section 6.2.2). 
 ## The `burnin` argument
 
-First, the \code{\link[impulseR]{irf_empirical}} fits the model to data, and only afterwards does it calculate the system responses. When proceeding from the estimation to the calculation step, the \code{\link[impulseR]{irf_empirical}} function sets the `burnin` argument to `FALSE`. Otherwise, there will be slight discrepancies between $y_{t}^{obs}$ (the observed values of the dependent variable in the data) and $y_{t}$ (the model implied total response). This section illustrates why the `burnin` argument is set to `FALSE` by default when empirical trajectory plots are desired.
+First, the `irf_empirical` fits the model to data, and only afterwards does it calculate the system responses. When proceeding from the estimation to the calculation step, the `irf_empirical` function sets the `burnin` argument to `FALSE`. Otherwise, there will be slight discrepancies between $y_{t}^{obs}$ (the observed values of the dependent variable in the data) and $y_{t}$ (the model implied total response). This section illustrates why the `burnin` argument is set to `FALSE` by default when empirical trajectory plots are desired.
 
-We call the \code{\link[impulseR]{irf_empirical}} function to our empirical data twice, once with the default value of the argument `burnin = FALSE`, and one with the default overridden. 
+We call the `irf_empirical` function to our empirical data twice, once with the default value of the argument `burnin = FALSE`, and one with the default overridden. 
 
 ```{r}
 # Fit the data and do not burn in the intercept response (default behavior)
