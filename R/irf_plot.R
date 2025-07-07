@@ -135,18 +135,18 @@ irf_plot <- function(data,
                      legend.title = NULL,
                      legend.position = "right") {
   
+  # Determine which IRFs to plot, based on the `cols` argument. If NULL, then 
+  # it will use the default of all columns.
+  if(is.null(cols)) {
+    cols <- c("irf_intercept", "irf_x", "irf_v", "irf")
+  }
+
   # Convert dataframe to long format, making the call to ggplot2 somewhat 
   # easier.
   data <- tidyr::pivot_longer(
     data,
-    cols = c("irf", "irf_x", "irf_v", "irf_intercept")
+    cols = cols
   )
-  
-  # Determine which IRFs to plot, based on the `cols` argument. If NULL, then 
-  # it will use the default of all columns.
-  if(is.null(cols)) {
-    cols <- unique(data$name) 
-  }
   
   # Filter out all of the IRFs that you don't want to plot.
   #
@@ -188,24 +188,24 @@ irf_plot <- function(data,
   # will look like for each of the separate IRFs. These variables are made 
   # based on the values provided by the user.
   colors <- c(
-    "irf" = irf.color,
+    "irf_intercept" = intercept.color,
     "irf_x" = x.color,
     "irf_v" = v.color,
-    "irf_intercept" = intercept.color
+    "irf" = irf.color
   )
   
   linetypes <- c(
-    "irf" = irf.linetype,
+    "irf_intercept" = intercept.linetype,
     "irf_x" = x.linetype,
     "irf_v" = v.linetype,
-    "irf_intercept" = intercept.linetype
+    "irf" = irf.linetype
   )
   
   linewidths <- c(
-    "irf" = irf.linewidth,
+    "irf_intercept" = intercept.linewidth,
     "irf_x" = x.linewidth,
     "irf_v" = v.linewidth,
-    "irf_intercept" = intercept.linewidth
+    "irf" = irf.linewidth
   )
   
   
@@ -248,10 +248,10 @@ irf_plot <- function(data,
   }  
   
   labels <- c(
-    "irf" = irf.label,
+    "irf_intercept" = intercept.label,
     "irf_x" = x.label,
     "irf_v" = v.label,
-    "irf_intercept" = intercept.label
+    "irf" = irf.label
   )
 
   impulses <- data[, c("time", "x", "innovations")]
@@ -259,10 +259,16 @@ irf_plot <- function(data,
   
   
   # Create the actual plot.
-  data$name <- factor(data$name)
+  data$name <- factor(
+    data$name,
+    levels = c(
+      "irf_intercept",
+      "irf_x",
+      "irf_v",
+      "irf"
+    ))
   x_impulse <- impulses[impulses$x != 0, ]
   v_impulse <- impulses[impulses$innovations != 0, ]
-  axis.breaks <- 1:max(data$time)
   
   plt <- ggplot2::ggplot(
     data = data, 
@@ -311,17 +317,6 @@ irf_plot <- function(data,
       alpha = impulse.alpha
     ) +
     ggplot2::annotate(
-      "segment",
-      x = x_impulse$time, 
-      xend = x_impulse$time, 
-      y = 0,
-      yend = x_impulse$x,
-      color = x.color,
-      linewidth = impulse.linewidth,
-      linetype = impulse.x.linetype,
-      alpha = impulse.alpha
-    ) +
-    ggplot2::annotate(
       "point",
       x = v_impulse$time, 
       y = v_impulse$innovations, 
@@ -346,11 +341,13 @@ irf_plot <- function(data,
     ) +
     
     # Theme and other stuff
-    # TO DO: Ask Sigert about the scale_x_continuous: Why done this way?
-    # ggplot2::scale_x_continuous(
-    #   breaks = axis.breaks, 
-    #   labels = c('0','1','2','3', rep("", max(datalong$time) -3))
-    # ) + 
+    ggplot2::scale_x_continuous(
+      breaks = seq(
+        floor(min(data$time)), 
+        ceiling(max(data$time)), 
+        by = 1
+      )
+    ) + 
     ggplot2::labs(
       title = ifelse(is.null(title), "", title),
       x = xlabel, 
@@ -373,8 +370,7 @@ irf_plot <- function(data,
       color = ggplot2::guide_legend(title = legend.title), 
       linetype = "none",
       linewidth = "none"
-    ) + 
-    ggplot2::scale_x_continuous(breaks = seq(floor(min(data$time)), ceiling(max(data$time)), by = 1)) # ensure integer steps in plot
+    )
   
   return(plt)
 }
