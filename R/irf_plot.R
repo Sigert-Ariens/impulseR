@@ -366,6 +366,11 @@ irf_plot <- function(data,
       ),
       axis.text = ggplot2::element_text(size = axis.text.size), 
       axis.title = ggplot2::element_text(size = label.size),
+      legend.background = ggplot2::element_rect(
+        fill = background.fill,
+        color = NA
+      ),
+      legend.key = ggplot2::element_rect(fill = background.fill, color = NA),
       legend.position = ifelse(legend, legend.position, "none"),
       legend.title = ggplot2::element_text(size = legend.title.size),
       legend.text = ggplot2::element_text(size = legend.text.size)
