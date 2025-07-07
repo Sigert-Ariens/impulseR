@@ -77,6 +77,8 @@
 #' input and to \code{"Cumulative responses"} for multiple inputs
 #' @param legend.position Character denoting the position of the legend. Ignored
 #' if \code{legend = FALSE}. Defaults to \code{"right"}
+#' @param background.fill Character denoting the color of the background of the 
+#' plot. Defaults to \code{"white"}.
 #' 
 #' @return Plot visualizing the impulse response for the predefined model.
 #' 
@@ -133,7 +135,8 @@ irf_plot <- function(data,
                      impulse.alpha = 0.95,
                      legend = TRUE,
                      legend.title = NULL,
-                     legend.position = "right") {
+                     legend.position = "right",
+                     background.fill = "white") {
   
   # Determine which IRFs to plot, based on the `cols` argument. If NULL, then 
   # it will use the default of all columns.
@@ -355,6 +358,7 @@ irf_plot <- function(data,
     ) +
     ggplot2::theme_minimal() + 
     ggplot2::theme(
+      panel.background = ggplot2::element_rect(fill = background.fill),
       panel.grid.minor.x = ggplot2::element_blank(), 
       plot.title = ggplot2::element_text(
         size = title.size,
