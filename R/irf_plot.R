@@ -145,7 +145,9 @@ irf_plot <- function(data,
   }
 
   # Convert dataframe to long format, making the call to ggplot2 somewhat 
-  # easier.
+  # easier. Keep a copy of the original to ensure correct labeling of the 
+  # system responses
+  original <- data
   data <- tidyr::pivot_longer(
     data,
     cols = cols
@@ -219,7 +221,7 @@ irf_plot <- function(data,
   
   if(is.null(xlabel)) {
     xlabel <- ifelse(
-      all(data$x[-1] == 0) & all(data$innovations[-1] == 0), 
+      all(original$x[-1] == 0) & all(original$innovations[-1] == 0), 
       "s (time step since input)", 
       "t (time)"
     )
@@ -228,9 +230,9 @@ irf_plot <- function(data,
   # Legend labels 
   if(is.null(x.label)){    
     x.label <- ifelse(
-      all(data$x[-1] == 0) & all(data$innovations[-1] == 0),
+      all(original$x[-1] == 0) & all(original$innovations[-1] == 0),
       ifelse(
-        data$x[1] == 1, 
+        original$x[1] == 1, 
         latex2exp::TeX("$h_x(s)$"),
         latex2exp::TeX("$h_x(s) x_{0}$")
       ),
@@ -240,9 +242,9 @@ irf_plot <- function(data,
   
   if(is.null(v.label)){    
     v.label <- ifelse(
-      all(data$x[-1] == 0) & all(data$innovations[-1] == 0),
+      all(original$x[-1] == 0) & all(original$innovations[-1] == 0),
       ifelse(
-        data$innovations[1] == 1, 
+        original$innovations[1] == 1, 
         latex2exp::TeX("$h_v(s)$"),
         latex2exp::TeX("$h_v(s) v_{0}$")
       ),
