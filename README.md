@@ -1,6 +1,6 @@
 # impulseR
 
-An R package around the creation and visualization of impulse response functions for one-dimensional dynamic regression models. Specifically, TO DO
+An R package around the creation and visualization of impulse response functions for one-dimensional dynamic regression models.
 
 ## Installation
 
