@@ -16,7 +16,7 @@ navbar:
         href: articles/getting_started.html
       - text: Analysis
         href: articles/irf_generator.html
-      - text: Estimation
+      - text: Empirical data
         href: articles/irf_empirical.html
       - text: Plotting
         href: articles/plotting.html
