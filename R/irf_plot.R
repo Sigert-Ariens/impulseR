@@ -79,6 +79,8 @@
 #' if \code{legend = FALSE}. Defaults to \code{"right"}
 #' @param background.fill Character denoting the color of the background of the 
 #' plot. Defaults to \code{"white"}.
+#' @param breaks Integer denoting the number of breaks to allow in the time-axis.
+#' Defaults to \code{10}.
 #' 
 #' @return Plot visualizing the impulse response for the predefined model.
 #' 
@@ -136,7 +138,8 @@ irf_plot <- function(data,
                      legend = TRUE,
                      legend.title = NULL,
                      legend.position = "right",
-                     background.fill = "white") {
+                     background.fill = "white",
+                     breaks = 10) {
   
   # Determine which IRFs to plot, based on the `cols` argument. If NULL, then 
   # it will use the default of all columns.
@@ -347,10 +350,12 @@ irf_plot <- function(data,
     
     # Theme and other stuff
     ggplot2::scale_x_continuous(
-      breaks = seq(
-        floor(min(data$time)), 
-        ceiling(max(data$time)), 
-        by = 1
+      breaks = round(
+        seq(
+          floor(min(data$time)), 
+          ceiling(max(data$time)), 
+          length.out = breaks
+        )
       )
     ) + 
     ggplot2::labs(
