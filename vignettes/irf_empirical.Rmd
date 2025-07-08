@@ -9,7 +9,7 @@ vignette: >
 
 ```{r, echo = FALSE}
 set.seed(1)
-library(impulseR)
+library(impulseR) 
 ```
 
 In this vignette, we discuss how the `irf_empirical` function can be used to estimate a general $ADL(p, q)$ model and then generate the different types of system responses discussed in the manuscript. 
