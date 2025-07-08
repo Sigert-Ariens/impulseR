@@ -2,9 +2,7 @@
 % Please edit documentation in R/estimate.R
 \name{estimate}
 \alias{estimate}
-\title{Estimate the parameters of an 
-\ifelse{html}{\out{<span class="mathjax-latex">\(ADL(p, q)\)</span>}}{\eqn{ADL(p, q)}} 
-model}
+\title{Estimate the parameters of an \eqn{ADL(p, q)} model}
 \usage{
 estimate(data, cols = c("y", "x"), y_lags = NULL, x_lags = NULL)
 }
@@ -21,9 +19,8 @@ Starts at the value \code{1}, allowing for an AR(1) structure. Defaults to
 
 \item{x_lags}{Integer denoting the number of lagged covariate effects. Starts 
 at the value \code{0}, implying that only the contemporaneous effect, 
-\ifelse{html}{\out{<span class="mathjax-latex">\(\beta_x\)</span>}}{\eqn{\beta_x}}, 
-is estimated freely. Defaults to \code{NA}, communicating that you don't want 
-to estimate any covariate parameters}
+\eqn{\beta_x}, is estimated freely. Defaults to \code{NA}, communicating that 
+you don't want to estimate any covariate parameters}
 }
 \value{
 Named list containing the estimated model (\code{fit}), the 
@@ -32,28 +29,18 @@ the observed covariate values (\code{x}) and the estimated innovations
 \code{innovations}
 }
 \description{
-This function estimates the parameters of an 
-\ifelse{html}{\out{<span class="mathjax-latex">\(ADL(p, q)\)</span>}}{\eqn{ADL(p, q)}}
-and prepares the output for the calculation of system responses in other 
-functions of the package. Always estimates an intercept.
+This function estimates the parameters of an \eqn{ADL(p, q)} and prepares the 
+output for the calculation of system responses in other functions of the 
+package. Always estimates an intercept.
 }
 \details{
-Estimate the parameters of an 
-\ifelse{html}{\out{<span class="mathjax-latex">\(ADL(p, q)\)</span>}}{\eqn{ADL(p, q)}}, 
-where \ifelse{html}{\out{<span class="mathjax-latex">\(p\)</span>}}{\eqn{p}} 
-represents the number of autoregressive effects (effects of lags of the 
-dependent variable 
-\ifelse{html}{\out{<span class="mathjax-latex">\(y_t\)</span>}}{\eqn{y_t}} and 
-\ifelse{html}{\out{<span class="mathjax-latex">\(q\)</span>}}{\eqn{q}} 
-represents the number of lagged covariate effects. The 
-\ifelse{html}{\out{<span class="mathjax-latex">\(ADL(p, q)\)</span>}}{\eqn{ADL(p, q)}}
-is formalized as: 
+Estimate the parameters of an \eqn{ADL(p, q)}, where \eqn{p} represents the 
+number of autoregressive effects (effects of lags of the dependent variable 
+\eqn{y_t} and \eqn{q} represents the number of lagged covariate effects. The 
+\eqn{ADL(p, q)} is formalized as: 
 
-\ifelse{html}
-{\out{<span class="mathjax-latex">
-\[y_t = \alpha + \sum_{i = 1}^p \phi_{i}y_{t-i} + \beta_{x} x_{t} + \sum_{i = 1}^q \beta_{L^{j}x} x_{t - j} + v_{t}\]
-</span>}}
-{\deqn{y_t = \alpha + \sum_{i = 1}^p \phi_{i}y_{t-i} + \beta_{x} x_{t} + \sum_{i = 1}^q \beta_{L^{j}x} x_{t - j} + v_{t}}}
+\deqn{y_t = \alpha + \sum_{i = 1}^p \phi_{i}y_{t-i} + \beta_{x} x_{t} + 
+\sum_{i = 1}^q \beta_{L^{j}x} x_{t - j} + v_{t}}
 }
 \examples{
 # Define a dataset

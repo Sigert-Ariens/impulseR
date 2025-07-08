@@ -1,29 +1,17 @@
-#' Estimate the parameters of an 
-#' \ifelse{html}{\out{<span class="mathjax-latex">\(ADL(p, q)\)</span>}}{\eqn{ADL(p, q)}} 
-#' model
+#' Estimate the parameters of an \eqn{ADL(p, q)} model
 #' 
-#' This function estimates the parameters of an 
-#' \ifelse{html}{\out{<span class="mathjax-latex">\(ADL(p, q)\)</span>}}{\eqn{ADL(p, q)}}
-#' and prepares the output for the calculation of system responses in other 
-#' functions of the package. Always estimates an intercept. 
+#' This function estimates the parameters of an \eqn{ADL(p, q)} and prepares the 
+#' output for the calculation of system responses in other functions of the 
+#' package. Always estimates an intercept. 
 #' 
 #' @details
-#' Estimate the parameters of an 
-#' \ifelse{html}{\out{<span class="mathjax-latex">\(ADL(p, q)\)</span>}}{\eqn{ADL(p, q)}}, 
-#' where \ifelse{html}{\out{<span class="mathjax-latex">\(p\)</span>}}{\eqn{p}} 
-#' represents the number of autoregressive effects (effects of lags of the 
-#' dependent variable 
-#' \ifelse{html}{\out{<span class="mathjax-latex">\(y_t\)</span>}}{\eqn{y_t}} and 
-#' \ifelse{html}{\out{<span class="mathjax-latex">\(q\)</span>}}{\eqn{q}} 
-#' represents the number of lagged covariate effects. The 
-#' \ifelse{html}{\out{<span class="mathjax-latex">\(ADL(p, q)\)</span>}}{\eqn{ADL(p, q)}}
-#' is formalized as: 
+#' Estimate the parameters of an \eqn{ADL(p, q)}, where \eqn{p} represents the 
+#' number of autoregressive effects (effects of lags of the dependent variable 
+#' \eqn{y_t} and \eqn{q} represents the number of lagged covariate effects. The 
+#' \eqn{ADL(p, q)} is formalized as: 
 #' 
-#' \ifelse{html}
-#' {\out{<span class="mathjax-latex">
-#' \[y_t = \alpha + \sum_{i = 1}^p \phi_{i}y_{t-i} + \beta_{x} x_{t} + \sum_{i = 1}^q \beta_{L^{j}x} x_{t - j} + v_{t}\]
-#' </span>}}
-#' {\deqn{y_t = \alpha + \sum_{i = 1}^p \phi_{i}y_{t-i} + \beta_{x} x_{t} + \sum_{i = 1}^q \beta_{L^{j}x} x_{t - j} + v_{t}}}
+#' \deqn{y_t = \alpha + \sum_{i = 1}^p \phi_{i}y_{t-i} + \beta_{x} x_{t} + 
+#' \sum_{i = 1}^q \beta_{L^{j}x} x_{t - j} + v_{t}}
 #' 
 #' @param data Dataframe containing the variables of interest
 #' @param cols Character vector denoting the columns containing the variables of
@@ -34,9 +22,8 @@
 #' \code{NA}, communicating that you don't want to allow for any AR effects.
 #' @param x_lags Integer denoting the number of lagged covariate effects. Starts 
 #' at the value \code{0}, implying that only the contemporaneous effect, 
-#' \ifelse{html}{\out{<span class="mathjax-latex">\(\beta_x\)</span>}}{\eqn{\beta_x}}, 
-#' is estimated freely. Defaults to \code{NA}, communicating that you don't want 
-#' to estimate any covariate parameters 
+#' \eqn{\beta_x}, is estimated freely. Defaults to \code{NA}, communicating that 
+#' you don't want to estimate any covariate parameters 
 #' 
 #' @return Named list containing the estimated model (\code{fit}), the 
 #' parameter estimates (\code{intercept}, \code{x_params}, \code{ar_params}), 
@@ -196,26 +183,18 @@ estimate <- function(data,
   )
 }
 
-#' Compute estimated innovations of an 
-#' \ifelse{html}{\out{<span class="mathjax-latex">\(ADL(p, q)\)</span>}}{\eqn{ADL(p,q)}} 
-#' model
+#' Compute estimated innovations of an \eqn{ADL(p,q)} model
 #' 
-#' This function computes the innovations of an 
-#' \ifelse{html}{\out{<span class="mathjax-latex">\(ADL(p, q)\)</span>}}{\eqn{ADL(p,q)}} 
-#' model, fixing initial innovations in order to construct 
-#' empirical trajectory plots. 
+#' This function computes the innovations of an \eqn{ADL(p,q)} model, fixing 
+#' initial innovations in order to construct empirical trajectory plots. 
 #' 
 #' @details
-#' If there are \ifelse{html}{\out{<span class="mathjax-latex">\(p\)</span>}}{\eqn{p}} 
-#' AR effects, the fit object will only return innovations for the last 
-#' \code{N - p} datapoints. Least squares treats the initial values, 
-#' \ifelse{html}{\out{<span class="mathjax-latex">\(y_0, ..., y_p\)</span>}}{\eqn{y_0,...,y_p}} 
-#' and \ifelse{html}{\out{<span class="mathjax-latex">\(x_0, ..., x_p\)</span>}}{\eqn{x_0,...,x_p}}
-#' as known for parameter estimation. To generate empirical trajectory plots 
-#' starting from the first measurement occasion 
-#' (\ifelse{html}{\out{<span class="mathjax-latex">\(t = 0\)</span>}}{\eqn{t = 0}}), we 
-#' can fix the 'missing' innovations by using knowledge of the initial values 
-#' and the parameter estimates. 
+#' If there are \eqn{p} AR effects, the fit object will only return innovations 
+#' for the last \code{N - p} datapoints. Least squares treats the initial values, 
+#' \eqn{y_0,...,y_p} and \eqn{x_0,...,x_p} as known for parameter estimation. To 
+#' generate empirical trajectory plots starting from the first measurement 
+#' occasion (\eqn{t = 0}), we can fix the 'missing' innovations by using 
+#' knowledge of the initial values and the parameter estimates. 
 #' 
 #' This function fixes the initial innovations appropriately for the user, and 
 #' returns a list containing all \code{N} innovations. This function is primarily
@@ -230,23 +209,16 @@ estimate <- function(data,
 #' function. Defaults to \code{0}
 #' @param ar_params Numeric vector denoting the estimated AR parameters. 
 #' Parameters need to be given in order of increased lag (i.e., first element 
-#' for \ifelse{html}{\out{<span class="mathjax-latex">\(\phi_1\)</span>}}{\eqn{\phi_1}}, 
-#' second element for 
-#' \ifelse{html}{\out{<span class="mathjax-latex">\(\phi_2\)</span>}}{\eqn{\phi_2}},...). 
-#' Defaults to \code{0}
+#' for \eqn{\phi_1}, second element for \eqn{\phi_2},...). Defaults to \code{0}
 #' @param x_params Numeric vector denoting the estimated covariate parameters. 
 #' Parameters again need to be given in order of increased lag (i.e., first 
-#' element for 
-#' \ifelse{html}{\out{<span class="mathjax-latex">\(\beta_x\)</span>}}{\eqn{\beta_x}}, 
-#' second element for 
-#' \ifelse{html}{\out{<span class="mathjax-latex">\(\beta_{Lx}\)</span>}}{\eqn{\beta_{Lx}}},...). 
+#' element for \eqn{\beta_x}, second element for \eqn{\beta_{Lx}},...). 
 #' Defaults to \code{0}, implying no covariate parameters.
 #' @param innovations Numeric vector denoting the values of estimated innovations 
-#' up to time point t (e.g., those acquired through the \code{lm} function). 
-#' Defaults to \code{NULL}, signalling the estimated innovations are first 
-#' calculated from the parameter estimates and observed data values 
-#' \ifelse{html}{\out{<span class="mathjax-latex">\(y\)</span>}}{\eqn{y}} and 
-#' \ifelse{html}{\out{<span class="mathjax-latex">\(x\)</span>}}{\eqn{x}}. 
+#' up to time point \eqn{t} (e.g., those acquired through the \code{lm} 
+#' function). Defaults to \code{NULL}, signaling the estimated innovations are 
+#' first calculated from the parameter estimates and observed data values 
+#' \eqn{y} and \eqn{x}. 
 #' 
 #' @return Numeric vector of the same length as the data containing the 
 #' innovations for the provided model
