@@ -2,7 +2,9 @@
 % Please edit documentation in R/estimate.R
 \name{compute_innovations}
 \alias{compute_innovations}
-\title{Compute estimated innovations of an \eqn{ADL(p,q)} model}
+\title{Compute estimated innovations of an 
+\ifelse{html}{\out{<span class="mathjax-latex">\(ADL(p, q)\)</span>}}{\eqn{ADL(p,q)}} 
+model}
 \usage{
 compute_innovations(
   data,
@@ -25,33 +27,47 @@ function. Defaults to \code{0}}
 
 \item{ar_params}{Numeric vector denoting the estimated AR parameters. 
 Parameters need to be given in order of increased lag (i.e., first element 
-for \eqn{\phi_{1}}, second element for \eqn{\phi_{2}},...). Defaults to \code{0}}
+for \ifelse{html}{\out{<span class="mathjax-latex">\(\phi_1\)</span>}}{\eqn{\phi_1}}, 
+second element for 
+\ifelse{html}{\out{<span class="mathjax-latex">\(\phi_2\)</span>}}{\eqn{\phi_2}},...). 
+Defaults to \code{0}}
 
 \item{x_params}{Numeric vector denoting the estimated covariate parameters. 
 Parameters again need to be given in order of increased lag (i.e., first 
-element for \eqn{\beta_{x}}, second element for \eqn{\beta_{Lx}},...). 
+element for 
+\ifelse{html}{\out{<span class="mathjax-latex">\(\beta_x\)</span>}}{\eqn{\beta_x}}, 
+second element for 
+\ifelse{html}{\out{<span class="mathjax-latex">\(\beta_{Lx}\)</span>}}{\eqn{\beta_{Lx}}},...). 
 Defaults to \code{0}, implying no covariate parameters.}
 
 \item{innovations}{Numeric vector denoting the values of estimated innovations 
 up to time point t (e.g., those acquired through the \code{lm} function). 
 Defaults to \code{NULL}, signalling the estimated innovations are first 
-calculated from the parameter estimates and observed data values $y$ and $x$.}
+calculated from the parameter estimates and observed data values 
+\ifelse{html}{\out{<span class="mathjax-latex">\(y\)</span>}}{\eqn{y}} and 
+\ifelse{html}{\out{<span class="mathjax-latex">\(x\)</span>}}{\eqn{x}}.}
 }
 \value{
 Numeric vector of the same length as the data containing the 
 innovations for the provided model
 }
 \description{
-This function computes the innovations of an \eqn{ADL(p, q)} model, fixing 
-initial innovations in order to construct empirical trajectory plots.
+This function computes the innovations of an 
+\ifelse{html}{\out{<span class="mathjax-latex">\(ADL(p, q)\)</span>}}{\eqn{ADL(p,q)}} 
+model, fixing initial innovations in order to construct 
+empirical trajectory plots.
 }
 \details{
-If there are \eqn{p} AR effects, the fit object will only return innovations 
-for the last \code{N - p} datapoints. Least squares treats the initial values, 
-\eqn{y_{0},...,y_{p}} and \eqn{x_{0},...,x_{p}} as known for parameter 
-estimation. To generate empirical trajectory plots starting from the first 
-measurement occasion (\eqn{t = 0}), we can fix the 'missing' innovations by 
-using knowledge of the initial values and the parameter estimates. 
+If there are \ifelse{html}{\out{<span class="mathjax-latex">\(p\)</span>}}{\eqn{p}} 
+AR effects, the fit object will only return innovations for the last 
+\code{N - p} datapoints. Least squares treats the initial values, 
+\ifelse{html}{\out{<span class="mathjax-latex">\(y_0, ..., y_p\)</span>}}{\eqn{y_0,...,y_p}} 
+and \ifelse{html}{\out{<span class="mathjax-latex">\(x_0, ..., x_p\)</span>}}{\eqn{x_0,...,x_p}}
+as known for parameter estimation. To generate empirical trajectory plots 
+starting from the first measurement occasion 
+(\ifelse{html}{\out{<span class="mathjax-latex">\(t = 0\)</span>}}{\eqn{t = 0}}), we 
+can fix the 'missing' innovations by using knowledge of the initial values 
+and the parameter estimates. 
 
 This function fixes the initial innovations appropriately for the user, and 
 returns a list containing all \code{N} innovations. This function is primarily

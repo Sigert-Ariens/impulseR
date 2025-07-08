@@ -44,7 +44,8 @@ irf_plot(
   legend = TRUE,
   legend.title = NULL,
   legend.position = "right",
-  background.fill = "white"
+  background.fill = "white",
+  breaks = 10
 )
 }
 \arguments{
@@ -146,6 +147,9 @@ if \code{legend = FALSE}. Defaults to \code{"right"}}
 
 \item{background.fill}{Character denoting the color of the background of the 
 plot. Defaults to \code{"white"}.}
+
+\item{breaks}{Integer denoting the number of breaks to allow in the time-axis.
+Defaults to \code{10}.}
 }
 \value{
 Plot visualizing the impulse response for the predefined model.

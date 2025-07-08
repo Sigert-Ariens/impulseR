@@ -6,13 +6,13 @@ An R package around the creation and visualization of impulse response functions
 
 To install the package, you can use the `remotes` package:
 
-```{r, eval = FALSE}
+```
 remotes::install_gitlab("u0133721/impulseR", host = "gitlab.kuleuven.be")
 ```
 
 To use the package, use `library` 
 
-```{r, eval = FALSE}
+```
 library(impulseR)
 ```
 
