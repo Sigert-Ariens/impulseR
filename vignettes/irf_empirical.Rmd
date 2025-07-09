@@ -88,7 +88,7 @@ estimated_responses <- irf_empirical(
 The estimated_responses object is a list containing 5 elements. 
 
 - `fit`: The raw output of the `lm` fit object. Note that estimates of the first $p$ innovations will not be returned by this fit object, because the initial values $\{ y_{0}, y_{1} \}$ and $\{ x_{0}, x_{1} \}$ were conditioned on for estimation;
-- `irf`: A data.frame containing the estimated cumulative responses towards the input variables over the observation period. This output has the same format as the output of the `irf_generator` function. Calling `estimated_responses\$irf\$innovations` provides us with the first $p$ innovations needed to construct the empirical trajectory plots;
+- `irf`: A data.frame containing the estimated cumulative responses towards the input variables over the observation period. This output has the same format as the output of the `irf_generator` function. The column `estimated_responses\$irf\$innovations` contains the full set of estimated innovations needed to construct the empirical trajectory plots;
 - `intercept`: A numeric containing the estimate of the intercept parameter;
 - `x_params`: A numeric vector containing the estimates of the covariate parameters. The first element will be $\hat{\beta}_{x}$, the second element will be $\hat{\beta}_{Lx}$, and so on. The list will be of dimension $q+1$ if $q$ lagged covariate parameters are allowed for and a contemporaneous effect is estimated;
 - `ar_params`: A numeric vector containing the estimates of the AR parameters, again in order of increasing lag.  
@@ -108,7 +108,7 @@ irf_plot(estimated_responses$irf)
 
 ### Estimated parameter values, hypothetical input vectors
 
-The output of the `irf_empirical` function contains the cumulative responses over the study period. Given that we have parameter estimates available, it is straightforward to use the `irf_generator` function with hypothetical input vectors. For example, if we wish to study the behavior of the estimated model when provided with an impulse, we first look at the estimates of the model: 
+The output of the `irf_empirical` function contains the cumulative responses over the study period. Given that we have parameter estimates available, it is straightforward to use the `irf_generator` function to construct impulse response plots or scaled impulse response plots. For example, if we wish to study the behavior of the estimated model when provided with an impulse, we first look at the estimates of the model: 
 
 ```{r}
 estimated_responses$fit 
