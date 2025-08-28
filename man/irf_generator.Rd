@@ -16,54 +16,53 @@ irf_generator(
 )
 }
 \arguments{
-\item{intercept}{Numeric denoting the intercept, \eqn{\alpha}. Defaults to 
-\code{0}}
+\item{intercept}{Numeric denoting the intercept, \eqn{\alpha}. Defaults to \code{0}.}
 
-\item{ar_params}{Numeric vector denoting the autoregressive parameters (the 
-\eqn{\phi}) parameters of the model. Parameters need to be given in order of 
-increasing lags (i.e., first element for \eqn{\phi_{1}}, second element for 
-\eqn{\phi_{2}},...). Defaults to \code{0}}
+\item{ar_params}{Numeric vector denoting the autoregressive parameters (the
+\eqn{\phi}) parameters of the model. Parameters need to be given in order of
+increasing lags (i.e., first element for \eqn{\phi_{1}}, second element for
+\eqn{\phi_{2}},...). Defaults to \code{0}.}
 
-\item{x_params}{Numeric vector denoting the covariate parameters of the model 
-(the \eqn{\beta} parameters). Parameters again need to be given in order of 
-increasing lags(i.e., first element for \eqn{\beta_{x}}, second element for 
-\eqn{\beta_{Lx}},...). Defaults to \code{0}, indicating that there are no 
+\item{x_params}{Numeric vector denoting the covariate parameters of the model
+(the \eqn{\beta} parameters). Parameters again need to be given in order of
+increasing lags(i.e., first element for \eqn{\beta_{x}}, second element for
+\eqn{\beta_{Lx}},...). Defaults to \code{0}, indicating that there are no
 covariate parameters.}
 
-\item{x}{Numeric vector denoting the values of covariate at each time point. 
-Depending on the input vectors supplied, different system responses will be 
+\item{x}{Numeric vector denoting the values of covariate at each time point.
+Depending on the input vectors supplied, different system responses will be
 returned. Defaults to \code{NULL}, which returns an empty vector of the same
 length as \code{innovations} (if provided).}
 
-\item{innovations}{Numeric vector denoting the values of the innovations at 
-each time point. Depending on the input vectors supplied, different system 
-responses will be returned. Defaults to \code{NULL}, which returns an empty 
+\item{innovations}{Numeric vector denoting the values of the innovations at
+each time point. Depending on the input vectors supplied, different system
+responses will be returned. Defaults to \code{NULL}, which returns an empty
 vector of the same length as \code{x} (if provided).}
 
-\item{data}{Dataframe containing the variables of interest. Defaults to 
+\item{data}{Dataframe containing the variables of interest. Defaults to
 \code{NULL}, meaning there are no data attached}
 
 \item{cols}{Character vector denoting the columns containing the variables of
-interest. First character should denote the dependent variable, the second 
-one the covariate of interest. Defaults to \code{c("y", "x")}}
+interest. First character should denote the dependent variable, the second
+one the covariate of interest. Defaults to \code{c("y", "x")}.}
 
-\item{burnin}{Logical specifying if the part of the system response due to 
-the intercept should be burned in analytically. Defaults to \code{TRUE}, the 
-system responses responses will be displayed relative to the hypothetical 
-equilibrium state of the system. If set to \code{FALSE}, initial value 
+\item{burnin}{Logical specifying if the part of the system response due to
+the intercept should be burned in analytically. Defaults to \code{TRUE}, the
+system responses responses will be displayed relative to the hypothetical
+equilibrium state of the system. If set to \code{FALSE}, initial value
 dependent behavior will be present.}
 }
 \value{
-List containing the parameters that were used for the generation of 
-the system responses (under \code{"intercept"}, \code{"x_params"}, and 
-\code{"ar_params"}, and a data.frame containing the model-implied total 
-responses over the observation period (under \code{"irf"}). Within the 
-data.frame, column \code{"time"} contains the time index starting at 0. The 
-columns \code{"irf_intercept"}, \code{"irf_x"}, and \code{"irf_v"} contain 
-the cumulative responses towards the unit vector, covariate, and innovations 
+List containing the parameters that were used for the generation of
+the system responses (under \code{"intercept"}, \code{"x_params"}, and
+\code{"ar_params"}, and a data.frame containing the model-implied total
+responses over the observation period (under \code{"irf"}). Within the
+data.frame, column \code{"time"} contains the time index starting at 0. The
+columns \code{"irf_intercept"}, \code{"irf_x"}, and \code{"irf_v"} contain
+the cumulative responses towards the unit vector, covariate, and innovations
 respectively. These partial responses sum up to the total response \eqn{y_{t}},
-which is provided in the \code{"irf"} column. Finally, the columns \code{"x"} 
-and \code{"innovations"} contain the values of the covariate and the 
+which is provided in the \code{"irf"} column. Finally, the columns \code{"x"}
+and \code{"innovations"} contain the values of the covariate and the
 innovations.
 }
 \description{
@@ -71,31 +70,30 @@ Compute system responses based on a particular set of parameters of the general
 \eqn{ADL(p, q)} model.
 }
 \details{
-This function calculates system responses for an \eqn{ADL(p, q)} model, 
+This function calculates system responses for an \eqn{ADL(p, q)} model,
 formalized as:
 
-\deqn{y_t = \alpha + \sum_{i = 1}^p \phi_{i}y_{t-i} + \beta_{x} x_{t} + 
+\deqn{y_t = \alpha + \sum_{i = 1}^p \phi_{i}y_{t-i} + \beta_{x} x_{t} +
 \sum_{j = 1}^q \beta_{L^{j}x} x_{t - j} + v_{t}}.
 
-One should provide an a priori chosen set of parameters through the arguments 
-\code{intercept}, \code{x_params}, and \code{ar_params}. 
+One should provide an a priori chosen set of parameters through the arguments
+\code{intercept}, \code{x_params}, and \code{ar_params}.
 
-Additionally, one also needs to provide the impulses to the system. One can 
-achieve this in two ways. First, one can specify the impulses to the covariates 
-through \code{x} and/or the impulses to the innovations through 
-\code{innovations}. Second, one can provide a data set to the argument 
-\code{data}, which is then used to derive the (cumulative) impulses of 
-\code{x} and \code{innovations} automatically. In this case, it is 
-recommended to put \code{burnin} to \code{FALSE}
+Additionally, one also needs to provide the impulses to the system. One can
+achieve this in two ways. First, one can specify the impulses to the covariates
+through \code{x} and/or the impulses to the innovations through
+\code{innovations}. Second, one can provide a data set to the argument
+\code{data}, which is then used to derive the (cumulative) impulses of
+\code{x} and \code{innovations} automatically. In this case, it is
+recommended to put \code{burnin} to \code{FALSE}.
 
 When both options are specified, the data takes precedence.
 }
 \examples{
- 
 # Create parameters of an ADL(2, 1), meaning having two lags in the residuals
 # and one lag in the values of x. These will be used for all examples.
 params <- list(
-  "intercept" = 1, 
+  "intercept" = 1,
   "autoregression" = c(0.5, 0.1),
   "slopes" = c(2, 0.5)
 )
@@ -107,7 +105,7 @@ params <- list(
 
 # Use with single impulse of x in the beginning of the study, with burnin
 irf_generator(
-  params$intercept, 
+  params$intercept,
   params$autoregression,
   params$slopes,
   x = c(1, rep(0, 9))
@@ -115,7 +113,7 @@ irf_generator(
 
 # Use with single impulse of x in the beginning of the study, without burnin
 irf_generator(
-  params$intercept, 
+  params$intercept,
   params$autoregression,
   params$slopes,
   x = c(1, rep(0, 9)),
@@ -124,7 +122,7 @@ irf_generator(
 
 # Use with multiple values for the innovations, with burnin
 irf_generator(
-  params$intercept, 
+  params$intercept,
   params$autoregression,
   params$slopes,
   innovations = rnorm(10)
@@ -132,7 +130,7 @@ irf_generator(
 
 # Use with multiple values for the innovations, without burnin
 irf_generator(
-  params$intercept, 
+  params$intercept,
   params$autoregression,
   params$slopes,
   innovations = rnorm(10),
@@ -147,19 +145,19 @@ irf_generator(
 # Generate data
 set.seed(1)
 data <- irf_generator(
-  intercept = 1, 
+  intercept = 1,
   x_params = c(1, 2, -0.5),
   ar_params = c(0.9, -0.1, 0.25),
   x = rnorm(100),
   innovations = rnorm(100)
 )$irf
 
-# Use the data to determine the values for x and y. 
+# Use the data to determine the values for x and y.
 #
 # Using "irf" as the dependent variable and "x" as the independent variable
 # in the original data set.
 irf_generator(
-  params$intercept, 
+  params$intercept,
   params$autoregression,
   params$slopes,
   data = data,

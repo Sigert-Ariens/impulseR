@@ -1,9 +1,9 @@
-testthat::test_that(
+test_that(
   "Testing known errors",
   {
     # Wrong columns in estimate
-    testthat::expect_error(
-      impulseR::estimate(
+    expect_error(
+      estimate(
         data.frame(Y = numeric(100), X = numeric(100)),
         cols = c("y", "x"),
         x_lags = 2,
@@ -12,33 +12,33 @@ testthat::test_that(
     )
 
     # Wrong columns in compute_innovations
-    testthat::expect_error(
-      impulseR::compute_innovations(
+    expect_error(
+      compute_innovations(
         data.frame(Y = numeric(100), X = numeric(100)),
         cols = c("y", "x")
       )
     )
 
     # Wrong columns in prepare_data
-    testthat::expect_error(
-      impulseR::prepare_data(
+    expect_error(
+      prepare_data(
         data.frame(Y = numeric(100), X = numeric(100)),
         cols = c("y", "x")
       )
     )
 
     # Single column specified, but only if x_lags specified in estimate
-    testthat::expect_error(
-      impulseR::estimate(
+    expect_error(
+      estimate(
         data.frame(Y = numeric(100)),
         cols = c("y", "x"),
-        x_lags = 2, 
+        x_lags = 2,
         y_lags = 2
       )
     )
 
-    testthat::expect_no_error(
-      impulseR::estimate(
+    expect_no_error(
+      estimate(
         data.frame(Y = numeric(100)),
         cols = c("y", "x"),
         y_lags = 2
@@ -47,37 +47,37 @@ testthat::test_that(
     )
 
     # Single column specified, but only if x_lags specified in estimate
-    testthat::expect_error(
-      impulseR::compute_innovations(
+    expect_error(
+      compute_innovations(
         data.frame(Y = numeric(100)),
         cols = c("y", "x"),
-        intercept = 2, 
+        intercept = 2,
         ar_params = c(0.75, 0.5),
         x_params = c(2, 1)
       )
     )
 
-    testthat::expect_no_error(
-      impulseR::compute_innovations(
+    expect_no_error(
+      compute_innovations(
         data.frame(Y = numeric(100)),
         cols = c("y", "x"),
-        intercept = 2, 
+        intercept = 2,
         ar_params = c(0.75, 0.5)
       )
     )
 
     # Single column specified, but only if x_lags in estimate
-    testthat::expect_error(
-      impulseR::prepare_data(
+    expect_error(
+      prepare_data(
         data.frame(Y = numeric(100)),
         cols = c("y", "x"),
-        x_lags = 2, 
+        x_lags = 2,
         y_lags = 2
       )
     )
 
-    testthat::expect_no_error(
-      impulseR::prepare_data(
+    expect_no_error(
+      prepare_data(
         data.frame(Y = numeric(100)),
         cols = c("y", "x"),
         y_lags = 2
@@ -86,147 +86,147 @@ testthat::test_that(
   }
 )
 
-testthat::test_that(
+test_that(
   "Testing known warnings: No lags specified",
   {
     data <- data.frame(y = rnorm(100), x = rnorm(100))
 
     # No lags specified. Also testing output
-    testthat::expect_warning(impulseR::prepare_data(data))
+    expect_warning(prepare_data(data))
 
-    tst <- suppressWarnings(impulseR::prepare_data(data))
-    testthat::expect_equal(tst, data)
+    tst <- suppressWarnings(prepare_data(data))
+    expect_equal(tst, data)
   }
 )
 
-testthat::test_that(
+test_that(
   "Testing known warnings: Lags wrongly specified",
   {
     data <- data.frame(y = rnorm(100), x = rnorm(100))
 
-    # Lags wrongly specified in `prepare_data`. Also testing output (but only 
+    # Lags wrongly specified in `prepare_data`. Also testing output (but only
     # for single option)
     #
     # Multiple warnings are sometimes expect, which leads to the nested calls
-    testthat::expect_warning(
-      testthat::expect_warning(
-        testthat::expect_warning(
-          impulseR::prepare_data(
+    expect_warning(
+      expect_warning(
+        expect_warning(
+          prepare_data(
             data,
-            x_lags = -2, 
+            x_lags = -2,
             y_lags = -2
           )
         )
       )
     )
 
-    testthat::expect_warning(
-      impulseR::prepare_data(
+    expect_warning(
+      prepare_data(
         data,
         x_lags = -2,
         y_lags = 1
       )
     )
 
-    testthat::expect_warning(
-      impulseR::prepare_data(
+    expect_warning(
+      prepare_data(
         data,
-        x_lags = 1, 
+        x_lags = 1,
         y_lags = -2
       )
     )
 
     tst <- suppressWarnings(
-      impulseR::prepare_data(
+      prepare_data(
         data,
-        x_lags = -2, 
+        x_lags = -2,
         y_lags = -2
       )
     )
-    testthat::expect_equal(tst, data)
+    expect_equal(tst, data)
 
     # Lags wrongly specified in `estimate`. Also testing output
     #
     # Multiple warnings are sometimes expect, which leads to the nested calls
-    testthat::expect_warning(
-      testthat::expect_warning(
-        impulseR::estimate(
+    expect_warning(
+      expect_warning(
+        estimate(
           data,
-          x_lags = -2, 
+          x_lags = -2,
           y_lags = -2
         )
       )
     )
 
-    testthat::expect_warning(
-      impulseR::estimate(
+    expect_warning(
+      estimate(
         data,
         x_lags = -2,
         y_lags = 1
       )
     )
 
-    testthat::expect_warning(
-      impulseR::estimate(
+    expect_warning(
+      estimate(
         data,
-        x_lags = 1, 
+        x_lags = 1,
         y_lags = -2
       )
     )
 
     tst <- suppressWarnings(
-      impulseR::estimate(
-        data, 
-        x_lags = -2, 
+      estimate(
+        data,
+        x_lags = -2,
         y_lags = -2
       )
     )
-    testthat::expect_equal(tst$x_params, 0)
-    testthat::expect_equal(tst$ar_params, 0)
+    expect_equal(tst$x_params, 0)
+    expect_equal(tst$ar_params, 0)
 
     tst <- suppressWarnings(
-      impulseR::estimate(
-        data, 
-        x_lags = 1, 
+      estimate(
+        data,
+        x_lags = 1,
         y_lags = -2
       )
     )
-    testthat::expect_equal(length(tst$x_params), 2)
-    testthat::expect_equal(tst$ar_params, 0)
+    expect_equal(length(tst$x_params), 2)
+    expect_equal(tst$ar_params, 0)
 
     tst <- suppressWarnings(
-      impulseR::estimate(
-        data, 
-        x_lags = -2, 
+      estimate(
+        data,
+        x_lags = -2,
         y_lags = 2
       )
     )
-    testthat::expect_equal(tst$x_params, 0)
-    testthat::expect_equal(length(tst$ar_params), 2)
+    expect_equal(tst$x_params, 0)
+    expect_equal(length(tst$ar_params), 2)
   }
 )
 
-testthat::test_that(
+test_that(
   "Testing known warnings: NAs in the data",
   {
     # Create data to be used in this test
     data <- data.frame(y = rnorm(100), x = rnorm(100))
-    data$y[1:3] <- NA 
-    data$x[4:6] <- NA 
-    
-    # NAs in data in `estimate`. Also testing output
-    testthat::expect_warning(impulseR::estimate(data))
+    data$y[1:3] <- NA
+    data$x[4:6] <- NA
 
-    tst <- suppressWarnings(impulseR::estimate(data))
-    testthat::expect_equal(tst$x, data$x[-c(1:6)])
-    testthat::expect_equal(
-      tst$innovations + tst$intercept, 
+    # NAs in data in `estimate`. Also testing output
+    expect_warning(estimate(data))
+
+    tst <- suppressWarnings(estimate(data))
+    expect_equal(tst$x, data$x[-c(1:6)])
+    expect_equal(
+      tst$innovations + tst$intercept,
       data$y[-c(1:6)]
     )
 
     # NAs in data in `compute_innovations`. Also testing output
-    testthat::expect_warning(
-      impulseR::compute_innovations(
+    expect_warning(
+      compute_innovations(
         data,
         ar_params = c(0.5, 0.25),
         x_params = c(2, 2)
@@ -234,45 +234,45 @@ testthat::test_that(
     )
 
     tst <- suppressWarnings(
-      impulseR::compute_innovations(
-        data, 
+      compute_innovations(
+        data,
         ar_params = c(0.5, 0.25),
         x_params = c(2, 2)
       )
     )
-    testthat::expect_equal(length(tst), 100 - 6)
+    expect_equal(length(tst), 100 - 6)
 
     # NAs in data in `prepare_data`. Also testing output
-    testthat::expect_warning(
-      impulseR::prepare_data(
-        data, 
-        x_lags = 2, 
+    expect_warning(
+      prepare_data(
+        data,
+        x_lags = 2,
         y_lags = 2
       )
     )
 
     tst <- suppressWarnings(
-      impulseR::prepare_data(
-        data, 
-        x_lags = 2, 
+      prepare_data(
+        data,
+        x_lags = 2,
         y_lags = 2
       )
     )
-    testthat::expect_equal(nrow(tst), 100 - 6)
+    expect_equal(nrow(tst), 100 - 6)
   }
 )
 
-testthat::test_that(
+test_that(
   "Testing the recovery of estimation",
   {
     tst <- logical(length(parameters))
 
     # Loop over each of the parameters
     set.seed(1)
-    for(i in seq_along(parameters)) {
+    for (i in seq_along(parameters)) {
       # Generate data
       y <- suppressWarnings(
-        impulseR::irf_generator(
+        irf_generator(
           intercept = parameters[[i]]$intercept,
           x_params = parameters[[i]]$x,
           ar_params = parameters[[i]]$eps,
@@ -282,8 +282,8 @@ testthat::test_that(
       )
 
       # Estimate the parameters
-      results <- impulseR::estimate(
-        y, 
+      results <- estimate(
+        y,
         cols = c("irf", "x"),
         y_lags = est_lags[i, 1],
         x_lags = est_lags[i, 2]
@@ -292,8 +292,8 @@ testthat::test_that(
       # Check whether all of the parameters are smaller than a given tolerance
       # level
       params <- c(
-        parameters[[i]]$intercept - results$intercept, 
-        parameters[[i]]$x_params - results$x_params, 
+        parameters[[i]]$intercept - results$intercept,
+        parameters[[i]]$x_params - results$x_params,
         parameters[[i]]$ar_params - results$ar_params
       )
 
@@ -301,11 +301,11 @@ testthat::test_that(
     }
 
     # Do the actual check
-    testthat::expect_true(all(tst))
+    expect_true(all(tst))
   }
 )
 
-testthat::test_that(
+test_that(
   "Testing creation of initial conditions",
   {
     lags <- c(NA, 1, 2, 3, 4)
@@ -321,17 +321,17 @@ testthat::test_that(
     )
 
     # Idea behind this test: We should be able to exactly replicate the observed
-    # data `y` if we correctly compute the innovations in `estimate`. innovations 
+    # data `y` if we correctly compute the innovations in `estimate`. innovations
     # and other impulse response functions may deviate, however, due to nonexact
     # recovery of the parameters.
     #
     # To make this point even clearer, This analysis is done for different types
-    # of models that do not necessarily correspond to the original generating 
+    # of models that do not necessarily correspond to the original generating
     # model
-    for(i in seq_along(parameters)) {
+    for (i in seq_along(parameters)) {
       # Generate data
       y <- suppressWarnings(
-        impulseR::irf_generator(
+        irf_generator(
           intercept = parameters[[i]]$intercept,
           x_params = parameters[[i]]$x,
           ar_params = parameters[[i]]$eps,
@@ -341,10 +341,10 @@ testthat::test_that(
       )
 
       # Loop over all possibilities of the lags
-      for(j in seq_len(nrow(lags))) {
+      for (j in seq_len(nrow(lags))) {
         # Estimate the parameters and retrieve the results
-        results <- impulseR::estimate(
-          y, 
+        results <- estimate(
+          y,
           cols = c("irf", "x"),
           y_lags = lags$y_lags[j],
           x_lags = ifelse(is.na(lags$x_lags[j]), NA, lags$x_lags[j] - 1)
@@ -352,7 +352,7 @@ testthat::test_that(
 
         # Create the impulse response functions
         results <- suppressWarnings(
-          impulseR::irf_generator(
+          irf_generator(
             intercept = results$intercept,
             x_params = results$x_params,
             ar_params = results$ar_params,
@@ -370,12 +370,12 @@ testthat::test_that(
     }
 
     # Do the actual check
-    testthat::expect_true(all(tst_y))
-    testthat::expect_true(all(tst_x))
+    expect_true(all(tst_y))
+    expect_true(all(tst_x))
   }
 )
 
-testthat::test_that(
+test_that(
   "Testing creation of initial conditions without any estimated ones",
   {
     lags <- c(NA, 1, 2, 3, 4)
@@ -391,17 +391,17 @@ testthat::test_that(
     )
 
     # Idea behind this test: We should be able to exactly replicate the observed
-    # data `y` if we correctly compute the innovations in `estimate`. innovations 
+    # data `y` if we correctly compute the innovations in `estimate`. innovations
     # and other impulse response functions may deviate, however, due to nonexact
     # recovery of the parameters.
     #
     # To make this point even clearer, This analysis is done for different types
-    # of models that do not necessarily correspond to the original generating 
+    # of models that do not necessarily correspond to the original generating
     # model
-    for(i in seq_along(parameters)) {
+    for (i in seq_along(parameters)) {
       # Generate data
       y <- suppressWarnings(
-        impulseR::irf_generator(
+        irf_generator(
           intercept = parameters[[i]]$intercept,
           x_params = parameters[[i]]$x,
           ar_params = parameters[[i]]$eps,
@@ -411,10 +411,10 @@ testthat::test_that(
       )
 
       # Loop over all possibilities of the lags
-      for(j in seq_len(nrow(lags))) {
+      for (j in seq_len(nrow(lags))) {
         # Estimate the parameters and retrieve the results
-        results <- impulseR::estimate(
-          y, 
+        results <- estimate(
+          y,
           cols = c("irf", "x"),
           y_lags = lags$y_lags[j],
           x_lags = ifelse(is.na(lags$x_lags[j]), NA, lags$x_lags[j] - 1)
@@ -422,8 +422,8 @@ testthat::test_that(
           suppressWarnings()
 
         # Create the impulse response functions
-        innovations <- impulseR::compute_innovations(
-          y, 
+        innovations <- compute_innovations(
+          y,
           cols = c("irf", "x"),
           intercept = results$intercept,
           x_params = results$x_params,
@@ -438,6 +438,6 @@ testthat::test_that(
     }
 
     # Do the actual check
-    testthat::expect_true(all(tst))
+    expect_true(all(tst))
   }
 )

@@ -9,22 +9,22 @@ scaled_impulse(N, index = 1, scale = 1)
 \arguments{
 \item{N}{Integer denoting the size of the impulse vector}
 
-\item{index}{Integer denoting at which index in the vector to add the single 
-impulse. Defaults to \code{1}}
+\item{index}{Integer denoting at which index in the vector to add the single
+impulse. Defaults to \code{1}.}
 
 \item{scale}{Numeric denoting the value the impulse should be given. Defaults
 to \code{1}}
 }
 \value{
-Numeric vector containing a singular impulse of value \code{scale}
+Numeric vector containing a singular impulse of value \code{scale}.
 }
 \description{
 Create single scaled impulse
 }
 \examples{
 scaled_impulse(
-  10, 
-  index = 1, 
+  10,
+  index = 1,
   scale = 2
 )
 

@@ -10,36 +10,36 @@ estimate(data, cols = c("y", "x"), y_lags = NULL, x_lags = NULL)
 \item{data}{Dataframe containing the variables of interest}
 
 \item{cols}{Character vector denoting the columns containing the variables of
-interest. First character should denote the dependent variable, the second 
-one the covariate of interest. Defaults to \code{c("y", "x")}}
+interest. First character should denote the dependent variable, the second
+one the covariate of interest. Defaults to \code{c("y", "x")}.}
 
-\item{y_lags}{Integer denoting the number of AR effects to estimate freely. 
-Starts at the value \code{1}, allowing for an AR(1) structure. Defaults to 
+\item{y_lags}{Integer denoting the number of AR effects to estimate freely.
+Starts at the value \code{1}, allowing for an AR(1) structure. Defaults to
 \code{NA}, communicating that you don't want to allow for any AR effects.}
 
-\item{x_lags}{Integer denoting the number of lagged covariate effects. Starts 
-at the value \code{0}, implying that only the contemporaneous effect, 
-\eqn{\beta_x}, is estimated freely. Defaults to \code{NA}, communicating that 
+\item{x_lags}{Integer denoting the number of lagged covariate effects. Starts
+at the value \code{0}, implying that only the contemporaneous effect,
+\eqn{\beta_x}, is estimated freely. Defaults to \code{NA}, communicating that
 you don't want to estimate any covariate parameters}
 }
 \value{
-Named list containing the estimated model (\code{fit}), the 
-parameter estimates (\code{intercept}, \code{x_params}, \code{ar_params}), 
-the observed covariate values (\code{x}) and the estimated innovations 
+Named list containing the estimated model (\code{fit}), the
+parameter estimates (\code{intercept}, \code{x_params}, \code{ar_params}),
+the observed covariate values (\code{x}) and the estimated innovations
 \code{innovations}
 }
 \description{
-This function estimates the parameters of an \eqn{ADL(p, q)} and prepares the 
-output for the calculation of system responses in other functions of the 
+This function estimates the parameters of an \eqn{ADL(p, q)} and prepares the
+output for the calculation of system responses in other functions of the
 package. Always estimates an intercept.
 }
 \details{
-Estimate the parameters of an \eqn{ADL(p, q)}, where \eqn{p} represents the 
-number of autoregressive effects (effects of lags of the dependent variable 
-\eqn{y_t} and \eqn{q} represents the number of lagged covariate effects. The 
-\eqn{ADL(p, q)} is formalized as: 
+Estimate the parameters of an \eqn{ADL(p, q)}, where \eqn{p} represents the
+number of autoregressive effects (effects of lags of the dependent variable
+\eqn{y_t} and \eqn{q} represents the number of lagged covariate effects. The
+\eqn{ADL(p, q)} is formalized as:
 
-\deqn{y_t = \alpha + \sum_{i = 1}^p \phi_{i}y_{t-i} + \beta_{x} x_{t} + 
+\deqn{y_t = \alpha + \sum_{i = 1}^p \phi_{i}y_{t-i} + \beta_{x} x_{t} +
 \sum_{i = 1}^q \beta_{L^{j}x} x_{t - j} + v_{t}}
 }
 \examples{
@@ -52,9 +52,9 @@ data <- data.frame(
 
 # Estimate an ADL(2, 2)
 estimate(
-  data, 
+  data,
   cols = c("DV", "IV"),
-  y_lags = 2, 
+  y_lags = 2,
   x_lags = 2
 )
 

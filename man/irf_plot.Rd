@@ -27,11 +27,11 @@ irf_plot(
   irf.color = "black",
   irf.linetype = "dashed",
   irf.linewidth = 1,
-  irf.label = latex2exp::TeX("$y_t$"),
+  irf.label = "y[t]",
   intercept.color = "gray",
   intercept.linetype = "solid",
   intercept.linewidth = 1,
-  intercept.label = latex2exp::TeX("$h_1 * 1$"),
+  intercept.label = "h[1] \%*\% 1",
   impulse.size = 2,
   impulse.shape = 19,
   impulse.x.shape = impulse.shape,
@@ -49,103 +49,100 @@ irf_plot(
 )
 }
 \arguments{
-\item{data}{Output of the \code{\link[impulseR]{irf_generator}} or 
-\code{\link[impulseR]{irf_empirical}} function}
+\item{data}{Output of the \code{\link[=irf_generator]{irf_generator()}} or \code{\link[=irf_empirical]{irf_empirical()}} function.}
 
-\item{cols}{Character vector denoting the impulse responses you would like 
-to plot. The values in this vector should be columns in \code{data} and are 
+\item{cols}{Character vector denoting the impulse responses you would like
+to plot. The values in this vector should be columns in \code{data} and are
 thus typically limited to \code{"irf"}, \code{"irf_x"}, \code{"irf_v"},
-or \code{"irf_intercept"}, or any combination of those. Defaults to all 
-impulse responses}
+or \code{"irf_intercept"}, or any combination of those. Defaults to all
+impulse responses.}
 
 \item{title}{Character denoting the title of the plot. Defaults to \code{NULL},
-that is no title}
+that is no title.}
 
 \item{xlabel}{Character denoting the label of the x-axis. Defaults to
 \code{"s (time since input)"} for a single input and to \code{"t (time)"}
-for multiple inputs}
+for multiple inputs.}
 
-\item{ylabel}{Character denoting the label of the y-axis. Defaults to 
-\code{NULL}, that is no such label}
+\item{ylabel}{Character denoting the label of the y-axis. Defaults to
+\code{NULL}, that is no such label.}
 
-\item{title.size}{Integer denoting the size of the title. Defaults to a 
-relative size of \code{1} as defined by the \code{\link[ggplot2]{rel}} function}
+\item{title.size}{Integer denoting the size of the title. Defaults to a
+relative size of \code{1} as defined by the \code{\link[ggplot2:element]{ggplot2::rel()}} function.}
 
-\item{title.hjust}{Numeric denoting the justification of the title. Defaults 
+\item{title.hjust}{Numeric denoting the justification of the title. Defaults
 to \code{0.5}, or centered justification}
 
-\item{label.size}{Integer denoting the size of the axis labels. Defaults to a 
-relative size of \code{1} as defined by the \code{\link[ggplot2]{rel}} function}
+\item{label.size}{Integer denoting the size of the axis labels. Defaults to a
+relative size of \code{1} as defined by the \code{\link[ggplot2:element]{ggplot2::rel()}} function.}
 
-\item{axis.text.size}{Integer denoting the size of the axis text. Defaults to 
-a relative size of \code{0.75} as defined by the \code{\link[ggplot2]{rel}} 
-function}
+\item{axis.text.size}{Integer denoting the size of the axis text. Defaults to
+a relative size of \code{0.75} as defined by the \code{\link[ggplot2:element]{ggplot2::rel()}} function.}
 
-\item{legend.title.size}{Integer denoting the size of the legend title. 
-Defaults to a relative size of \code{1.25} as defined by the 
+\item{legend.title.size}{Integer denoting the size of the legend title.
+Defaults to a relative size of \code{1.25} as defined by the
+\code{\link[ggplot2]{rel}} function.}
+
+\item{legend.text.size}{Integer denoting the size of the legend text.
+Defaults to a relative size of \code{1} as defined by the
 \code{\link[ggplot2]{rel}} function}
 
-\item{legend.text.size}{Integer denoting the size of the legend text. 
-Defaults to a relative size of \code{1} as defined by the 
-\code{\link[ggplot2]{rel}} function}
+\item{irf.color, x.color, v.color, intercept.color}{Character denoting the
+colors to use to visualize the total response (\code{irf.}), the response to
+impulses of the variable x (\code{x.}), the response to the innovations
+(\code{v.}), and the intercept responses (\code{intercept.}) respectively.
+Defaults are \code{"black"}, \code{"red4"}, \code{"green4"}, and  \code{"gray"} respectively.}
 
-\item{irf.color, x.color, v.color, intercept.color}{Character denoting the 
-colors to use to visualize the total response (\code{irf.}), the response to 
-impulses of the variable x (\code{x.}), the response to the innovations 
-(\code{v.}), and the intercept responses (\code{intercept.}) respectively. 
-Defaults are \code{"black"}, \code{"red4"}, \code{"green4"}, and \code{"gray"} 
-respectively}
-
-\item{irf.linetype, x.linetype, v.linetype, intercept.linetype}{Character 
-denoting the linetype to use to visualize the total response (\code{irf.}), 
-the response to impulses of the variable x (\code{x.}), the response to the 
-innovations (\code{v.}), and the intercept responses (\code{intercept.}) 
-respectively. Defaults are \code{"dashed"}, \code{"solid"}, \code{"solid"}, 
+\item{irf.linetype, x.linetype, v.linetype, intercept.linetype}{Character
+denoting the linetype to use to visualize the total response (\code{irf.}),
+the response to impulses of the variable x (\code{x.}), the response to the
+innovations (\code{v.}), and the intercept responses (\code{intercept.})
+respectively. Defaults are \code{"dashed"}, \code{"solid"}, \code{"solid"},
 and \code{"solid"} respectively}
 
-\item{irf.linewidth, x.linewidth, v.linewidth, intercept.linewidth}{Numeric 
-denoting the linewidth to use to visualize the total response (\code{irf.}), 
-the response to impulses of the variable x (\code{x.}), the response to the 
-innovations (\code{v.}), and the intercept responses (\code{intercept.}) 
+\item{irf.linewidth, x.linewidth, v.linewidth, intercept.linewidth}{Numeric
+denoting the linewidth to use to visualize the total response (\code{irf.}),
+the response to impulses of the variable x (\code{x.}), the response to the
+innovations (\code{v.}), and the intercept responses (\code{intercept.})
 respectively. Defaults to \code{1} for all variables}
 
-\item{irf.label, x.label, v.label, intercept.label}{Character denoting the 
-legend label to give to the the total response (\code{irf.}), the response to 
-impulses of the variable x (\code{x.}), the response to the innovations 
+\item{irf.label, x.label, v.label, intercept.label}{Character denoting the
+legend label to give to the the total response (\code{irf.}), the response to
+impulses of the variable x (\code{x.}), the response to the innovations
 (\code{v.}), and the intercept responses (\code{intercept.}) respectively.
 Defaults to the mathematical labels for each specific part}
 
-\item{impulse.size}{Numeric denoting the size of the point that indicates an 
-impulse has been given. Defaults to \code{2}}
+\item{impulse.size}{Numeric denoting the size of the point that indicates an
+impulse has been given. Defaults to \code{2}.}
 
-\item{impulse.shape, impulse.x.shape, impulse.v.shape}{Integer or character 
-denoting the shape of the point that indicates an impulse has been given. 
-You can give impulses of variable x (\code{.x.}) and impulses of the 
+\item{impulse.shape, impulse.x.shape, impulse.v.shape}{Integer or character
+denoting the shape of the point that indicates an impulse has been given.
+You can give impulses of variable x (\code{.x.}) and impulses of the
 innovations (\code{.v.}) different shapes if desired. Defaults to \code{19}.}
 
-\item{impulse.linetype, impulse.x.linetype, impulse.v.linetype}{Character 
-denoting the linetype of the line connecting the impulses to a given time on 
-the x-axis. You can give impulses of variable x (\code{.x.}) and impulses of the 
-innovations (\code{.v.}) different linetypes if desired. Defaults to 
-\code{"dotted"}}
+\item{impulse.linetype, impulse.x.linetype, impulse.v.linetype}{Character
+denoting the linetype of the line connecting the impulses to a given time on
+the x-axis. You can give impulses of variable x (\code{.x.}) and impulses of the
+innovations (\code{.v.}) different linetypes if desired. Defaults to
+\code{"dotted"}.}
 
 \item{impulse.linewidth}{Numeric denoting the linewidth of the line connecting
-the impulses to a given time on the x-axis. Defaults to \code{1}}
+the impulses to a given time on the x-axis. Defaults to \code{1}.}
 
-\item{impulse.alpha}{Numeric denoting the opacity of the impulses (point and 
-line). Defaults to \code{0.95}}
+\item{impulse.alpha}{Numeric denoting the opacity of the impulses (point and
+line). Defaults to \code{0.95}.}
 
-\item{legend}{Logical denoting whether a legend should be printed. Defaults 
+\item{legend}{Logical denoting whether a legend should be printed. Defaults
 to \code{TRUE},}
 
-\item{legend.title}{Character denoting the title of the legend. Ignored if 
-\code{legend = FALSE}. Defaults to \code{"Impulse response"} for a single 
-input and to \code{"Cumulative responses"} for multiple inputs}
+\item{legend.title}{Character denoting the title of the legend. Ignored if
+\code{legend = FALSE}. Defaults to \code{"Impulse response"} for a single
+input and to \code{"Cumulative responses"} for multiple inputs.}
 
 \item{legend.position}{Character denoting the position of the legend. Ignored
-if \code{legend = FALSE}. Defaults to \code{"right"}}
+if \code{legend = FALSE}. Defaults to \code{"right"}.}
 
-\item{background.fill}{Character denoting the color of the background of the 
+\item{background.fill}{Character denoting the color of the background of the
 plot. Defaults to \code{"white"}.}
 
 \item{breaks}{Integer denoting the number of breaks to allow in the time-axis.
@@ -155,15 +152,14 @@ Defaults to \code{10}.}
 Plot visualizing the impulse response for the predefined model.
 }
 \description{
-Plots the system responses based on the provided input. This input 
-should be the output of the \code{\link[impulseR]{irf_generator}} or the 
-\code{\link[impulseR]{irf_empirical}} functions.
+Plots the system responses based on the provided input. This input
+should be the output of the \code{\link[=irf_generator]{irf_generator()}} or the \code{\link[=irf_empirical]{irf_empirical()}} functions.
 }
 \examples{
 # Create an impulse response function
 output <- irf_generator(
-  intercept = 1, 
-  ar_params = c(0.5, 0.25), 
+  intercept = 1,
+  ar_params = c(0.5, 0.25),
   x_params = c(2, 0.5),
   x = c(1, rep(0, 9))
 )
