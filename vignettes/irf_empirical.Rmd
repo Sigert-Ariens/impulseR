@@ -152,18 +152,18 @@ We call the `irf_empirical` function to our empirical data twice, once with the 
 ```{r}
 # Fit the data and do not burn in the intercept response (default behavior)
 est_raw <- irf_empirical(
-  observed_data, 
-  cols = c("Y", "X"), 
-  y_lags = 2, 
+  observed_data,
+  cols = c("Y", "X"),
+  y_lags = 2,
   x_lags = 2
 )
 
 # Fit the data and burn in the intercept response (not recommended for empirical trajectory plots)
 est_burned <- irf_empirical(
-  observed_data, 
-  cols = c("Y", "X"), 
-  y_lags = 2, 
-  x_lags = 2, 
+  observed_data,
+  cols = c("Y", "X"),
+  y_lags = 2,
+  x_lags = 2,
   burnin = TRUE
 )
 

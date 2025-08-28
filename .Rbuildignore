@@ -1,0 +1,8 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^LICENSE\.md$
+^\.gitlab-ci\.yml$
+^_pkgdown\.yml$
+^[.]?air[.]toml$
+^\.vscode$
+^cran-comments\.md$

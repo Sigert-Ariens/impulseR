@@ -10,16 +10,16 @@ prepare_data(data, cols = c("y", "x"), x_lags = NULL, y_lags = NULL)
 \item{data}{Dataframe containing the variables of interest}
 
 \item{cols}{Character vector denoting the columns containing the variables of
-interest. First character should denote the dependent variable, the second 
-one the covariate of interest. Defaults to \code{c("y", "x")}}
+interest. First character should denote the dependent variable, the second
+one the covariate of interest. Defaults to \code{c("y", "x")}.}
 
-\item{x_lags}{Integer denoting the number of lags to include for the 
-covariate. Starts at the value \code{0}. Defaults to \code{NA}, communicating 
+\item{x_lags}{Integer denoting the number of lags to include for the
+covariate. Starts at the value \code{0}. Defaults to \code{NA}, communicating
 that you don't want to use any lagged values of the dependent variable}
 
-\item{y_lags}{Integer denoting the number of lags to include for the 
-dependent variable. Starts at the value \code{1}. Defaults to \code{NA}, 
-communicating that you don't want to use any lagged values of the dependent 
+\item{y_lags}{Integer denoting the number of lags to include for the
+dependent variable. Starts at the value \code{1}. Defaults to \code{NA},
+communicating that you don't want to use any lagged values of the dependent
 variable}
 }
 \value{
@@ -30,10 +30,10 @@ variables that are used as predictors in the estimation routine.
 Prepare data for analysis
 }
 \details{
-Transforms a data.frame in such a way that we can estimate the parameters 
+Transforms a data.frame in such a way that we can estimate the parameters
 for the specified number of lags in y and x.
 
-Used under the hood in the \code{\link[impulseR]{estimate}} function.
+Used under the hood in the \code{\link[=estimate]{estimate()}} function.
 }
 \examples{
 # Define a dataset
@@ -45,9 +45,9 @@ data <- data.frame(
 
 # For these data, prepare the data for estimation for an ADL(2, 2)
 prepared_data <- prepare_data(
-  data, 
+  data,
   cols = c("DV", "IV"),
-  y_lags = 2, 
+  y_lags = 2,
   x_lags = 2
 )
 

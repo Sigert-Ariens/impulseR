@@ -2,7 +2,7 @@
 #   "Testing whether two plotting methods converge",
 #   {
 #     ref <- impulseR::irf_plot(
-#       intercept = 0, 
+#       intercept = 0,
 #       x_params = c(2, -1),
 #       ar_params = c(0.75, 0.25),
 #       x = impulseR::impulse(10, 1),
@@ -10,7 +10,7 @@
 #     )
 
 #     results <- impulseR::irf_generator(
-#       intercept = 0, 
+#       intercept = 0,
 #       x_params = c(2, -1),
 #       ar_params = c(0.75, 0.25),
 #       x = impulseR::impulse(10, 1),

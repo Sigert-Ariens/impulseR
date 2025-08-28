@@ -17,47 +17,46 @@ compute_innovations(
 \item{data}{Dataframe containing the variables of interest}
 
 \item{cols}{Character vector denoting the columns containing the variables of
-interest. First character should denote the dependent variable, the second 
-one the covariate of interest. Defaults to \code{c("y", "x")}}
+interest. First character should denote the dependent variable, the second
+one the covariate of interest. Defaults to \code{c("y", "x")}.}
 
-\item{intercept}{Numeric denoting the intercept to use for the impulse response 
-function. Defaults to \code{0}}
+\item{intercept}{Numeric denoting the intercept to use for the impulse response
+function. Defaults to \code{0}.}
 
-\item{ar_params}{Numeric vector denoting the estimated AR parameters. 
-Parameters need to be given in order of increased lag (i.e., first element 
-for \eqn{\phi_1}, second element for \eqn{\phi_2},...). Defaults to \code{0}}
+\item{ar_params}{Numeric vector denoting the estimated AR parameters.
+Parameters need to be given in order of increased lag (i.e., first element
+for \eqn{\phi_1}, second element for \eqn{\phi_2},...). Defaults to \code{0}.}
 
-\item{x_params}{Numeric vector denoting the estimated covariate parameters. 
-Parameters again need to be given in order of increased lag (i.e., first 
-element for \eqn{\beta_x}, second element for \eqn{\beta_{Lx}},...). 
+\item{x_params}{Numeric vector denoting the estimated covariate parameters.
+Parameters again need to be given in order of increased lag (i.e., first
+element for \eqn{\beta_x}, second element for \eqn{\beta_{Lx}},...).
 Defaults to \code{0}, implying no covariate parameters.}
 
-\item{innovations}{Numeric vector denoting the values of estimated innovations 
-up to time point \eqn{t} (e.g., those acquired through the \code{lm} 
-function). Defaults to \code{NULL}, signaling the estimated innovations are 
-first calculated from the parameter estimates and observed data values 
+\item{innovations}{Numeric vector denoting the values of estimated innovations
+up to time point \eqn{t} (e.g., those acquired through the \code{lm}.
+function). Defaults to \code{NULL}, signaling the estimated innovations are
+first calculated from the parameter estimates and observed data values
 \eqn{y} and \eqn{x}.}
 }
 \value{
-Numeric vector of the same length as the data containing the 
+Numeric vector of the same length as the data containing the
 innovations for the provided model
 }
 \description{
-This function computes the innovations of an \eqn{ADL(p,q)} model, fixing 
+This function computes the innovations of an \eqn{ADL(p,q)} model, fixing
 initial innovations in order to construct empirical trajectory plots.
 }
 \details{
-If there are \eqn{p} AR effects, the fit object will only return innovations 
-for the last \code{N - p} datapoints. Least squares treats the initial values, 
-\eqn{y_0,...,y_p} and \eqn{x_0,...,x_p} as known for parameter estimation. To 
-generate empirical trajectory plots starting from the first measurement 
-occasion (\eqn{t = 0}), we can fix the 'missing' innovations by using 
-knowledge of the initial values and the parameter estimates. 
+If there are \eqn{p} AR effects, the fit object will only return innovations
+for the last \code{N - p} datapoints. Least squares treats the initial values,
+\eqn{y_0,...,y_p} and \eqn{x_0,...,x_p} as known for parameter estimation. To
+generate empirical trajectory plots starting from the first measurement
+occasion (\eqn{t = 0}), we can fix the 'missing' innovations by using
+knowledge of the initial values and the parameter estimates.
 
-This function fixes the initial innovations appropriately for the user, and 
+This function fixes the initial innovations appropriately for the user, and
 returns a list containing all \code{N} innovations. This function is primarily
-used under the hood of the \code{\link[impulseR]{estimate}} and 
-\code{\link[impulseR]{irf_generator}} function.
+used under the hood of the \code{\link[=estimate]{estimate()}} and \code{\link[=irf_generator]{irf_generator()}} function.
 }
 \examples{
 # Define a dataset
@@ -69,9 +68,9 @@ data <- data.frame(
 
 # For these data, compute the innovations of an ADL(2, 2)
 innovations <- compute_innovations(
-  data, 
+  data,
   cols = c("DV", "IV"),
-  intercept = 0.5, 
+  intercept = 0.5,
   ar_params = c(0.75, 0.25),
   x_params = c(1.5, 0.25)
 )

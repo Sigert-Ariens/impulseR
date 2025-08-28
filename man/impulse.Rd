@@ -9,18 +9,18 @@ impulse(N, index = 1)
 \arguments{
 \item{N}{Integer denoting the size of the impulse vector}
 
-\item{index}{Integer denoting at which index in the vector to add the single 
+\item{index}{Integer denoting at which index in the vector to add the single
 impulse. Defaults to \code{1}.}
 }
 \value{
-Numeric vector containing a singular impulse of value \code{1}
+Numeric vector containing a singular impulse of value \code{1}.
 }
 \description{
 Create single unit impulse
 }
 \examples{
 impulse(
-  10, 
+  10,
   index = 1
 )
 
