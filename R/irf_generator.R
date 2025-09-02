@@ -1,17 +1,18 @@
 #' Calculate system responses
 #'
 #' Compute system responses based on a particular set of parameters of the general
-#' \eqn{ADL(p, q)} model.
+#' \eqn{ARMAX(b, p, q)} model.
 #'
 #' @details
-#' This function calculates system responses for an \eqn{ADL(p, q)} model,
+#' This function calculates system responses for an \eqn{ARMAX(b, p, q)} model,
 #' formalized as:
 #'
-#' \deqn{y_t = \alpha + \sum_{i = 1}^p \phi_{i}y_{t-i} + \beta_{x} x_{t} +
-#' \sum_{j = 1}^q \beta_{L^{j}x} x_{t - j} + v_{t}}.
+#' \deqn{y_t = \alpha + \sum_{j = 0}^q \beta_{L^{j}x} x_{t - j} + 
+#' \sum_{i = 1}^p \phi_{i} y_{t-i} + \sum_{i = 1}^q \omega_{i} v_{t - i}
+#' + v_{t}}.
 #'
 #' One should provide an a priori chosen set of parameters through the arguments
-#' `intercept`, `x_params`, and `ar_params`.
+#' `intercept`, `x_params`, `ar_params`, and `ma_params`.
 #'
 #' Additionally, one also needs to provide the impulses to the system. One can
 #' achieve this in two ways. First, one can specify the impulses to the covariates
@@ -30,9 +31,13 @@
 #' \eqn{\phi_{2}},...). Defaults to `0`.
 #' @param x_params Numeric vector denoting the covariate parameters of the model
 #' (the \eqn{\beta} parameters). Parameters again need to be given in order of
-#' increasing lags(i.e., first element for \eqn{\beta_{x}}, second element for
+#' increasing lags (i.e., first element for \eqn{\beta_{x}}, second element for
 #' \eqn{\beta_{Lx}},...). Defaults to `0`, indicating that there are no
 #' covariate parameters.
+#' @param ma_params Numeric vector denoting the moving average parameters of the
+#' model (the \eqn{\omega} parameters). Parameters need to be given in order of 
+#' increasing lags (i.e., first element for \eqn{\omega_{1}}), second element 
+#' for \eqn{\omega_{2}},...). Defaults to `0`.
 #' @param x Numeric vector denoting the values of covariate at each time point.
 #' Depending on the input vectors supplied, different system responses will be
 #' returned. Defaults to `NULL`, which returns an empty vector of the same
@@ -65,12 +70,14 @@
 #' innovations.
 #'
 #' @examples
-#' # Create parameters of an ADL(2, 1), meaning having two lags in the residuals
-#' # and one lag in the values of x. These will be used for all examples.
+#' # Create parameters of an ARMAX(1, 2, 2), meaning having one lag in the values
+#' # of x, two lags in the residuals through y, and two lags in the moving average 
+#' # component. These will be used for all examples.
 #' params <- list(
 #'   "intercept" = 1,
 #'   "autoregression" = c(0.5, 0.1),
-#'   "slopes" = c(2, 0.5)
+#'   "slopes" = c(2, 0.5),
+#'   "moving_average" = c(0.2, 0.1)
 #' )
 #'
 #'
@@ -80,34 +87,38 @@
 #'
 #' # Use with single impulse of x in the beginning of the study, with burnin
 #' irf_generator(
-#'   params$intercept,
-#'   params$autoregression,
-#'   params$slopes,
+#'   intercept = params$intercept,
+#'   ar_params = params$autoregression,
+#'   x_params = params$slopes,
+#'   ma_params = params$moving_average,
 #'   x = c(1, rep(0, 9))
 #' )
 #'
 #' # Use with single impulse of x in the beginning of the study, without burnin
 #' irf_generator(
-#'   params$intercept,
-#'   params$autoregression,
-#'   params$slopes,
+#'   intercept = params$intercept,
+#'   ar_params = params$autoregression,
+#'   x_params = params$slopes,
+#'   ma_params = params$moving_average,
 #'   x = c(1, rep(0, 9)),
 #'   burnin = FALSE
 #' )
 #'
 #' # Use with multiple values for the innovations, with burnin
 #' irf_generator(
-#'   params$intercept,
-#'   params$autoregression,
-#'   params$slopes,
+#'   intercept = params$intercept,
+#'   ar_params = params$autoregression,
+#'   x_params = params$slopes,
+#'   ma_params = params$moving_average,
 #'   innovations = rnorm(10)
 #' )
 #'
 #' # Use with multiple values for the innovations, without burnin
 #' irf_generator(
-#'   params$intercept,
-#'   params$autoregression,
-#'   params$slopes,
+#'   intercept = params$intercept,
+#'   ar_params = params$autoregression,
+#'   x_params = params$slopes,
+#'   ma_params = params$moving_average,
 #'   innovations = rnorm(10),
 #'   burnin = FALSE
 #' )
@@ -123,6 +134,7 @@
 #'   intercept = 1,
 #'   x_params = c(1, 2, -0.5),
 #'   ar_params = c(0.9, -0.1, 0.25),
+#'   ma_params = c(0.5, 0.2, 0.1),
 #'   x = rnorm(100),
 #'   innovations = rnorm(100)
 #' )$irf
@@ -132,19 +144,24 @@
 #' # Using "irf" as the dependent variable and "x" as the independent variable
 #' # in the original data set.
 #' irf_generator(
-#'   params$intercept,
-#'   params$autoregression,
-#'   params$slopes,
+#'   intercept = params$intercept,
+#'   ar_params = params$autoregression,
+#'   x_params = params$slopes,
+#'   ma_params = params$moving_average,
 #'   data = data,
 #'   cols = c("irf", "x"),
 #'   burnin = FALSE
 #' )
 #'
 #' @export
+#
+# TO DO
+#   - CHECK FOR INVERTIBILITY OF THE CREATED MODEL (THROUGH OMEGA)
 irf_generator <- function(
   intercept = 0,
   ar_params = 0,
   x_params = 0,
+  ma_params = 0,
   x = NULL,
   innovations = NULL,
   data = NULL,
@@ -172,7 +189,8 @@ irf_generator <- function(
       cols = cols,
       intercept = intercept,
       ar_params = ar_params,
-      x_params = x_params
+      x_params = x_params,
+      ma_params = ma_params
     )
   }
 
@@ -239,32 +257,44 @@ irf_generator <- function(
   #
   # Create a matrix to avoid double for loops
   p <- length(ar_params)
+  q <- length(ma_params)
+
   phi <- rep(ar_params, each = p) |>
     matrix(nrow = p, ncol = p)
   phi[upper.tri(phi)] <- 0
 
-  # Initialize theta
-  theta <- numeric(nt)
-  theta[1] <- 1
+  omega <- c(1, ma_params)
 
-  # Loop over the datapoints and apply Equation 26 to get \theta.
+  # Initialize theta and zeta
+  theta <- zeta <- numeric(nt)
+  theta[1] <- 1
+  zeta[1] <- theta[1]
+
+  # Loop over the datapoints and apply Equation 26 to get \theta and the 
+  # moving average equations to get \zeta
   for (k in 2:nt) {
+    # Update \theta
     if (k - p < 1) {
-      terms <- phi[(k - 1), 1:(k - 1)] %*% theta[(k - 1):1]
+      theta[k] <- sum(phi[(k - 1), 1:(k - 1)] %*% theta[(k - 1):1])
     } else {
-      terms <- phi[p, ] %*% theta[(k - 1):(k - p)]
+      theta[k] <- sum(phi[p, ] %*% theta[(k - 1):(k - p)])
     }
 
-    theta[k] <- sum(terms)
+    # Update \zeta
+    if (k - q < 1) {
+      zeta[k] <- sum(theta[k:1] %*% omega[1:k])
+    } else {
+      zeta[k] <- sum(theta[k:(k - q)] %*% omega[(k - q):k])
+    }
   }
 
   # Use Equations 30 and 33 to generate the impulse response function towards the
   # covariate
   #
   # Create a matrix to avoid double for loops
-  q <- length(x_params)
-  beta <- rep(x_params, each = q) |>
-    matrix(nrow = q, ncol = q)
+  b <- length(x_params)
+  beta <- rep(x_params, each = b) |>
+    matrix(nrow = b, ncol = b)
   beta[upper.tri(beta)] <- 0
 
   # Initialize psi and loop over the data, applying Equation 33 to get
@@ -272,10 +302,10 @@ irf_generator <- function(
   psi <- numeric(nt)
 
   for (k in 1:nt) {
-    if (k - q < 1) {
+    if (k - b < 1) {
       terms <- beta[k, 1:k] %*% theta[k:1]
     } else {
-      terms <- beta[q, ] %*% theta[k:(k - q + 1)]
+      terms <- beta[b, ] %*% theta[k:(k - b + 1)]
     }
 
     psi[k] <- sum(terms)
@@ -294,10 +324,12 @@ irf_generator <- function(
   irf_x <- irf_v <- irf_intercept <- numeric(nt)
   for (t in 1:nt) {
     irf_x[t] <- sum(psi[1:t] * x[t:1])
-    irf_v[t] <- sum(theta[1:t] * innovations[t:1])
+    irf_v[t] <- sum(zeta[1:t] * innovations[t:1])
     irf_intercept[t] <- sum(theta[1:t] * intercept)
   }
 
+  # TO DO: CHECK THIS EQUATION, IS THIS TRUE FOR AN ARMA
+  #
   # Use these sums to generate y_t, following Equation 38. First, decide what
   # to do with the intercept based on the argument `burnin`. If `burnin = TRUE`,
   # replace the previously computed sum with the long-time limit of the process,
@@ -330,6 +362,7 @@ irf_generator <- function(
       "intercept" = intercept,
       "x_params" = x_params,
       "ar_params" = ar_params,
+      "ma_params" = ma_params,
       "irf" = irf
     )
   )

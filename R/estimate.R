@@ -245,6 +245,7 @@ compute_innovations <- function(
   intercept = 0,
   ar_params = 0,
   x_params = 0,
+  ma_params = 0,
   innovations = NULL
 ) {
   # Define the lags in x and y based on the parameters that are provided.
