@@ -251,10 +251,10 @@ irf_plot <- function(
   }
 
   labels <- c(
-    "irf_intercept" = intercept.label,
-    "irf_x" = x.label,
-    "irf_v" = v.label,
-    "irf" = irf.label
+    "irf_intercept" = parse(text = intercept.label),
+    "irf_x" = parse(text = x.label),
+    "irf_v" = parse(text = v.label),
+    "irf" = parse(text = irf.label)
   )
 
   impulses <- data[, c("time", "x", "innovations")]
