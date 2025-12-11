@@ -56,6 +56,7 @@ Collate:
     'irf_generator.R'
     'irf_empirical.R'
     'impulse.R'
+    'bootstrap.R'
     'irf_plot.R'
 Suggests: 
     fs,
