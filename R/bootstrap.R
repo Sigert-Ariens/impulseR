@@ -38,6 +38,10 @@
 #' # Example here
 #' 
 #' @export
+#
+# INTERNAL MESSAGE: Keep `x` in here as an argument: Otherwise R will confuse 
+# `x_lags` with `x` when the former is not specified. Not sure why this bug occurs, 
+# but used this workaround for now.
 bootstrap <- function(
   mean, 
   covariances, 
@@ -45,6 +49,7 @@ bootstrap <- function(
   x_lags = NA,
   parameter_names = NULL,
   N = 1000,
+  x = NULL,
   ...
 ) {
 
@@ -176,22 +181,24 @@ bootstrap <- function(
     covariances
   )
 
+  # Divide and conquer: Divide up the parameters in their own groups. Makes the 
+  # loop a bit less burdensome
+  intercept <- parameters$intercept
+  ar_params <- parameters[, grepl("y_", colnames, fixed = TRUE)]
+  x_params <- parameters[, grepl("x_", colnames, fixed = TRUE)]
+
   # Once parameters have been simulated, we loop over the different parameters
   # and compute the system responses according to the new set of parameters
   samples <- lapply(
     seq_len(nrow(parameters)),
     function(i) {
-      # Divide up the parameters in their respective categories
-      intercept <- parameters$intercept[i]
-      ar_params <- parameters[i, grepl("y_", colnames(parameters), fixed = TRUE)]
-      x_params <- parameters[i, grepl("x_", colnames(parameters), fixed = TRUE)]
-
       # Use irf_generator to generate the system responses according to this 
       # new set of parameters. Extract only the impulse responses
       responses <- irf_generator(
-        intercept = intercept,
-        ar_params = ar_params,
-        x_params = x_params,
+        intercept = as.numeric(intercept[i]),
+        ar_params = as.numeric(ar_params[i, ]),
+        x_params = as.numeric(x_params[i, ]),
+        x = x,
         ...
       )
       responses <- responses$irf
