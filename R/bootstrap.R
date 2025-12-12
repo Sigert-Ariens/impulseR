@@ -155,7 +155,6 @@ bootstrap <- function(
 
   # If the parameter names are not defined, then equate them to the previously 
   # created column names
-  browser()
   if(is.null(parameter_names)) {
     parameter_names <- colnames
   }
