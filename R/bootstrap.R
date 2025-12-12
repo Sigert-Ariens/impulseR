@@ -64,6 +64,38 @@ bootstrap <- function(
     stop("Covariance matrix does not have the same dimensionality as the means.")
   }
 
+  # If x_lag and y_lag are both NA, but parameter_names are provided, then we 
+  # extract the lag of each variable. Note that if parameter_names is not 
+  # provided, that we fall back to the case of only an intercept/mean and no 
+  # dynamical or lagged parameters
+  if(is.na(x_lags) & is.na(y_lags) & !is.null(parameter_names)) {
+    # Extract the lags in y
+    idx <- grepl("y_", parameter_names, fixed = TRUE)
+    y_lags <- max(
+      as.numeric(
+        gsub(
+          "y_",
+          "",
+          parameter_names,
+          fixed = TRUE
+        )
+      )
+    )
+
+    # Extract the lags in x
+    idx <- grepl("x_", parameter_names, fixed = TRUE)
+    x_lags <- max(
+      as.numeric(
+        gsub(
+          "x_",
+          "",
+          parameter_names,
+          fixed = TRUE
+        )
+      )
+    )
+  }
+
   # Check for impossible lags
   if(!is.na(x_lags)) {
     if(x_lags < 0) {
@@ -91,25 +123,35 @@ bootstrap <- function(
     }
   }
 
-  # Create the parameter names if have not been created before
+  # Define a variable that contains all parameters needed to compute the system
+  # responses according to particular lags. These will help with identifying the
+  # values of the correct parameters in the bootstrap, keeping those that are 
+  # irrelevant to 0 and providing those that are relevant (in parameter_names)
+  # with values for their parameters.
+  #
+  # Not proud of what I do here, but I don't see another way to do it as easily.
+  # Note that the way this is done now, it automatically puts the parameters in 
+  # the correct order (as expected by irf_generator) 
+  colnames <- c("intercept")
+
+  if(!is.na(y_lags)) {
+    colnames <- c(
+      colnames, 
+      paste("y_", seq(1, y_lags, 1), sep = "")
+    )
+  }
+
+  if(!is.na(x_lags)) {
+    colnames <- c(
+      colnames, 
+      paste("x_", seq(0, x_lags, 1), sep = "")
+    )
+  }
+
+  # If the parameter names are not defined, then equate them to the previously 
+  # created column names
   if(is.null(parameter_names)) {
-    # Not proud of what I'm about to do, but I don't see another way to do it
-    # as easily 
-    parameter_names <- c("intercept")
-
-    if(!is.na(y_lags)) {
-      parameter_names <- c(
-        parameter_names, 
-        paste("y_", seq(1, y_lags, 1), sep = "")
-      )
-    }
-
-    if(!is.na(x_lags)) {
-      parameter_names <- c(
-        parameter_names, 
-        paste("x_", seq(0, x_lags, 1), sep = "")
-      )
-    }
+    parameter_names <- colnames
   }
 
   # Check whether the parameter names have the same size as the parameter 
@@ -123,5 +165,49 @@ bootstrap <- function(
     )
   }
 
+  # Sample the required number of parameters and add them in a data.frame
+  parameters <- matrix(0, nrow = N, ncol = length(colnames)) |>
+    as.data.frame() |>
+    setNames(colnames)
   
+  parameters[, parameter_names] <- MASS::mvrnorm(
+    N, 
+    mean,
+    covariances
+  )
+
+  # Once parameters have been simulated, we loop over the different parameters
+  # and compute the system responses according to the new set of parameters
+  samples <- lapply(
+    seq_len(nrow(parameters)),
+    function(i) {
+      # Divide up the parameters in their respective categories
+      intercept <- parameters$intercept[i]
+      ar_params <- parameters[i, grepl("y_", colnames(parameters), fixed = TRUE)]
+      x_params <- parameters[i, grepl("x_", colnames(parameters), fixed = TRUE)]
+
+      # Use irf_generator to generate the system responses according to this 
+      # new set of parameters. Extract only the impulse responses
+      responses <- irf_generator(
+        intercept = intercept,
+        ar_params = ar_params,
+        x_params = x_params,
+        ...
+      )
+      responses <- responses$irf
+
+      # Add a column indicating the sample and return the data.frame
+      responses$sample <- i
+      return(responses)
+    }
+  )
+  samples <- do.call("rbind", samples)
+
+  # Return the parameters and the bootstrapped samples
+  return(
+    list(
+      "parameters" = parameters,
+      "samples" = samples
+    )
+  )
 }
