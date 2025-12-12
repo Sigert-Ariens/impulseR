@@ -1,4 +1,4 @@
-# Test expected error
+# Test expected errors
 test_that(
   "Testing expected error: No provided x and innovations",
   {
@@ -6,6 +6,24 @@ test_that(
 
     expect_no_error(irf_generator(0, 0.5, 1, x = rep(1, 10)))
     expect_no_error(irf_generator(0, 0.5, 1, innovations = rep(1, 10)))
+  }
+)
+
+test_that(
+  "Testing expected error: Column names in data cannot be found",
+  {
+    expect_error(
+      irf_generator(
+        0, 
+        0.5, 
+        1, 
+        data = data.frame(
+          x = rnorm(100),
+          y = rnorm(100)
+        ),
+        cols = c("dependent", "independent")
+      )
+    )
   }
 )
 
