@@ -69,6 +69,46 @@ bootstrap <- function(
     stop("Covariance matrix does not have the same dimensionality as the means.")
   }
 
+  # If parameter names are provided, check their validity
+  if(!is.null(parameter_names)) {
+    # Check for valid parameters
+    check <- sapply(
+      c("intercept", "y_", "x_"), 
+      function(x) grepl(x, parameter_names, fixed = TRUE)
+    )
+    check <- rowSums(check) > 0
+
+    # If no valid parameters are found, throw an error. Otherwise only retain 
+    # those parameters that do have a valid name. 
+    #
+    # Note that we do not correct the mean parameters: Ideally, people make sure
+    # that parameter names and actual parameters (`mean`) correspond to each 
+    # other, meaning that another error will be thrown later after this warning, 
+    # making them aware of why the later error is thrown.
+    if(!any(check)) {
+      stop(
+        paste(
+          "None of the parameters provided to `parameter_names` corresponds to the required format.",
+          "Ensure you use `'intercept'`, `'y_'`, or `'x_'` and their lag numbers in `parameter_names.`",
+          "For example, `c('intercept', 'y_1', 'y_2', 'x_0', 'x_1')` for the ADL(2, 1)."
+        ))
+
+    } else if(!all(check)) {
+      # Only retain those parameter names that actually tell us something about
+      # the parameters
+      warning(
+        paste(
+          "Some of the parameters provided to `parameter_names` does not correspond to the required format.",
+          "If this was a mistake, ensure you use `'intercept'`, `'y_'`, or `'x_'` and their lag numbers in `parameter_names.`",
+          "For example, `c('intercept', 'y_1', 'y_2', 'x_0', 'x_1')` for the ADL(2, 1).",
+          "For now, only using those parameters that do follow the required format."
+        )
+      )
+
+      parameter_names <- parameter_names[check]
+    }
+  }
+
   # If x_lag and y_lag are both NA, but parameter_names are provided, then we 
   # extract the lag of each variable. Note that if parameter_names is not 
   # provided, that we fall back to the case of only an intercept/mean and no 
@@ -76,29 +116,37 @@ bootstrap <- function(
   if(is.na(x_lags) & is.na(y_lags) & !is.null(parameter_names)) {
     # Extract the lags in y
     idx <- grepl("y_", parameter_names, fixed = TRUE)
-    y_lags <- max(
-      as.numeric(
-        gsub(
-          "y_",
-          "",
-          parameter_names[idx],
-          fixed = TRUE
+    if(!any(idx)) {
+      y_lags <- NA
+    } else {
+      y_lags <- max(
+        as.numeric(
+          gsub(
+            "y_",
+            "",
+            parameter_names[idx],
+            fixed = TRUE
+          )
         )
       )
-    )
+    }
 
     # Extract the lags in x
     idx <- grepl("x_", parameter_names, fixed = TRUE)
-    x_lags <- max(
-      as.numeric(
-        gsub(
-          "x_",
-          "",
-          parameter_names[idx],
-          fixed = TRUE
+    if(!any(idx)) {
+      x_lags <- NA
+    } else {
+      x_lags <- max(
+        as.numeric(
+          gsub(
+            "x_",
+            "",
+            parameter_names[idx],
+            fixed = TRUE
+          )
         )
       )
-    )
+    }
   }
 
   # Check for impossible lags
