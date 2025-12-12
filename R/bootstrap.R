@@ -81,7 +81,7 @@ bootstrap <- function(
         gsub(
           "y_",
           "",
-          parameter_names,
+          parameter_names[idx],
           fixed = TRUE
         )
       )
@@ -94,7 +94,7 @@ bootstrap <- function(
         gsub(
           "x_",
           "",
-          parameter_names,
+          parameter_names[idx],
           fixed = TRUE
         )
       )
@@ -155,6 +155,7 @@ bootstrap <- function(
 
   # If the parameter names are not defined, then equate them to the previously 
   # created column names
+  browser()
   if(is.null(parameter_names)) {
     parameter_names <- colnames
   }
@@ -164,7 +165,7 @@ bootstrap <- function(
   if(length(parameter_names) != d) {
     stop(
       paste(
-        "Provided means do not correspond to the lags in x and/or y.",
+        "More or less values of the parameters provided compared to their names.",
         "Cannot make the mapping between means and their meaning within the model."
       )
     )
