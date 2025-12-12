@@ -30,12 +30,45 @@
 #' @param ... Additional arguments provided to the 
 #' \code{link[impulseR]{irf_generator}} function.
 #' 
-#' @return Data.frame of bootstrapped system responses having a structure similar
-#' to the output of \code{\link[impulseR]{irf_generator}} with a column 
-#' specifying the sample 
+#' @return Named list containing the parameters that were used to create the 
+#' system responses (under \code{"parameters"}) and data.frame of bootstrapped 
+#' system responses having a structure similar to the output of 
+#' \code{\link[impulseR]{irf_generator}} with a column specifying the sample 
+#' number (under \code{"samples"}).
 #' 
 #' @examples 
-#' # Example here
+#' # Define parameters to be used in the bootstrap according to an ADL(1, 1)
+#' params <- c(1, 0.5, 2, 1)
+#' covariances <- diag(4) * 0.05^2
+#' 
+#' # Perform the bootstrap
+#' results <- bootstrap(
+#'   params,
+#'   covariances,
+#'   y_lags = 1, 
+#'   x_lags = 1
+#' )
+#' 
+#' # Inspect the parameters that were sampled
+#' View(results$parameters)
+#' 
+#' # Inspect the sampled impulse responses
+#' View(results$samples)
+#' 
+#' # Perform a bootstrap in which you yourself specify which values correspond 
+#' # to which parameters. Let's say you want to specify an ADL(2, 2) where the
+#' # first lag of y is ignored (set to 0) and similarly for the first lag of x, 
+#' # then we get the following specification
+#' results <- bootstrap(
+#'   params,
+#'   covariances,
+#'   parameter_names = c(
+#'     "intercept",
+#'     "y_2",
+#'     "x_0",
+#'     "x_2"
+#'   )
+#' ) 
 #' 
 #' @export
 #
