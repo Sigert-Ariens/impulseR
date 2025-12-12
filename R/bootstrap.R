@@ -256,7 +256,7 @@ bootstrap <- function(
   # Sample the required number of parameters and add them in a data.frame
   parameters <- matrix(0, nrow = N, ncol = length(colnames)) |>
     as.data.frame() |>
-    setNames(colnames)
+    `colnames<-`(colnames)
   
   parameters[, parameter_names] <- MASS::mvrnorm(
     N, 
