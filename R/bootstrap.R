@@ -27,7 +27,7 @@
 #' communicating that no lags in \eqn{x} are included.
 #' @param N Integer denoting the number of samples to generate. Defaults to 
 #' \code{1000}
-#' @param ... Additional arguments provided to the 
+#' @param x,... Additional arguments provided to the 
 #' \code{link[impulseR]{irf_generator}} function.
 #' 
 #' @return Named list containing the parameters that were used to create the 
@@ -46,14 +46,15 @@
 #'   params,
 #'   covariances,
 #'   y_lags = 1, 
-#'   x_lags = 1
+#'   x_lags = 1,
+#'   x = impulse(10)
 #' )
 #' 
 #' # Inspect the parameters that were sampled
-#' View(results$parameters)
+#' results$parameters
 #' 
 #' # Inspect the sampled impulse responses
-#' View(results$samples)
+#' results$samples
 #' 
 #' # Perform a bootstrap in which you yourself specify which values correspond 
 #' # to which parameters. Let's say you want to specify an ADL(2, 2) where the
@@ -67,7 +68,8 @@
 #'     "y_2",
 #'     "x_0",
 #'     "x_2"
-#'   )
+#'   ),
+#'   x = impulse(10)
 #' ) 
 #' 
 #' @export
