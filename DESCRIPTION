@@ -46,6 +46,7 @@ Depends: R (>= 4.1.0)
 Imports: 
     ggplot2,
     tidyr,
+    dplyr,
     stats,
     rlang,
     MASS
