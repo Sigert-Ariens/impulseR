@@ -1,3 +1,6 @@
+# We may need to look at vdiffr at some point if we wish to test our plotting 
+# function
+
 # testthat::test_that(
 #   "Testing whether two plotting methods converge",
 #   {
