@@ -44,3 +44,4 @@
 
 # irf_plot(result$irf)
 # irf_plot(result$irf, cols = "irf")
+# irf_plot(result$irf, cols = "irf", confidence_interval = FALSE)
