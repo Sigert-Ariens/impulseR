@@ -121,6 +121,120 @@ test_that(
   }
 )
 
+test_that(
+  "Testing properties of the output: Bootstrapping confidence intervals",
+  {
+    intercept <- 1
+    ar_params <- c(0.5, 0.1, -.1)
+    x_params <- c(2, 1, -0.5)
+
+    # Generate a dataset
+    set.seed(1)
+    y <- irf_generator(
+      intercept = intercept,
+      ar_params = ar_params,
+      x_params = x_params, 
+      x = rnorm(100),
+      innovations = rnorm(100)
+    )$irf
+
+    # Estimate an ADL(1, 1) on these data and compute the bootstrapped interval 
+    # as well. Do so for 90%, 95%, and 99%
+    set.seed(1)
+    results_90 <- irf_empirical(
+      y, 
+      cols = c("irf", "x"),
+      y_lags = 1,
+      x_lags = 1,
+      confidence_interval = TRUE,
+      alpha = 0.10,
+      N = 1000
+    )
+
+    set.seed(1)
+    results_95 <- irf_empirical(
+      y, 
+      cols = c("irf", "x"),
+      y_lags = 1,
+      x_lags = 1,
+      confidence_interval = TRUE,
+      alpha = 0.05,
+      N = 1000
+    )
+
+    set.seed(1)
+    results_99 <- irf_empirical(
+      y, 
+      cols = c("irf", "x"),
+      y_lags = 1,
+      x_lags = 1,
+      confidence_interval = TRUE,
+      alpha = 0.01,
+      N = 1000
+    )
+
+    # Test: Check whether the confidence intervals are larger for the lower values
+    # of alpha
+    expect_true(
+      all(
+        sapply(
+          c("irf_lower", "irf_intercept_lower", "irf_x_lower", "irf_v_lower"),
+          function(x) results_99$irf[, x] <= results_95$irf[, x]
+        )
+      )
+    )
+    expect_true(
+      all(
+        sapply(
+          c("irf_lower", "irf_intercept_lower", "irf_x_lower", "irf_v_lower"),
+          function(x) results_99$irf[, x] <= results_90$irf[, x]
+        )
+      )
+    )
+    expect_true(
+      all(
+        sapply(
+          c("irf_lower", "irf_intercept_lower", "irf_x_lower", "irf_v_lower"),
+          function(x) results_95$irf[, x] <= results_90$irf[, x]
+        )
+      )
+    )
+
+    # Test: Check whether the confidence intervals contain the actual system 
+    # responses
+    expect_true(
+      all(
+        sapply(
+          c("irf", "irf_intercept", "irf_x", "irf_v"),
+          function(x) 
+            results_99$irf[, x] <= results_99$irf[, paste0(x, "_upper")] & 
+            results_99$irf[, x] >= results_99$irf[, paste0(x, "_lower")]
+        )
+      )
+    )
+    expect_true(
+      all(
+        sapply(
+          c("irf", "irf_intercept", "irf_x", "irf_v"),
+          function(x) 
+            results_95$irf[, x] <= results_95$irf[, paste0(x, "_upper")] & 
+            results_95$irf[, x] >= results_95$irf[, paste0(x, "_lower")]
+        )
+      )
+    )
+    expect_true(
+      all(
+        sapply(
+          c("irf", "irf_intercept", "irf_x", "irf_v"),
+          function(x) 
+            results_90$irf[, x] <= results_90$irf[, paste0(x, "_upper")] & 
+            results_90$irf[, x] >= results_90$irf[, paste0(x, "_lower")]
+        )
+      )
+    )
+  }
+)
+
 # Currently not supported, but might be useful to put it back in at some point
 # test_that(
 #   "Testing estimation of parameters and providing own impulses",
