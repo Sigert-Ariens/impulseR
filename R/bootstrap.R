@@ -184,8 +184,8 @@ bootstrap <- function(
   # Divide and conquer: Divide up the parameters in their own groups. Makes the 
   # loop a bit less burdensome
   intercept <- parameters$intercept
-  ar_params <- parameters[, grepl("y_", colnames, fixed = TRUE)]
-  x_params <- parameters[, grepl("x_", colnames, fixed = TRUE)]
+  ar_params <- parameters[, grepl("y_", colnames, fixed = TRUE), drop = FALSE]
+  x_params <- parameters[, grepl("x_", colnames, fixed = TRUE), drop = FALSE]
 
   # Once parameters have been simulated, we loop over the different parameters
   # and compute the system responses according to the new set of parameters
