@@ -192,8 +192,8 @@ irf_plot <- function(
     # If no confidence interval is specified or recoverable, add lower and upper
     # columns to the pivotted data anyway. Removes the need for an additional 
     # if-statement along the way
-    data_long$lower <- data$value
-    data_long$upper <- data$value
+    data_long$lower <- data_long$value
+    data_long$upper <- data_long$value
   }
 
   # Filter out all of the IRFs that you don't want to plot.
