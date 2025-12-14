@@ -14,7 +14,20 @@ test_that(
     data$x[seq(1, 100, 10)] <- NA
 
     # Do the test
-    expect_warning(irf_empirical(data = data, cols = c("irf", "x")))
+    expect_warning(
+      irf_empirical(
+        data = data, 
+        cols = c("irf", "x"),
+        na_action = "listwise"
+      )
+    )
+    expect_warning(
+      irf_empirical(
+        data = data, 
+        cols = c("irf", "x"),
+        na_action = "casewise"
+      )
+    )
 
     # Test of the output can be added here, but is already being tested elsewhere
   }
