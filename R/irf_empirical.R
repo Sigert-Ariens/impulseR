@@ -35,6 +35,11 @@
 #' @param alpha Numeric between \code{0} and \code{1} denoting the specificity
 #' of the confidence interval. Ignored if \code{confidence_interval = FALSE}. 
 #' Defaults to \code{0.05}, leading to a 95% bootstrapped confidence interval.
+#' @param na_action Character denoting how \code{NA}s should be removed from the
+#' data. Either \code{"listwise"} or \code{"casewise"}. Defaults to 
+#' \code{"listwise"}, which may lead to different results when running the 
+#' \code{lm} function yourself with the same specifications, as \code{lm} uses
+#' casewise deletion by default. 
 #' @param ... Additional arguments provided to \code{\link[impulseR]{bootstrap}},
 #' defining the procedure used to derive the confidence intervals
 #'
@@ -86,6 +91,7 @@ irf_empirical <- function(
   burnin = FALSE,
   confidence_interval = FALSE,
   alpha = 0.05,
+  na_action = "listwise",
   ...
 ) {
   # Call the estimate function. The parameters are estimated and initial
@@ -94,7 +100,8 @@ irf_empirical <- function(
     data,
     cols = cols,
     y_lags = y_lags,
-    x_lags = x_lags
+    x_lags = x_lags,
+    na_action = na_action
   )
 
   # Call the irf_generator function  on the observed covariate values and

@@ -24,6 +24,11 @@
 #' at the value `0`, implying that only the contemporaneous effect,
 #' \eqn{\beta_x}, is estimated freely. Defaults to `NA`, communicating that
 #' you don't want to estimate any covariate parameters
+#' @param na_action Character denoting how \code{NA}s should be removed from the
+#' data. Either \code{"listwise"} or \code{"casewise"}. Defaults to 
+#' \code{"listwise"}, which may lead to different results when running the 
+#' \code{lm} function yourself with the same specifications, as \code{lm} uses
+#' casewise deletion by default. 
 #'
 #' @return Named list containing the estimated model (`fit`), the
 #' parameter estimates (`intercept`, `x_params`, `ar_params`),
@@ -51,7 +56,8 @@ estimate <- function(
   data,
   cols = c("y", "x"),
   y_lags = NULL,
-  x_lags = NULL
+  x_lags = NULL,
+  na_action = "listwise"
 ) {
   # Check whether only a single column is provided in the data.frame, and whether
   # the person specified no use of x_lags. In this case, we make a pass and allow
@@ -75,11 +81,20 @@ estimate <- function(
   }
 
   # Check for NAs
-  if (any(is.na(data))) {
+  if (any(is.na(data)) & na_action == "listwise") {
     warning("NAs found in the data. Deleting them in a listwise fashion.")
 
     idx <- !is.na(rowSums(data))
     data <- data[idx, ]
+  } else if(any(is.na(data)) & na_action == "casewise") {
+    warning("NAs found in the data. Deleting them in a casewise fashion.")
+  } else if(any(is.na(data))) {
+    warning(
+      paste(
+        "NAs found in the data, but proposed method is not known.", 
+        "Please specify 'listwise' or 'casewise' for the `na_action` argument."
+      )
+    )
   }
 
   # Check for impossible lags
