@@ -36,8 +36,13 @@
 #' of the confidence interval. Ignored if \code{confidence_interval = FALSE}. 
 #' Defaults to \code{0.05}, leading to a 95% bootstrapped confidence interval.
 #' @param na_action Character denoting how \code{NA}s should be removed from the
-#' data. Either \code{"listwise"} or \code{"casewise"}. Defaults to 
-#' \code{"listwise"}, which may lead to different results when running the 
+#' data. Either \code{"listwise"}, \code{"listwise.partial"}, or \code{"casewise"}, 
+#' where \code{"listwise"} indicates the deletion of full rows of data when one 
+#' of the matched variables contains an \code{NA} (including lagged variables), 
+#' \code{"listwise.partial"} indicates the deletion of full rows of data when 
+#' one of the variables contains an \code{NA} but excluding the lags of variables,
+#' and \code{"casewise"} indicates casewise deletion in the estimation. 
+#' Defaults to \code{"listwise"}, which may lead to different results when running the 
 #' \code{lm} function yourself with the same specifications, as \code{lm} uses
 #' casewise deletion by default. 
 #' @param ... Additional arguments provided to \code{\link[impulseR]{bootstrap}},
