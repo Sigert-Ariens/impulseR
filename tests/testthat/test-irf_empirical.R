@@ -353,13 +353,18 @@ test_that(
     )
 
     # Perform estimation through the irf_empirical function and extract the 
-    # results of the estimation procedure
+    # results of the estimation procedure.
+    #
+    # Importantly, NAs are removed in a casewise fashion, in which case we do 
+    # not expect any differences between the `lm` outside and inside of 
+    # `irf_empirical` 
     tst <- irf_empirical(
       data = data, 
       cols = c("y", "x"),
       y_lags = 2,
       x_lags = 2,
-      burnin = FALSE
+      burnin = FALSE,
+      na_action = "casewise"
     )$fit |>
       suppressWarnings()
 
@@ -403,6 +408,75 @@ test_that(
     expect_equal(
       ref$adj.r.squared,
       tst$adj.r.squared
+    )
+
+    # Perform estimation through the irf_empirical function and extract the 
+    # results of the estimation procedure.
+    #
+    # Importantly, NAs are removed in a listwise fashion, in which case we do 
+    # expect differences between the `lm` outside and inside of `irf_empirical` 
+    tst <- irf_empirical(
+      data = data, 
+      cols = c("y", "x"),
+      y_lags = 2,
+      x_lags = 2,
+      burnin = FALSE,
+      na_action = "listwise"
+    )$fit |>
+      suppressWarnings()
+
+    # Test how well each aspect of the results corresponds between the two 
+    # methods
+    expect_failure(
+      expect_equal(
+        as.matrix(ref$coefficients) |>
+          `dimnames<-`(NULL), 
+        as.matrix(tst$coefficients) |>
+          `dimnames<-`(NULL)
+      )
+    )
+
+    expect_failure(
+      expect_equal(
+        as.numeric(ref$residuals), 
+        as.numeric(tst$residuals)
+      )
+    )
+
+    # Test how well each aspect of the summary holds up between the two methods
+    ref <- summary(ref)
+    tst <- summary(tst)
+
+    expect_failure(
+      expect_equal(
+        as.matrix(ref$coefficients) |>
+          `dimnames<-`(NULL),
+        as.matrix(tst$coefficients) |>
+          `dimnames<-`(NULL)
+      )
+    )
+
+    expect_failure(
+      expect_equal(
+        as.matrix(ref$cov.unscaled) |>
+          `dimnames<-`(NULL),
+        as.matrix(tst$cov.unscaled) |>
+          `dimnames<-`(NULL)
+      )
+    )
+
+    expect_failure(
+      expect_equal(
+        ref$r.squared,
+        tst$r.squared
+      )
+    )
+
+    expect_failure(
+      expect_equal(
+        ref$adj.r.squared,
+        tst$adj.r.squared
+      )
     )
   }
 )
