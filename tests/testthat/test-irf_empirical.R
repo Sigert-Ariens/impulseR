@@ -266,7 +266,8 @@ test_that(
       y_lags = 2,
       x_lags = 2,
       burnin = FALSE
-    )$fit
+    )$fit |>
+      suppressWarnings()
 
     # Test how well each aspect of the results corresponds between the two 
     # methods
@@ -280,6 +281,115 @@ test_that(
     expect_equal(
       as.numeric(ref$residuals), 
       as.numeric(tst$residuals)
+    )
+
+    # Test how well each aspect of the summary holds up between the two methods
+    ref <- summary(ref)
+    tst <- summary(tst)
+
+    expect_equal(
+      as.matrix(ref$coefficients) |>
+        `dimnames<-`(NULL),
+      as.matrix(tst$coefficients) |>
+        `dimnames<-`(NULL)
+    )
+
+    expect_equal(
+      as.matrix(ref$cov.unscaled) |>
+        `dimnames<-`(NULL),
+      as.matrix(tst$cov.unscaled) |>
+        `dimnames<-`(NULL)
+    )
+
+    expect_equal(
+      ref$r.squared,
+      tst$r.squared
+    )
+
+    expect_equal(
+      ref$adj.r.squared,
+      tst$adj.r.squared
+    )
+  }
+)
+
+test_that(
+  "Check presence of bug: Results from estimation with NAs imputed",
+  {
+    # Create data that can be used for estimation
+    set.seed(1)
+    data <- irf_generator(
+      intercept = 0, 
+      ar_params = c(0.75, 0.25, -0.1),
+      x_params = c(2, 1, 0.5),
+      x = rnorm(50),
+      innovations = rnorm(50)
+    )$irf |>
+      dplyr::select(irf, x) |>
+      dplyr::rename(y = irf)
+
+    # Impute some NAs
+    data[seq(0, 50, 10), ] <- NA
+
+    # Perform estimation using the lag-function and estimate the parameters of 
+    # this model outside of the irf_empirical function
+    lag <- dplyr::lag
+    ref <- lm(
+      data = data,
+      y ~ lag(y, 1) + lag(y, 2) + x + lag(x, 1) + lag(x, 2)
+    )
+
+    # Perform estimation through the irf_empirical function and extract the 
+    # results of the estimation procedure
+    tst <- irf_empirical(
+      data = data, 
+      cols = c("y", "x"),
+      y_lags = 2,
+      x_lags = 2,
+      burnin = FALSE
+    )$fit |>
+      suppressWarnings()
+
+    # Test how well each aspect of the results corresponds between the two 
+    # methods
+    expect_equal(
+      as.matrix(ref$coefficients) |>
+        `dimnames<-`(NULL), 
+      as.matrix(tst$coefficients) |>
+        `dimnames<-`(NULL)
+    )
+
+    expect_equal(
+      as.numeric(ref$residuals), 
+      as.numeric(tst$residuals)
+    )
+
+    # Test how well each aspect of the summary holds up between the two methods
+    ref <- summary(ref)
+    tst <- summary(tst)
+
+    expect_equal(
+      as.matrix(ref$coefficients) |>
+        `dimnames<-`(NULL),
+      as.matrix(tst$coefficients) |>
+        `dimnames<-`(NULL)
+    )
+
+    expect_equal(
+      as.matrix(ref$cov.unscaled) |>
+        `dimnames<-`(NULL),
+      as.matrix(tst$cov.unscaled) |>
+        `dimnames<-`(NULL)
+    )
+
+    expect_equal(
+      ref$r.squared,
+      tst$r.squared
+    )
+
+    expect_equal(
+      ref$adj.r.squared,
+      tst$adj.r.squared
     )
   }
 )
