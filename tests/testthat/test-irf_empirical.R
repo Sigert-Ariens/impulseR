@@ -235,6 +235,55 @@ test_that(
   }
 )
 
+test_that(
+  "Check presence of bug: Results from estimation are same within and outside of irf_empirical",
+  {
+    # Create data that can be used for estimation
+    set.seed(1)
+    data <- irf_generator(
+      intercept = 0, 
+      ar_params = c(0.75, 0.25, -0.1),
+      x_params = c(2, 1, 0.5),
+      x = rnorm(50),
+      innovations = rnorm(50)
+    )$irf |>
+      dplyr::select(irf, x) |>
+      dplyr::rename(y = irf)
+
+    # Perform estimation using the lag-function and estimate the parameters of 
+    # this model outside of the irf_empirical function
+    lag <- dplyr::lag
+    ref <- lm(
+      data = data,
+      y ~ lag(y, 1) + lag(y, 2) + x + lag(x, 1) + lag(x, 2)
+    )
+
+    # Perform estimation through the irf_empirical function and extract the 
+    # results of the estimation procedure
+    tst <- irf_empirical(
+      data = data, 
+      cols = c("y", "x"),
+      y_lags = 2,
+      x_lags = 2,
+      burnin = FALSE
+    )$fit
+
+    # Test how well each aspect of the results corresponds between the two 
+    # methods
+    expect_equal(
+      as.matrix(ref$coefficients) |>
+        `dimnames<-`(NULL), 
+      as.matrix(tst$coefficients) |>
+        `dimnames<-`(NULL)
+    )
+
+    expect_equal(
+      as.numeric(ref$residuals), 
+      as.numeric(tst$residuals)
+    )
+  }
+)
+
 # Currently not supported, but might be useful to put it back in at some point
 # test_that(
 #   "Testing estimation of parameters and providing own impulses",
