@@ -567,3 +567,74 @@ test_that(
     )
   }
 )
+
+test_that(
+  "Bootstrap puts confidence intervals around innovations, not observed data",
+  {
+    # Create data
+    set.seed(1)
+    data <- irf_generator(
+      intercept = 0, 
+      ar_params = c(0.75, 0.2),
+      x_params = c(2, 1),
+      x = rnorm(100),
+      innovations = rnorm(100)
+    )$irf
+
+    # Use irf_empirical with confidence intervals
+    results <- irf_empirical(
+      data, 
+      cols = c("irf", "x"),
+      y_lags = 1, 
+      x_lags = 1,
+      confidence_interval = TRUE
+    )$irf
+
+    # Check whether there is no variation around the observed data: The observed
+    # irf is the one thing we should be sure of
+    expect_equal(
+      mean(abs(results$irf_lower - results$irf_upper)),
+      0
+    )
+    expect_equal(
+      mean(abs(results$irf - results$irf_upper)),
+      0
+    )
+    expect_equal(
+      mean(abs(results$irf_lower - results$irf)),
+      0
+    )
+  }
+)
+
+test_that(
+  "Bootstrap puts confidence intervals around data when computing responses",
+  {
+    # Create data
+    set.seed(1)
+    data <- irf_generator(
+      intercept = 0, 
+      ar_params = c(0.75, 0.2),
+      x_params = c(2, 1),
+      x = rnorm(100),
+      innovations = rnorm(100)
+    )$irf
+
+    # Use irf_empirical with confidence intervals
+    results <- irf_empirical(
+      data, 
+      cols = c("irf", "x"),
+      y_lags = 1, 
+      x_lags = 1,
+      confidence_interval = TRUE,
+      x = impulse(10),
+      innovations = impulse(10)
+    )$irf
+
+    # Check whether there is no variation around the observed data: The observed
+    # irf is the one thing we should be sure of
+    expect_true(mean(abs(results$irf_lower - results$irf_upper)) > 0)
+    expect_true(mean(abs(results$irf - results$irf_upper)) > 0)
+    expect_true(mean(abs(results$irf_lower - results$irf)) > 0)
+  }
+)
