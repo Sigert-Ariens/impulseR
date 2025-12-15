@@ -325,7 +325,7 @@ compute_innovations <- function(
 
     if (is.na(x_lags) & is.na(y_lags)) {
       # If no AR effects or covariate parameters are defined, then y_hat is simply the intercept.
-      innovations <- data$y - intercept
+      innovations <- prepared$y - intercept
 
     } else {
       # Otherwise, we can differentiate between several cases
