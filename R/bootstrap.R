@@ -27,8 +27,8 @@
 #' communicating that no lags in \eqn{x} are included.
 #' @param N Integer denoting the number of samples to generate. Defaults to 
 #' \code{1000}
-#' @param x,... Additional arguments provided to the 
-#' \code{link[impulseR]{irf_generator}} function.
+#' @param x,innovations,data,burning,cols,na_action Additional arguments provided \
+#' to the \code{link[impulseR]{irf_generator}} function.
 #' 
 #' @return Named list containing the parameters that were used to create the 
 #' system responses (under \code{"parameters"}) and data.frame of bootstrapped 
@@ -85,7 +85,11 @@ bootstrap <- function(
   parameter_names = NULL,
   N = 1000,
   x = NULL,
-  ...
+  innovations = NULL,
+  na_action = "listwise",
+  data = NULL, 
+  cols = c("y", "x"),
+  burnin = FALSE
 ) {
 
   # Check whether the covariances are a matrix
@@ -269,21 +273,31 @@ bootstrap <- function(
   intercept <- parameters$intercept
   ar_params <- parameters[, grepl("y_", colnames, fixed = TRUE), drop = FALSE]
   x_params <- parameters[, grepl("x_", colnames, fixed = TRUE), drop = FALSE]
+  data <- data[, cols]
 
   # Once parameters have been simulated, we loop over the different parameters
   # and compute the system responses according to the new set of parameters
   samples <- lapply(
     seq_len(nrow(parameters)),
     function(i) {
+      # Extract the parameters
+      intercept <- as.numeric(intercept[i])
+      ar_params <- as.numeric(ar_params[i, ])
+      x_params <- as.numeric(x_params[i, ])
+
       # Use irf_generator to generate the system responses according to this 
       # new set of parameters. Extract only the impulse responses
       responses <- irf_generator(
-        intercept = as.numeric(intercept[i]),
-        ar_params = as.numeric(ar_params[i, ]),
-        x_params = as.numeric(x_params[i, ]),
+        intercept = intercept,
+        ar_params = ar_params,
+        x_params = x_params,
         x = x,
-        ...
-      )
+        innovations = innovations,
+        na_action = na_action,
+        data = data, 
+        cols = cols
+      ) |>
+        suppressWarnings()
       responses <- responses$irf
 
       # Add a column indicating the sample and return the data.frame
@@ -292,6 +306,7 @@ bootstrap <- function(
     }
   )
   samples <- do.call("rbind", samples)
+  browser()
 
   # Return the parameters and the bootstrapped samples
   return(
