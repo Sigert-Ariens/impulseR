@@ -121,11 +121,11 @@ estimate <- function(
     return(
       list(
         "fit" = list(),
-        "intercept" = mean(data$y),
+        "intercept" = mean(data$y, na.rm = TRUE),
         "x_params" = 0,
         "ar_params" = 0,
         "x" = data$x,
-        "innovations" = data$y - mean(data$y)
+        "innovations" = data$y - mean(data$y, na.rm = TRUE)
       )
     )
   }
