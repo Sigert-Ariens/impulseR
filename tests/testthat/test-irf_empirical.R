@@ -355,8 +355,8 @@ test_that(
     # Perform estimation through the irf_empirical function and extract the 
     # results of the estimation procedure.
     #
-    # Importantly, NAs are removed in a casewise fashion, in which case we do 
-    # not expect any differences between the `lm` outside and inside of 
+    # Importantly, NAs are removed in a casewise/listwise fashion, in which case 
+    # we do not expect any differences between the `lm` outside and inside of 
     # `irf_empirical` 
     tst <- irf_empirical(
       data = data, 
@@ -364,7 +364,7 @@ test_that(
       y_lags = 2,
       x_lags = 2,
       burnin = FALSE,
-      na_action = "casewise"
+      na_action = "listwise"
     )$fit |>
       suppressWarnings()
 
@@ -383,37 +383,37 @@ test_that(
     )
 
     # Test how well each aspect of the summary holds up between the two methods
-    ref <- summary(ref)
-    tst <- summary(tst)
+    ref_summ <- summary(ref)
+    tst_summ <- summary(tst)
 
     expect_equal(
-      as.matrix(ref$coefficients) |>
+      as.matrix(ref_summ$coefficients) |>
         `dimnames<-`(NULL),
-      as.matrix(tst$coefficients) |>
+      as.matrix(tst_summ$coefficients) |>
         `dimnames<-`(NULL)
     )
 
     expect_equal(
-      as.matrix(ref$cov.unscaled) |>
+      as.matrix(ref_summ$cov.unscaled) |>
         `dimnames<-`(NULL),
-      as.matrix(tst$cov.unscaled) |>
+      as.matrix(tst_summ$cov.unscaled) |>
         `dimnames<-`(NULL)
     )
 
     expect_equal(
-      ref$r.squared,
-      tst$r.squared
+      ref_summ$r.squared,
+      tst_summ$r.squared
     )
 
     expect_equal(
-      ref$adj.r.squared,
-      tst$adj.r.squared
+      ref_summ$adj.r.squared,
+      tst_summ$adj.r.squared
     )
 
     # Perform estimation through the irf_empirical function and extract the 
     # results of the estimation procedure.
     #
-    # Importantly, NAs are removed in a listwise fashion, in which case we do 
+    # Importantly, NAs are removed in a partial fashion, in which case we do 
     # expect differences between the `lm` outside and inside of `irf_empirical` 
     tst <- irf_empirical(
       data = data, 
@@ -421,7 +421,7 @@ test_that(
       y_lags = 2,
       x_lags = 2,
       burnin = FALSE,
-      na_action = "listwise"
+      na_action = "partial"
     )$fit |>
       suppressWarnings()
 
@@ -444,38 +444,38 @@ test_that(
     )
 
     # Test how well each aspect of the summary holds up between the two methods
-    ref <- summary(ref)
-    tst <- summary(tst)
+    ref_summ <- summary(ref)
+    tst_summ <- summary(tst)
 
     expect_failure(
       expect_equal(
-        as.matrix(ref$coefficients) |>
+        as.matrix(ref_summ$coefficients) |>
           `dimnames<-`(NULL),
-        as.matrix(tst$coefficients) |>
+        as.matrix(tst_summ$coefficients) |>
           `dimnames<-`(NULL)
       )
     )
 
     expect_failure(
       expect_equal(
-        as.matrix(ref$cov.unscaled) |>
+        as.matrix(ref_summ$cov.unscaled) |>
           `dimnames<-`(NULL),
-        as.matrix(tst$cov.unscaled) |>
+        as.matrix(tst_summ$cov.unscaled) |>
           `dimnames<-`(NULL)
       )
     )
 
     expect_failure(
       expect_equal(
-        ref$r.squared,
-        tst$r.squared
+        ref_summ$r.squared,
+        tst_summ$r.squared
       )
     )
 
     expect_failure(
       expect_equal(
-        ref$adj.r.squared,
-        tst$adj.r.squared
+        ref_summ$adj.r.squared,
+        tst_summ$adj.r.squared
       )
     )
   }
