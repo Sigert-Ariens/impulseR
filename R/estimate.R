@@ -502,7 +502,6 @@ prepare_data <- function(
 
     idx <- !is.na(rowSums(data))
     data <- data[idx, ]
-    y <- data$y[idx]
 
   # If pairwise deletion, then throw an error and tell users that we still have
   # to implement this
@@ -619,9 +618,9 @@ prepare_data <- function(
   # least one NA as matched up after prepartion. If "partial" deletion was 
   # chosen, then this is the second round of filtering where only those NAs that 
   # were imputed by lagging the variables are still deleted.
-  idx <- !is.na(rowSums(X)) & !is.na(data[, cols[1]])
+  idx <- !is.na(rowSums(X)) & !is.na(data$y)
   X <- X[idx, , drop = FALSE]
-  y <- data[idx, cols[1]]
+  y <- data$y[idx]
 
   return(list("y" = y, "X" = X))
 }
