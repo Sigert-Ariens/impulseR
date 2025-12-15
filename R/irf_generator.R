@@ -178,7 +178,9 @@ irf_generator <- function(
       cols = cols,
       intercept = intercept,
       ar_params = ar_params,
-      x_params = x_params
+      x_params = x_params,
+      innovations = innovations,
+      na_action = na_action
     )
   }
 
