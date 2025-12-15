@@ -10,7 +10,8 @@ compute_innovations(
   intercept = 0,
   ar_params = 0,
   x_params = 0,
-  innovations = NULL
+  innovations = NULL,
+  na_action = "listwise"
 )
 }
 \arguments{
@@ -37,6 +38,19 @@ up to time point \eqn{t} (e.g., those acquired through the \code{lm}.
 function). Defaults to \code{NULL}, signaling the estimated innovations are
 first calculated from the parameter estimates and observed data values
 \eqn{y} and \eqn{x}.}
+
+\item{na_action}{Character denoting how \code{NA}s should be removed from the
+data. Either \code{"listwise"}, \code{"casewise"}, \code{"pairwise"}, or
+\code{"partial"}. Listwise and casewise deletion consists of deletion of
+full rows of data when one or more of the the matched variables contains an
+\code{NA}, including the values of the lagged variables. This method may lead
+to a lot of deleted data, especially when estimating \eqn{ADL}s with many
+lags in their predictor variables. To alleviate this difficulty, we also allow
+users to specify partial deletion -- the deletion of rows when \code{NA} is
+found in the contemporaneous values of the variables, meaning you bridge the
+gap created by \code{NA}s -- or pairwise deletion -- the pairwise use of
+for the estimation of the relevant parameters whenever they are not \code{NA},
+not implemented yet. Defaults to \code{"listwise"}.}
 }
 \value{
 Numeric vector of the same length as the data containing the
