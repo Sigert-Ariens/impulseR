@@ -25,15 +25,17 @@
 #' \eqn{\beta_x}, is estimated freely. Defaults to `NA`, communicating that
 #' you don't want to estimate any covariate parameters
 #' @param na_action Character denoting how \code{NA}s should be removed from the
-#' data. Either \code{"listwise"}, \code{"listwise.partial"}, or \code{"casewise"}, 
-#' where \code{"listwise"} indicates the deletion of full rows of data when one 
-#' of the matched variables contains an \code{NA} (including lagged variables), 
-#' \code{"listwise.partial"} indicates the deletion of full rows of data when 
-#' one of the variables contains an \code{NA} but excluding the lags of variables,
-#' and \code{"casewise"} indicates casewise deletion in the estimation. 
-#' Defaults to \code{"listwise"}, which may lead to different results when running the 
-#' \code{lm} function yourself with the same specifications, as \code{lm} uses
-#' casewise deletion by default. 
+#' data. Either \code{"listwise"}, \code{"casewise"}, \code{"pairwise"}, or
+#' \code{"partial"}. Listwise and casewise deletion consists of deletion of 
+#' full rows of data when one or more of the the matched variables contains an 
+#' \code{NA}, including the values of the lagged variables. This method may lead
+#' to a lot of deleted data, especially when estimating \eqn{ADL}s with many 
+#' lags in their predictor variables. To alleviate this difficulty, we also allow 
+#' users to specify partial deletion -- the deletion of rows when \code{NA} is 
+#' found in the contemporaneous values of the variables, meaning you bridge the 
+#' gap created by \code{NA}s -- or pairwise deletion -- the pairwise use of 
+#' for the estimation of the relevant parameters whenever they are not \code{NA},
+#' not implemented yet. Defaults to \code{"listwise"}.  
 #'
 #' @return Named list containing the estimated model (`fit`), the
 #' parameter estimates (`intercept`, `x_params`, `ar_params`),
@@ -180,7 +182,8 @@ estimate <- function(
         x_params = x_params,
         innovations = results$innovations,
         na_action = na_action
-      )
+      ) |>
+        suppressWarnings()
     )
   )
 }
@@ -221,15 +224,17 @@ estimate <- function(
 #' first calculated from the parameter estimates and observed data values
 #' \eqn{y} and \eqn{x}.
 #' @param na_action Character denoting how \code{NA}s should be removed from the
-#' data. Either \code{"listwise"}, \code{"listwise.partial"}, or \code{"casewise"}, 
-#' where \code{"listwise"} indicates the deletion of full rows of data when one 
-#' of the matched variables contains an \code{NA} (including lagged variables), 
-#' \code{"listwise.partial"} indicates the deletion of full rows of data when 
-#' one of the variables contains an \code{NA} but excluding the lags of variables,
-#' and \code{"casewise"} indicates casewise deletion in the estimation. 
-#' Defaults to \code{"listwise"}, which may lead to different results when running the 
-#' \code{lm} function yourself with the same specifications, as \code{lm} uses
-#' casewise deletion by default. 
+#' data. Either \code{"listwise"}, \code{"casewise"}, \code{"pairwise"}, or
+#' \code{"partial"}. Listwise and casewise deletion consists of deletion of 
+#' full rows of data when one or more of the the matched variables contains an 
+#' \code{NA}, including the values of the lagged variables. This method may lead
+#' to a lot of deleted data, especially when estimating \eqn{ADL}s with many 
+#' lags in their predictor variables. To alleviate this difficulty, we also allow 
+#' users to specify partial deletion -- the deletion of rows when \code{NA} is 
+#' found in the contemporaneous values of the variables, meaning you bridge the 
+#' gap created by \code{NA}s -- or pairwise deletion -- the pairwise use of 
+#' for the estimation of the relevant parameters whenever they are not \code{NA},
+#' not implemented yet. Defaults to \code{"listwise"}. 
 #'
 #' @return Numeric vector of the same length as the data containing the
 #' innovations for the provided model
@@ -421,15 +426,17 @@ compute_innovations <- function(
 #' covariate. Starts at the value `0`. Defaults to `NA`, communicating
 #' that you don't want to use any lagged values of the dependent variable
 #' @param na_action Character denoting how \code{NA}s should be removed from the
-#' data. Either \code{"listwise"}, \code{"listwise.partial"}, or \code{"casewise"}, 
-#' where \code{"listwise"} indicates the deletion of full rows of data when one 
-#' of the matched variables contains an \code{NA} (including lagged variables), 
-#' \code{"listwise.partial"} indicates the deletion of full rows of data when 
-#' one of the variables contains an \code{NA} but excluding the lags of variables,
-#' and \code{"casewise"} indicates casewise deletion in the estimation. 
-#' Defaults to \code{"listwise"}, which may lead to different results when running the 
-#' \code{lm} function yourself with the same specifications, as \code{lm} uses
-#' casewise deletion by default. 
+#' data. Either \code{"listwise"}, \code{"casewise"}, \code{"pairwise"}, or
+#' \code{"partial"}. Listwise and casewise deletion consists of deletion of 
+#' full rows of data when one or more of the the matched variables contains an 
+#' \code{NA}, including the values of the lagged variables. This method may lead
+#' to a lot of deleted data, especially when estimating \eqn{ADL}s with many 
+#' lags in their predictor variables. To alleviate this difficulty, we also allow 
+#' users to specify partial deletion -- the deletion of rows when \code{NA} is 
+#' found in the contemporaneous values of the variables, meaning you bridge the 
+#' gap created by \code{NA}s -- or pairwise deletion -- the pairwise use of 
+#' for the estimation of the relevant parameters whenever they are not \code{NA},
+#' not implemented yet. Defaults to \code{"listwise"}. 
 #' 
 #' @returns Named list containing the values of the dependent variable 
 #' (\code{"y"}) and a matched numeric matrix containing the values of the 
@@ -486,19 +493,19 @@ prepare_data <- function(
   #     but not extending it to lagged NAs
   #   - Casewise deletion: Only deleting NAs case per case, which is automatically
   #     handled by lm
-  if (any(is.na(data)) & na_action == "listwise.partial") {
-    warning("NAs found in the data. Deleting them in a partial listwise fashion.")
+  if (any(is.na(data)) & na_action %in% c("partial")) {
+    warning("NAs found in the data. Deleting them in a partial fashion.")
 
     idx <- !is.na(rowSums(data))
     data <- data[idx, ]
     y <- data$y[idx]
 
-  } else if(any(is.na(data)) & na_action == "casewise") {
-    warning("NAs found in the data. Deleting them in a casewise fashion.")
+  } else if(any(is.na(data)) & na_action == "pairwise") {
+    error("NAs found in the data. Wanting to delete them in a pairwise fashion, but has not been implemented yet.")
 
     y <- data$y
 
-  } else if(any(is.na(data)) & !(na_action %in% c("listwise", "listwise.partial", "casewise"))) {
+  } else if(any(is.na(data)) & !(na_action %in% c("listwise", "partial", "casewise", "pairwise"))) {
     stop(
       paste(
         "NAs found in the data, but proposed method is not known.", 
@@ -593,12 +600,21 @@ prepare_data <- function(
       `colnames<-`(cols2)
   }
 
-  if(any(is.na(X)) & na_action == "listwise") {
-    warning("NAs found in the data. Deleting them in a listwise fashion")
+  # Delete NAs in the desired way. If "listwise" or "casewise", then we delete 
+  # all rows in X and y that contain at least one NA. If "partial" deletion, then 
+  # we still need to delete the NAs that are imputed through lagging the 
+  # variables
+  if(any(is.na(X)) & na_action %in% c("listwise", "casewise")) {
+    warning("NAs found in the data. Deleting them in a listwise/casewise fashion")
 
-    idx <- !is.na(rowSums(X))
+    idx <- !is.na(rowSums(X)) & !is.na(data[, cols[1]])
     X <- X[idx, ]
     y <- data[idx, cols[1]]
+
+  } else if(any(is.na(X)) & na_action %in% c("partial")) {
+    idx <- !is.na(rowSums(X)) & !is.na(y)
+    X <- X[idx, ]
+    y <- y[idx]
   }
 
   return(list("y" = y, "X" = X))

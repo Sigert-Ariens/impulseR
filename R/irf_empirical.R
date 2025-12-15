@@ -36,15 +36,17 @@
 #' of the confidence interval. Ignored if \code{confidence_interval = FALSE}. 
 #' Defaults to \code{0.05}, leading to a 95% bootstrapped confidence interval.
 #' @param na_action Character denoting how \code{NA}s should be removed from the
-#' data. Either \code{"listwise"}, \code{"listwise.partial"}, or \code{"casewise"}, 
-#' where \code{"listwise"} indicates the deletion of full rows of data when one 
-#' of the matched variables contains an \code{NA} (including lagged variables), 
-#' \code{"listwise.partial"} indicates the deletion of full rows of data when 
-#' one of the variables contains an \code{NA} but excluding the lags of variables,
-#' and \code{"casewise"} indicates casewise deletion in the estimation. 
-#' Defaults to \code{"listwise"}, which may lead to different results when running the 
-#' \code{lm} function yourself with the same specifications, as \code{lm} uses
-#' casewise deletion by default. 
+#' data. Either \code{"listwise"}, \code{"casewise"}, \code{"pairwise"}, or
+#' \code{"partial"}. Listwise and casewise deletion consists of deletion of 
+#' full rows of data when one or more of the the matched variables contains an 
+#' \code{NA}, including the values of the lagged variables. This method may lead
+#' to a lot of deleted data, especially when estimating \eqn{ADL}s with many 
+#' lags in their predictor variables. To alleviate this difficulty, we also allow 
+#' users to specify partial deletion -- the deletion of rows when \code{NA} is 
+#' found in the contemporaneous values of the variables, meaning you bridge the 
+#' gap created by \code{NA}s -- or pairwise deletion -- the pairwise use of 
+#' for the estimation of the relevant parameters whenever they are not \code{NA},
+#' not implemented yet. Defaults to \code{"listwise"}. 
 #' @param ... Additional arguments provided to \code{\link[impulseR]{bootstrap}},
 #' defining the procedure used to derive the confidence intervals
 #'
