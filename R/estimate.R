@@ -493,6 +493,10 @@ prepare_data <- function(
   #     but not extending it to lagged NAs
   #   - Casewise deletion: Only deleting NAs case per case, which is automatically
   #     handled by lm
+  #
+  # If partial deletion, we already need to delete the NAs in the data to 
+  # bridge any gaps and connect datapoints that follow before and after the 
+  # gap
   if (any(is.na(data)) & na_action %in% c("partial")) {
     warning("NAs found in the data. Deleting them in a partial fashion.")
 
@@ -500,16 +504,24 @@ prepare_data <- function(
     data <- data[idx, ]
     y <- data$y[idx]
 
+  # If pairwise deletion, then throw an error and tell users that we still have
+  # to implement this
   } else if(any(is.na(data)) & na_action == "pairwise") {
-    error("NAs found in the data. Wanting to delete them in a pairwise fashion, but has not been implemented yet.")
+    stop("NAs found in the data. Wanting to delete them in a pairwise fashion, but has not been implemented yet.")
 
-    y <- data$y
+  # If listwise/casewise deletion, then throw a warning but do not delete the 
+  # NAs yet. Only do so after making the relevant matrix of values, ensuring we 
+  # delete all cases that are paired with an NA value
+  } else if(any(is.na(data)) & na_action %in% c("listwise", "casewise")) {
+    warning("NAs found in the data. Deleting them in a listwise/casewise fashion")
 
+  # If the user asked something else, throw an error and ensure that they know 
+  # the options we have for handling NAs
   } else if(any(is.na(data)) & !(na_action %in% c("listwise", "partial", "casewise", "pairwise"))) {
     stop(
       paste(
         "NAs found in the data, but proposed method is not known.", 
-        "Please specify 'listwise' or 'casewise' for the `na_action` argument."
+        "Please specify 'listwise', 'casewise', 'partial', or 'pairwise' for the `na_action` argument."
       )
     )
   }
@@ -600,22 +612,16 @@ prepare_data <- function(
       `colnames<-`(cols2)
   }
 
-  # Delete NAs in the desired way. If "listwise" or "casewise", then we delete 
-  # all rows in X and y that contain at least one NA. If "partial" deletion, then 
-  # we still need to delete the NAs that are imputed through lagging the 
-  # variables
-  if(any(is.na(X)) & na_action %in% c("listwise", "casewise")) {
-    warning("NAs found in the data. Deleting them in a listwise/casewise fashion")
-
-    idx <- !is.na(rowSums(X)) & !is.na(data[, cols[1]])
-    X <- X[idx, ]
-    y <- data[idx, cols[1]]
-
-  } else if(any(is.na(X)) & na_action %in% c("partial")) {
-    idx <- !is.na(rowSums(X)) & !is.na(y)
-    X <- X[idx, ]
-    y <- y[idx]
-  }
+  # Delete the remaining NAs in the dataset. 
+  #
+  # If "listwise" or "casewise" deletion was chosen, this is the first round of
+  # filtering these data get, which leads to all rows in X and y that contain at 
+  # least one NA as matched up after prepartion. If "partial" deletion was 
+  # chosen, then this is the second round of filtering where only those NAs that 
+  # were imputed by lagging the variables are still deleted.
+  idx <- !is.na(rowSums(X)) & !is.na(data[, cols[1]])
+  X <- X[idx, , drop = FALSE]
+  y <- data[idx, cols[1]]
 
   return(list("y" = y, "X" = X))
 }
