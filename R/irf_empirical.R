@@ -21,6 +21,15 @@
 #' \eqn{q}, to estimate. Should starts at the value `0`, implying that only
 #' the contemporaneous effect is taken into account. Defaults to `NA`,
 #' communicating that you don't want to estimate any covariate parameters.
+#' @param x Numeric vector denoting the values of covariate at each time point.
+#' Depending on the input vectors supplied, different system responses will be
+#' returned. Defaults to `NULL`, in which case the observed covariate values will
+#' be used to decompose the observed data in its composite system responses.
+#' @param innovations Numeric vector denoting the values of the innovations at
+#' each time point. Depending on the input vectors supplied, different system
+#' responses will be returned. Defaults to `NULL`, in which case the derived 
+#' residuals of the observed data will be used to decompose the observed data in 
+#' its composite system responses.
 #' @param burnin Logical specifying if the part of the system response due to
 #' the intercept should be burned in analytically. Defaults to `FALSE`, as
 #' expected analytically. If set to `TRUE`, there will usually be
@@ -47,8 +56,9 @@
 #' gap created by \code{NA}s -- or pairwise deletion -- the pairwise use of 
 #' for the estimation of the relevant parameters whenever they are not \code{NA},
 #' not implemented yet. Defaults to \code{"listwise"}. 
-#' @param ... Additional arguments provided to \code{\link[impulseR]{bootstrap}},
-#' defining the procedure used to derive the confidence intervals
+#' @param ... Additional arguments provided to 
+#' \code{\link[impulseR]{bootstrap}}, defining the procedure used to derive the 
+#' confidence intervals
 #'
 #' @return List containing all information provided by
 #' [irf_generator()] as well as the fitted model (under `"fit"`). Note that if
@@ -96,6 +106,8 @@ irf_empirical <- function(
   y_lags = NA,
   x_lags = NA,
   burnin = FALSE,
+  x = NULL,
+  innovations = NULL,
   confidence_interval = FALSE,
   alpha = 0.05,
   na_action = "listwise",
@@ -111,14 +123,29 @@ irf_empirical <- function(
     na_action = na_action
   )
 
+  # Define the covariate effects and innovations to use. We need to create a 
+  # new variable here to ensure that the bootstrap uses the correct input 
+  # (a NULL when the innovations are not defined, the actual innovations when 
+  # they are defined, and the same for the covariates)
+  if(is.null(innovations)) {
+    innovation_gen <- params$innovations
+  } else {
+    innovation_gen <- innovations
+  }
+  if(is.null(x)) {
+    x_gen <- params$x
+  } else {
+    x_gen <- x
+  }
+
   # Call the irf_generator function  on the observed covariate values and
   # estimated innovations:
   result <- irf_generator(
     intercept = params$intercept,
     x_params = params$x_params,
     ar_params = params$ar_params,
-    x = params$x,
-    innovations = params$innovations,
+    x = x_gen,
+    innovations = innovation_gen,
     burnin = burnin
   )
   result[["fit"]] <- params$fit
@@ -147,9 +174,12 @@ irf_empirical <- function(
       covariances,
       y_lags = y_lags,
       x_lags = x_lags,
-      x = params$x, 
-      innovations = params$innovations,
+      x = x,
+      innovations = innovations,
+      data = data, 
+      cols = cols,
       burnin = burnin,
+      na_action = na_action,
       ...
     )
 
