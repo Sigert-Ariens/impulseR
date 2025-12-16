@@ -295,7 +295,8 @@ bootstrap <- function(
         innovations = innovations,
         na_action = na_action,
         data = data, 
-        cols = cols
+        cols = cols,
+        burnin = burnin
       ) |>
         suppressWarnings()
       responses <- responses$irf
@@ -306,7 +307,6 @@ bootstrap <- function(
     }
   )
   samples <- do.call("rbind", samples)
-  browser()
 
   # Return the parameters and the bootstrapped samples
   return(
