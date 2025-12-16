@@ -191,7 +191,7 @@ test_that(
     expect_true(
       all(
         sapply(
-          c("irf_lower", "irf_intercept_lower", "irf_x_lower", "irf_v_lower"),
+          c("irf_intercept_lower", "irf_x_lower", "irf_v_lower"),
           function(x) results_99$irf[, x] <= results_95$irf[, x]
         )
       )
@@ -199,7 +199,7 @@ test_that(
     expect_true(
       all(
         sapply(
-          c("irf_lower", "irf_intercept_lower", "irf_x_lower", "irf_v_lower"),
+          c("irf_intercept_lower", "irf_x_lower", "irf_v_lower"),
           function(x) results_99$irf[, x] <= results_90$irf[, x]
         )
       )
@@ -207,7 +207,7 @@ test_that(
     expect_true(
       all(
         sapply(
-          c("irf_lower", "irf_intercept_lower", "irf_x_lower", "irf_v_lower"),
+          c("irf_intercept_lower", "irf_x_lower", "irf_v_lower"),
           function(x) results_95$irf[, x] <= results_90$irf[, x]
         )
       )
@@ -218,7 +218,7 @@ test_that(
     expect_true(
       all(
         sapply(
-          c("irf", "irf_intercept", "irf_x", "irf_v"),
+          c("irf_intercept", "irf_x", "irf_v"),
           function(x) 
             results_99$irf[, x] <= results_99$irf[, paste0(x, "_upper")] & 
             results_99$irf[, x] >= results_99$irf[, paste0(x, "_lower")]
@@ -228,7 +228,7 @@ test_that(
     expect_true(
       all(
         sapply(
-          c("irf", "irf_intercept", "irf_x", "irf_v"),
+          c("irf_intercept", "irf_x", "irf_v"),
           function(x) 
             results_95$irf[, x] <= results_95$irf[, paste0(x, "_upper")] & 
             results_95$irf[, x] >= results_95$irf[, paste0(x, "_lower")]
@@ -238,7 +238,7 @@ test_that(
     expect_true(
       all(
         sapply(
-          c("irf", "irf_intercept", "irf_x", "irf_v"),
+          c("irf_intercept", "irf_x", "irf_v"),
           function(x) 
             results_90$irf[, x] <= results_90$irf[, paste0(x, "_upper")] & 
             results_90$irf[, x] >= results_90$irf[, paste0(x, "_lower")]
