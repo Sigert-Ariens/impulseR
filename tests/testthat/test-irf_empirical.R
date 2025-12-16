@@ -213,6 +213,31 @@ test_that(
       )
     )
 
+    expect_true(
+      all(
+        sapply(
+          c("irf_intercept_upper", "irf_x_upper", "irf_v_upper"),
+          function(x) results_99$irf[, x] >= results_95$irf[, x]
+        )
+      )
+    )
+    expect_true(
+      all(
+        sapply(
+          c("irf_intercept_upper", "irf_x_upper", "irf_v_upper"),
+          function(x) results_99$irf[, x] >= results_90$irf[, x]
+        )
+      )
+    )
+    expect_true(
+      all(
+        sapply(
+          c("irf_intercept_upper", "irf_x_upper", "irf_v_upper"),
+          function(x) results_95$irf[, x] >= results_90$irf[, x]
+        )
+      )
+    )
+
     # Test: Check whether the confidence intervals contain the actual system 
     # responses
     expect_true(
@@ -329,6 +354,31 @@ test_that(
         sapply(
           c("irf_lower", "irf_intercept_lower", "irf_x_lower", "irf_v_lower"),
           function(x) results_95$irf[, x] <= results_90$irf[, x]
+        )
+      )
+    )
+
+    expect_true(
+      all(
+        sapply(
+          c("irf_upper", "irf_intercept_upper", "irf_x_upper", "irf_v_upper"),
+          function(x) results_99$irf[, x] >= results_95$irf[, x]
+        )
+      )
+    )
+    expect_true(
+      all(
+        sapply(
+          c("irf_upper", "irf_intercept_upper", "irf_x_upper", "irf_v_upper"),
+          function(x) results_99$irf[, x] >= results_90$irf[, x]
+        )
+      )
+    )
+    expect_true(
+      all(
+        sapply(
+          c("irf_upper", "irf_intercept_upper", "irf_x_upper", "irf_v_upper"),
+          function(x) results_95$irf[, x] >= results_90$irf[, x]
         )
       )
     )
