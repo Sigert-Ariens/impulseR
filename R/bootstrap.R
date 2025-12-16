@@ -27,7 +27,7 @@
 #' communicating that no lags in \eqn{x} are included.
 #' @param N Integer denoting the number of samples to generate. Defaults to 
 #' \code{1000}
-#' @param x,innovations,data,burning,cols,na_action Additional arguments provided \
+#' @param x,innovations,data,burnin,cols,na_action Additional arguments provided
 #' to the \code{link[impulseR]{irf_generator}} function.
 #' 
 #' @return Named list containing the parameters that were used to create the 

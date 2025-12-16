@@ -12,7 +12,8 @@ irf_generator(
   innovations = NULL,
   data = NULL,
   cols = c("y", "x"),
-  burnin = TRUE
+  burnin = TRUE,
+  na_action = "listwise"
 )
 }
 \arguments{
@@ -51,6 +52,12 @@ the intercept should be burned in analytically. Defaults to \code{TRUE}, the
 system responses responses will be displayed relative to the hypothetical
 equilibrium state of the system. If set to \code{FALSE}, initial value
 dependent behavior will be present.}
+
+\item{na_action}{Character denoting how \code{NA}s should be removed from the
+data. Either \code{"listwise"}, \code{"casewise"}, \code{"pairwise"}, or
+\code{"partial"} (see \code{\link[impulseR]{estimate}} for more information).
+Ignored whenever innovations do not need to be computed. Defaults to
+\code{"listwise"}.}
 }
 \value{
 List containing the parameters that were used for the generation of

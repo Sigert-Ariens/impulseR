@@ -12,7 +12,11 @@ bootstrap(
   parameter_names = NULL,
   N = 1000,
   x = NULL,
-  ...
+  innovations = NULL,
+  na_action = "listwise",
+  data = NULL,
+  cols = c("y", "x"),
+  burnin = FALSE
 )
 }
 \arguments{
@@ -43,8 +47,8 @@ care off by \code{y_lags} and \code{x_lags} in that order.}
 \item{N}{Integer denoting the number of samples to generate. Defaults to
 \code{1000}}
 
-\item{x, ...}{Additional arguments provided to the
-\code{link[impulseR]{irf_generator}} function.}
+\item{x, innovations, data, burnin, cols, na_action}{Additional arguments provided
+to the \code{link[impulseR]{irf_generator}} function.}
 }
 \value{
 Named list containing the parameters that were used to create the

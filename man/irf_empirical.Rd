@@ -10,6 +10,8 @@ irf_empirical(
   y_lags = NA,
   x_lags = NA,
   burnin = FALSE,
+  x = NULL,
+  innovations = NULL,
   confidence_interval = FALSE,
   alpha = 0.05,
   na_action = "listwise",
@@ -40,6 +42,17 @@ discrepancies between the model-implied total response \eqn{y_t}
 and the observed values of the outcome variable \eqn{y_t^{obs}} at the start
 of the time series.}
 
+\item{x}{Numeric vector denoting the values of covariate at each time point.
+Depending on the input vectors supplied, different system responses will be
+returned. Defaults to \code{NULL}, in which case the observed covariate values will
+be used to decompose the observed data in its composite system responses.}
+
+\item{innovations}{Numeric vector denoting the values of the innovations at
+each time point. Depending on the input vectors supplied, different system
+responses will be returned. Defaults to \code{NULL}, in which case the derived
+residuals of the observed data will be used to decompose the observed data in
+its composite system responses.}
+
 \item{confidence_interval}{Logical denoting whether to include the lower and
 upper bound of the \eqn{100 (1 - \alpha)}\% confidence interval in the
 generated system responses. Confidence intervals will be computed using a
@@ -63,8 +76,9 @@ gap created by \code{NA}s -- or pairwise deletion -- the pairwise use of
 for the estimation of the relevant parameters whenever they are not \code{NA},
 not implemented yet. Defaults to \code{"listwise"}.}
 
-\item{...}{Additional arguments provided to \code{\link[impulseR]{bootstrap}},
-defining the procedure used to derive the confidence intervals}
+\item{...}{Additional arguments provided to
+\code{\link[impulseR]{bootstrap}}, defining the procedure used to derive the
+confidence intervals}
 }
 \value{
 List containing all information provided by
