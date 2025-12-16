@@ -628,7 +628,26 @@ test_that(
       x_lags = 1,
       confidence_interval = TRUE,
       x = impulse(10),
-      innovations = impulse(10)
+      innovations = impulse(10),
+      burnin = FALSE
+    )$irf
+
+    # Check whether there is no variation around the observed data: The observed
+    # irf is the one thing we should be sure of
+    expect_true(mean(abs(results$irf_lower - results$irf_upper)) > 0)
+    expect_true(mean(abs(results$irf - results$irf_upper)) > 0)
+    expect_true(mean(abs(results$irf_lower - results$irf)) > 0)
+
+    # Use irf_empirical with confidence intervals
+    results <- irf_empirical(
+      data, 
+      cols = c("irf", "x"),
+      y_lags = 1, 
+      x_lags = 1,
+      confidence_interval = TRUE,
+      x = impulse(10),
+      innovations = impulse(10),
+      burnin = TRUE
     )$irf
 
     # Check whether there is no variation around the observed data: The observed
