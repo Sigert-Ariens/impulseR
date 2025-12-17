@@ -4,7 +4,13 @@
 \alias{estimate}
 \title{Estimate the parameters of an \eqn{ADL(p, q)} model}
 \usage{
-estimate(data, cols = c("y", "x"), y_lags = NULL, x_lags = NULL)
+estimate(
+  data,
+  cols = c("y", "x"),
+  y_lags = NULL,
+  x_lags = NULL,
+  na_action = "listwise"
+)
 }
 \arguments{
 \item{data}{Dataframe containing the variables of interest}
@@ -21,6 +27,19 @@ Starts at the value \code{1}, allowing for an AR(1) structure. Defaults to
 at the value \code{0}, implying that only the contemporaneous effect,
 \eqn{\beta_x}, is estimated freely. Defaults to \code{NA}, communicating that
 you don't want to estimate any covariate parameters}
+
+\item{na_action}{Character denoting how \code{NA}s should be removed from the
+data. Either \code{"listwise"}, \code{"casewise"}, \code{"pairwise"}, or
+\code{"partial"}. Listwise and casewise deletion consists of deletion of
+full rows of data when one or more of the the matched variables contains an
+\code{NA}, including the values of the lagged variables. This method may lead
+to a lot of deleted data, especially when estimating \eqn{ADL}s with many
+lags in their predictor variables. To alleviate this difficulty, we also allow
+users to specify partial deletion -- the deletion of rows when \code{NA} is
+found in the contemporaneous values of the variables, meaning you bridge the
+gap created by \code{NA}s -- or pairwise deletion -- the pairwise use of
+for the estimation of the relevant parameters whenever they are not \code{NA},
+not implemented yet. Defaults to \code{"listwise"}.}
 }
 \value{
 Named list containing the estimated model (\code{fit}), the

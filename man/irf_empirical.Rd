@@ -9,7 +9,13 @@ irf_empirical(
   cols = c("y", "x"),
   y_lags = NA,
   x_lags = NA,
-  burnin = FALSE
+  burnin = FALSE,
+  x = NULL,
+  innovations = NULL,
+  confidence_interval = FALSE,
+  alpha = 0.05,
+  na_action = "listwise",
+  ...
 )
 }
 \arguments{
@@ -35,10 +41,51 @@ expected analytically. If set to \code{TRUE}, there will usually be
 discrepancies between the model-implied total response \eqn{y_t}
 and the observed values of the outcome variable \eqn{y_t^{obs}} at the start
 of the time series.}
+
+\item{x}{Numeric vector denoting the values of covariate at each time point.
+Depending on the input vectors supplied, different system responses will be
+returned. Defaults to \code{NULL}, in which case the observed covariate values will
+be used to decompose the observed data in its composite system responses.}
+
+\item{innovations}{Numeric vector denoting the values of the innovations at
+each time point. Depending on the input vectors supplied, different system
+responses will be returned. Defaults to \code{NULL}, in which case the derived
+residuals of the observed data will be used to decompose the observed data in
+its composite system responses.}
+
+\item{confidence_interval}{Logical denoting whether to include the lower and
+upper bound of the \eqn{100 (1 - \alpha)}\% confidence interval in the
+generated system responses. Confidence intervals will be computed using a
+a bootstrap based on the estimated parameters and their standard errors.
+Defaults to \code{FALSE}.}
+
+\item{alpha}{Numeric between \code{0} and \code{1} denoting the specificity
+of the confidence interval. Ignored if \code{confidence_interval = FALSE}.
+Defaults to \code{0.05}, leading to a 95\% bootstrapped confidence interval.}
+
+\item{na_action}{Character denoting how \code{NA}s should be removed from the
+data. Either \code{"listwise"}, \code{"casewise"}, \code{"pairwise"}, or
+\code{"partial"}. Listwise and casewise deletion consists of deletion of
+full rows of data when one or more of the the matched variables contains an
+\code{NA}, including the values of the lagged variables. This method may lead
+to a lot of deleted data, especially when estimating \eqn{ADL}s with many
+lags in their predictor variables. To alleviate this difficulty, we also allow
+users to specify partial deletion -- the deletion of rows when \code{NA} is
+found in the contemporaneous values of the variables, meaning you bridge the
+gap created by \code{NA}s -- or pairwise deletion -- the pairwise use of
+for the estimation of the relevant parameters whenever they are not \code{NA},
+not implemented yet. Defaults to \code{"listwise"}.}
+
+\item{...}{Additional arguments provided to
+\code{\link[impulseR]{bootstrap}}, defining the procedure used to derive the
+confidence intervals}
 }
 \value{
 List containing all information provided by
-\code{\link[=irf_generator]{irf_generator()}} as well as the fitted model (under \code{"fit"}).
+\code{\link[=irf_generator]{irf_generator()}} as well as the fitted model (under \code{"fit"}). Note that if
+confidence intervals are computed, the data.frame provided under \code{"irf"} is
+extended with these confidence intervals for each component, denoted by
+\code{"_lower"} and \code{"_upper"}.
 }
 \description{
 This function can be used to construct empirical trajectory plots. First, an
@@ -69,6 +116,18 @@ result <- irf_empirical(
   cols = c("dependent", "independent"),
   y_lags = 2,
   x_lags = 2
+)
+
+# Fit an ADL(2, 2) and approximate the 99\% confidence interval around the 
+# cumulative responses through a bootstrap with 1000 samples
+result <- irf_empirical(
+  data = data,
+  cols = c("dependent", "independent"),
+  y_lags = 2,
+  x_lags = 2,
+  confidence_interval = TRUE,
+  alpha = 0.01,
+  N = 1000
 )
 
 }

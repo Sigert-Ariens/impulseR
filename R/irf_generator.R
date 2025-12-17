@@ -51,6 +51,11 @@
 #' system responses responses will be displayed relative to the hypothetical
 #' equilibrium state of the system. If set to `FALSE`, initial value
 #' dependent behavior will be present.
+#' @param na_action Character denoting how \code{NA}s should be removed from the
+#' data. Either \code{"listwise"}, \code{"casewise"}, \code{"pairwise"}, or
+#' \code{"partial"} (see \code{\link[impulseR]{estimate}} for more information).
+#' Ignored whenever innovations do not need to be computed. Defaults to 
+#' \code{"listwise"}.
 #'
 #' @returns List containing the parameters that were used for the generation of
 #' the system responses (under `"intercept"`, `"x_params"`, and
@@ -149,7 +154,8 @@ irf_generator <- function(
   innovations = NULL,
   data = NULL,
   cols = c("y", "x"),
-  burnin = TRUE
+  burnin = TRUE,
+  na_action = "listwise"
 ) {
   # Check whether only a single intercept is provided.
   if (length(intercept) > 1) {
@@ -159,7 +165,7 @@ irf_generator <- function(
 
   # Check whether the data are specified. If so, then we will recompute x and
   # the innovations
-  if (!is.null(data)) {
+  if (!is.null(data) & is.null(innovations) & is.null(x)) {
     # Check whether the columns can be found in the data.frame
     if (!all(cols %in% colnames(data))) {
       stop("Columns specified in `cols` cannot be found in the supplied dataframe.")
@@ -172,7 +178,9 @@ irf_generator <- function(
       cols = cols,
       intercept = intercept,
       ar_params = ar_params,
-      x_params = x_params
+      x_params = x_params,
+      innovations = innovations,
+      na_action = na_action
     )
   }
 

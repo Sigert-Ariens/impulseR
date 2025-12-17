@@ -66,6 +66,10 @@
 #' the impulses to a given time on the x-axis. Defaults to `1`.
 #' @param impulse.alpha Numeric denoting the opacity of the impulses (point and
 #' line). Defaults to `0.95`.
+#' @param confidence_interval Logical denoting whether to plot the confidence 
+#' interval when available in the \code{data}. Defaults to \code{TRUE}.
+#' @param interval.alpha Numeric between `0` and `1` denoting the opacity of the
+#' confidence interval. Defaults to `0.20`.
 #' @param legend Logical denoting whether a legend should be printed. Defaults
 #' to `TRUE`,
 #' @param legend.title Character denoting the title of the legend. Ignored if
@@ -136,6 +140,8 @@ irf_plot <- function(
   legend.title = NULL,
   legend.position = "right",
   background.fill = "white",
+  confidence_interval = TRUE,
+  interval.alpha = 0.20,
   breaks = 10
 ) {
   # Determine which IRFs to plot, based on the `cols` argument. If NULL, then
@@ -147,18 +153,55 @@ irf_plot <- function(
   # Convert dataframe to long format, making the call to ggplot2 somewhat
   # easier. Keep a copy of the original to ensure correct labeling of the
   # system responses
-  original <- data
-  data <- tidyr::pivot_longer(
+  data_long <- tidyr::pivot_longer(
     data,
     cols = tidyr::all_of(cols)
-  )
+  ) |>
+    dplyr::select(time, x, innovations, name, value)
+
+  # If confidence intervals should be plotted as well (and are available), use 
+  # a similar trick on the confidence intervals and merge them with the pivotted
+  # dataset
+  if(confidence_interval & any(grepl("lower", colnames(data), fixed = TRUE))) {
+    lower <- tidyr::pivot_longer(
+      data, 
+      cols = tidyr::all_of(paste(cols, "_lower", sep = ""))
+    ) |>
+      dplyr::mutate(name = gsub("_lower", "", name, fixed = TRUE)) |>
+      dplyr::rename(lower = value) |>
+      dplyr::select(time, x, innovations, name, lower)
+
+    upper <- tidyr::pivot_longer(
+      data, 
+      cols = tidyr::all_of(paste(cols, "_upper", sep = ""))
+    ) |>
+      dplyr::mutate(name = gsub("_upper", "", name, fixed = TRUE)) |>
+      dplyr::rename(upper = value) |>
+      dplyr::select(time, x, innovations, name, upper)
+
+    data_long <- data_long |>
+      dplyr::full_join(
+        lower, 
+        by = c("time", "x", "innovations", "name")
+      ) |>
+      dplyr::full_join(
+        upper, 
+        by = c("time", "x", "innovations", "name")
+      )
+  } else {
+    # If no confidence interval is specified or recoverable, add lower and upper
+    # columns to the pivotted data anyway. Removes the need for an additional 
+    # if-statement along the way
+    data_long$lower <- data_long$value
+    data_long$upper <- data_long$value
+  }
 
   # Filter out all of the IRFs that you don't want to plot.
   #
   # TO DO: Sigert has an additional filter here looking for whether X or Eps
   # was filled with values. If not, he filtered them out as well. All these
   # filters commented out for now.
-  data <- data[data$name %in% cols, ]
+  data_long <- data_long[data_long$name %in% cols, ]
 
   # if(any(data$IRFintercept != 0)){
   #   datalong <- datalong
@@ -219,7 +262,7 @@ irf_plot <- function(
 
   if (is.null(xlabel)) {
     xlabel <- ifelse(
-      all(original$x[-1] == 0) & all(original$innovations[-1] == 0),
+      all(data$x[-1] == 0) & all(data$innovations[-1] == 0),
       "s (time step since input)",
       "t (time)"
     )
@@ -228,9 +271,9 @@ irf_plot <- function(
   # Legend labels
   if (is.null(x.label)) {
     x.label <- ifelse(
-      all(original$x[-1] == 0) & all(original$innovations[-1] == 0),
+      all(data$x[-1] == 0) & all(data$innovations[-1] == 0),
       ifelse(
-        original$x[1] == 1,
+        data$x[1] == 1,
         "h[x](s)",
         "h[x](s)*x[0]"
       ),
@@ -240,9 +283,9 @@ irf_plot <- function(
 
   if (is.null(v.label)) {
     v.label <- ifelse(
-      all(original$x[-1] == 0) & all(original$innovations[-1] == 0),
+      all(data$x[-1] == 0) & all(data$innovations[-1] == 0),
       ifelse(
-        original$innovations[1] == 1,
+        data$innovations[1] == 1,
         "h[v](s)",
         "h[v](s)*v[0]"
       ),
@@ -257,11 +300,11 @@ irf_plot <- function(
     "irf" = parse(text = irf.label)
   )
 
-  impulses <- data[, c("time", "x", "innovations")]
+  impulses <- data_long[, c("time", "x", "innovations")]
 
   # Create the actual plot.
-  data$name <- factor(
-    data$name,
+  data_long$name <- factor(
+    data_long$name,
     levels = c(
       "irf_intercept",
       "irf_x",
@@ -273,16 +316,23 @@ irf_plot <- function(
   v_impulse <- impulses[impulses$innovations != 0, ]
 
   plt <- ggplot2::ggplot(
-    data = data,
+    data = data_long,
     ggplot2::aes(
       x = .data$time,
       y = .data$value,
+      ymin = .data$lower,
+      ymax = .data$upper,
       color = .data$name,
+      fill = .data$name,
       linetype = .data$name,
       linewidth = .data$name
     )
   ) +
     # Content
+    ggplot2::geom_ribbon(
+      alpha = interval.alpha,
+      color = NA
+    ) +
     ggplot2::geom_line() +
     ggplot2::annotate(
       "segment",
@@ -333,6 +383,10 @@ irf_plot <- function(
       values = colors,
       labels = labels
     ) +
+    ggplot2::scale_fill_manual(
+      values = colors,
+      labels = labels
+    ) +
     ggplot2::scale_linetype_manual(
       values = linetypes
     ) +
@@ -378,7 +432,8 @@ irf_plot <- function(
     ggplot2::guides(
       color = ggplot2::guide_legend(title = legend.title),
       linetype = "none",
-      linewidth = "none"
+      linewidth = "none",
+      fill = "none"
     )
   return(plt)
 }

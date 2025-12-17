@@ -46,8 +46,10 @@ Depends: R (>= 4.1.0)
 Imports: 
     ggplot2,
     tidyr,
+    dplyr,
     stats,
-    rlang
+    rlang,
+    MASS
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Collate:
@@ -56,6 +58,7 @@ Collate:
     'irf_generator.R'
     'irf_empirical.R'
     'impulse.R'
+    'bootstrap.R'
     'irf_plot.R'
 Suggests: 
     fs,

@@ -45,6 +45,8 @@ irf_plot(
   legend.title = NULL,
   legend.position = "right",
   background.fill = "white",
+  confidence_interval = TRUE,
+  interval.alpha = 0.2,
   breaks = 10
 )
 }
@@ -144,6 +146,12 @@ if \code{legend = FALSE}. Defaults to \code{"right"}.}
 
 \item{background.fill}{Character denoting the color of the background of the
 plot. Defaults to \code{"white"}.}
+
+\item{confidence_interval}{Logical denoting whether to plot the confidence
+interval when available in the \code{data}. Defaults to \code{TRUE}.}
+
+\item{interval.alpha}{Numeric between \code{0} and \code{1} denoting the opacity of the
+confidence interval. Defaults to \code{0.20}.}
 
 \item{breaks}{Integer denoting the number of breaks to allow in the time-axis.
 Defaults to \code{10}.}

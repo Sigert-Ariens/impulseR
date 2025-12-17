@@ -4,7 +4,13 @@
 \alias{prepare_data}
 \title{Prepare data for analysis}
 \usage{
-prepare_data(data, cols = c("y", "x"), x_lags = NULL, y_lags = NULL)
+prepare_data(
+  data,
+  cols = c("y", "x"),
+  x_lags = NULL,
+  y_lags = NULL,
+  na_action = "listwise"
+)
 }
 \arguments{
 \item{data}{Dataframe containing the variables of interest}
@@ -21,10 +27,25 @@ that you don't want to use any lagged values of the dependent variable}
 dependent variable. Starts at the value \code{1}. Defaults to \code{NA},
 communicating that you don't want to use any lagged values of the dependent
 variable}
+
+\item{na_action}{Character denoting how \code{NA}s should be removed from the
+data. Either \code{"listwise"}, \code{"casewise"}, \code{"pairwise"}, or
+\code{"partial"}. Listwise and casewise deletion consists of deletion of
+full rows of data when one or more of the the matched variables contains an
+\code{NA}, including the values of the lagged variables. This method may lead
+to a lot of deleted data, especially when estimating \eqn{ADL}s with many
+lags in their predictor variables. To alleviate this difficulty, we also allow
+users to specify partial deletion -- the deletion of rows when \code{NA} is
+found in the contemporaneous values of the variables, meaning you bridge the
+gap created by \code{NA}s -- or pairwise deletion -- the pairwise use of
+for the estimation of the relevant parameters whenever they are not \code{NA},
+not implemented yet. Defaults to \code{"listwise"}.}
 }
 \value{
-Numeric matrix containing the values of the independent and dependent
-variables that are used as predictors in the estimation routine.
+Named list containing the values of the dependent variable
+(\code{"y"}) and a matched numeric matrix containing the values of the
+independent and dependent variables that are used as predictors in the
+estimation routine.
 }
 \description{
 Prepare data for analysis

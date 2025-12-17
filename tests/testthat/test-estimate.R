@@ -214,14 +214,14 @@ test_that(
     data$y[1:3] <- NA
     data$x[4:6] <- NA
 
-    # NAs in data in `estimate`. Also testing output
-    expect_warning(estimate(data))
+    # NAs in data in `estimate`. Also testing output: By default no warning here
+    expect_no_warning(estimate(data))
 
-    tst <- suppressWarnings(estimate(data))
-    expect_equal(tst$x, data$x[-c(1:6)])
+    tst <- estimate(data)
+    expect_equal(tst$x, data$x)
     expect_equal(
       tst$innovations + tst$intercept,
-      data$y[-c(1:6)]
+      data$y
     )
 
     # NAs in data in `compute_innovations`. Also testing output
@@ -240,7 +240,7 @@ test_that(
         x_params = c(2, 2)
       )
     )
-    expect_equal(length(tst), 100 - 6)
+    expect_equal(length(tst), 100)
 
     # NAs in data in `prepare_data`. Also testing output
     expect_warning(
@@ -258,7 +258,9 @@ test_that(
         y_lags = 2
       )
     )
-    expect_equal(nrow(tst), 100 - 6)
+    expect_equal(names(tst), c("y", "X"))
+    expect_equal(nrow(tst$X), 92)
+    expect_equal(length(tst$y), 92)
   }
 )
 

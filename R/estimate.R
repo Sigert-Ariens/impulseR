@@ -24,6 +24,18 @@
 #' at the value `0`, implying that only the contemporaneous effect,
 #' \eqn{\beta_x}, is estimated freely. Defaults to `NA`, communicating that
 #' you don't want to estimate any covariate parameters
+#' @param na_action Character denoting how \code{NA}s should be removed from the
+#' data. Either \code{"listwise"}, \code{"casewise"}, \code{"pairwise"}, or
+#' \code{"partial"}. Listwise and casewise deletion consists of deletion of 
+#' full rows of data when one or more of the the matched variables contains an 
+#' \code{NA}, including the values of the lagged variables. This method may lead
+#' to a lot of deleted data, especially when estimating \eqn{ADL}s with many 
+#' lags in their predictor variables. To alleviate this difficulty, we also allow 
+#' users to specify partial deletion -- the deletion of rows when \code{NA} is 
+#' found in the contemporaneous values of the variables, meaning you bridge the 
+#' gap created by \code{NA}s -- or pairwise deletion -- the pairwise use of 
+#' for the estimation of the relevant parameters whenever they are not \code{NA},
+#' not implemented yet. Defaults to \code{"listwise"}.  
 #'
 #' @return Named list containing the estimated model (`fit`), the
 #' parameter estimates (`intercept`, `x_params`, `ar_params`),
@@ -51,7 +63,8 @@ estimate <- function(
   data,
   cols = c("y", "x"),
   y_lags = NULL,
-  x_lags = NULL
+  x_lags = NULL,
+  na_action = "listwise"
 ) {
   # Check whether only a single column is provided in the data.frame, and whether
   # the person specified no use of x_lags. In this case, we make a pass and allow
@@ -72,14 +85,6 @@ estimate <- function(
   # Check whether the columns specified can be found in the dataset
   if (!all(cols %in% colnames(data))) {
     stop("Columns specified in `cols` cannot be found in the supplied dataframe.")
-  }
-
-  # Check for NAs
-  if (any(is.na(data))) {
-    warning("NAs found in the data. Deleting them in a listwise fashion.")
-
-    idx <- !is.na(rowSums(data))
-    data <- data[idx, ]
   }
 
   # Check for impossible lags
@@ -116,11 +121,11 @@ estimate <- function(
     return(
       list(
         "fit" = list(),
-        "intercept" = mean(data$y),
+        "intercept" = mean(data$y, na.rm = TRUE),
         "x_params" = 0,
         "ar_params" = 0,
         "x" = data$x,
-        "innovations" = data$y - mean(data$y)
+        "innovations" = data$y - mean(data$y, na.rm = TRUE)
       )
     )
   }
@@ -130,16 +135,15 @@ estimate <- function(
   # which can be supplied to lm.
   #
   # Before applying lm, filter out the NA-values
-  X__ <- prepare_data(
+  prepared <- prepare_data(
     data,
     cols = c("y", "x"),
     x_lags = x_lags,
-    y_lags = y_lags
+    y_lags = y_lags,
+    na_action = na_action
   )
-  idx <- !is.na(rowSums(X__))
-
-  y <- data$y[idx]
-  X__ <- X__[idx, ]
+  y <- prepared$y
+  X__ <- prepared$X
 
   results <- stats::lm(y ~ X__)
 
@@ -176,8 +180,10 @@ estimate <- function(
         intercept = intercept,
         ar_params = ar_params,
         x_params = x_params,
-        innovations = results$innovations
-      )
+        innovations = results$innovations,
+        na_action = na_action
+      ) |>
+        suppressWarnings()
     )
   )
 }
@@ -217,6 +223,18 @@ estimate <- function(
 #' function). Defaults to `NULL`, signaling the estimated innovations are
 #' first calculated from the parameter estimates and observed data values
 #' \eqn{y} and \eqn{x}.
+#' @param na_action Character denoting how \code{NA}s should be removed from the
+#' data. Either \code{"listwise"}, \code{"casewise"}, \code{"pairwise"}, or
+#' \code{"partial"}. Listwise and casewise deletion consists of deletion of 
+#' full rows of data when one or more of the the matched variables contains an 
+#' \code{NA}, including the values of the lagged variables. This method may lead
+#' to a lot of deleted data, especially when estimating \eqn{ADL}s with many 
+#' lags in their predictor variables. To alleviate this difficulty, we also allow 
+#' users to specify partial deletion -- the deletion of rows when \code{NA} is 
+#' found in the contemporaneous values of the variables, meaning you bridge the 
+#' gap created by \code{NA}s -- or pairwise deletion -- the pairwise use of 
+#' for the estimation of the relevant parameters whenever they are not \code{NA},
+#' not implemented yet. Defaults to \code{"listwise"}. 
 #'
 #' @return Numeric vector of the same length as the data containing the
 #' innovations for the provided model
@@ -239,13 +257,17 @@ estimate <- function(
 #' )
 #'
 #' @export
+#
+# TO DO: Make possible to already provide the prepared data. Will avoid a second 
+# time the warning is called and is a reasonably easy fix
 compute_innovations <- function(
   data,
   cols = c("y", "x"),
   intercept = 0,
   ar_params = 0,
   x_params = 0,
-  innovations = NULL
+  innovations = NULL,
+  na_action = "listwise"
 ) {
   # Define the lags in x and y based on the parameters that are provided.
   x_lags <- ifelse(
@@ -280,14 +302,6 @@ compute_innovations <- function(
     stop("Columns specified in `cols` cannot be found in the supplied dataframe.")
   }
 
-  # Check for NAs
-  if (any(is.na(data))) {
-    warning("NAs found in the data. Deleting them in a listwise fashion.")
-
-    idx <- !is.na(rowSums(data))
-    data <- data[idx, ]
-  }
-
   # Change column names for easier handling
   data <- data[, cols] |>
     `colnames<-`(c("y", "x"))
@@ -301,16 +315,18 @@ compute_innovations <- function(
   # of a lm() output object.
   if (is.null(innovations)) {
     # Prepare the data and parameters for the prediction step.
-    X <- prepare_data(
+    prepared <- prepare_data(
       data,
       cols = c("y", "x"),
       x_lags = x_lags,
-      y_lags = y_lags
+      y_lags = y_lags,
+      na_action = na_action
     )
 
     if (is.na(x_lags) & is.na(y_lags)) {
       # If no AR effects or covariate parameters are defined, then y_hat is simply the intercept.
-      innovations <- data$y - intercept
+      innovations <- prepared$y - intercept
+
     } else {
       # Otherwise, we can differentiate between several cases
       if (!is.na(x_lags) & !is.na(y_lags)) {
@@ -321,13 +337,10 @@ compute_innovations <- function(
         params <- ar_params
       }
 
-      # Delete NAs from X (missing covariate values are treated by listwise deletion)
-      idx <- !is.na(rowSums(X))
-      X <- X[idx, , drop = FALSE]
-
       # Compute the estimated innovations based on the predicted values for y.
+      X <- prepared$X
       y_hat <- intercept + X %*% params
-      innovations <- data$y[(N - nrow(X) + 1):N] - y_hat
+      innovations <- prepared$y - y_hat
     }
   }
 
@@ -412,9 +425,23 @@ compute_innovations <- function(
 #' @param x_lags Integer denoting the number of lags to include for the
 #' covariate. Starts at the value `0`. Defaults to `NA`, communicating
 #' that you don't want to use any lagged values of the dependent variable
-#'
-#' @returns Numeric matrix containing the values of the independent and dependent
-#' variables that are used as predictors in the estimation routine.
+#' @param na_action Character denoting how \code{NA}s should be removed from the
+#' data. Either \code{"listwise"}, \code{"casewise"}, \code{"pairwise"}, or
+#' \code{"partial"}. Listwise and casewise deletion consists of deletion of 
+#' full rows of data when one or more of the the matched variables contains an 
+#' \code{NA}, including the values of the lagged variables. This method may lead
+#' to a lot of deleted data, especially when estimating \eqn{ADL}s with many 
+#' lags in their predictor variables. To alleviate this difficulty, we also allow 
+#' users to specify partial deletion -- the deletion of rows when \code{NA} is 
+#' found in the contemporaneous values of the variables, meaning you bridge the 
+#' gap created by \code{NA}s -- or pairwise deletion -- the pairwise use of 
+#' for the estimation of the relevant parameters whenever they are not \code{NA},
+#' not implemented yet. Defaults to \code{"listwise"}. 
+#' 
+#' @returns Named list containing the values of the dependent variable 
+#' (\code{"y"}) and a matched numeric matrix containing the values of the 
+#' independent and dependent variables that are used as predictors in the 
+#' estimation routine.
 #'
 #' @examples
 #' # Define a dataset
@@ -437,7 +464,8 @@ prepare_data <- function(
   data,
   cols = c("y", "x"),
   x_lags = NULL,
-  y_lags = NULL
+  y_lags = NULL,
+  na_action = "listwise"
 ) {
   # Check whether only a single column is provided in the data.frame, and whether
   # the person specified no use of x_lags. In this case, we make a pass and allow
@@ -458,6 +486,43 @@ prepare_data <- function(
   # Check whether columns are contained in the data
   if (!all(cols %in% colnames(data))) {
     stop("Columns specified in `cols` cannot be found in the supplied dataframe.")
+  }
+
+  # Check for NAs. Only includes less stringent types of deletion, namely
+  #   - Partial listwise deletion: Only deleting NAs at a particular timepoint, 
+  #     but not extending it to lagged NAs
+  #   - Casewise deletion: Only deleting NAs case per case, which is automatically
+  #     handled by lm
+  #
+  # If partial deletion, we already need to delete the NAs in the data to 
+  # bridge any gaps and connect datapoints that follow before and after the 
+  # gap
+  if (any(is.na(data)) & na_action %in% c("partial")) {
+    warning("NAs found in the data. Deleting them in a partial fashion.")
+
+    idx <- !is.na(rowSums(data))
+    data <- data[idx, ]
+
+  # If pairwise deletion, then throw an error and tell users that we still have
+  # to implement this
+  } else if(any(is.na(data)) & na_action == "pairwise") {
+    stop("NAs found in the data. Wanting to delete them in a pairwise fashion, but has not been implemented yet.")
+
+  # If listwise/casewise deletion, then throw a warning but do not delete the 
+  # NAs yet. Only do so after making the relevant matrix of values, ensuring we 
+  # delete all cases that are paired with an NA value
+  } else if(any(is.na(data)) & na_action %in% c("listwise", "casewise")) {
+    warning("NAs found in the data. Deleting them in a listwise/casewise fashion")
+
+  # If the user asked something else, throw an error and ensure that they know 
+  # the options we have for handling NAs
+  } else if(any(is.na(data)) & !(na_action %in% c("listwise", "partial", "casewise", "pairwise"))) {
+    stop(
+      paste(
+        "NAs found in the data, but proposed method is not known.", 
+        "Please specify 'listwise', 'casewise', 'partial', or 'pairwise' for the `na_action` argument."
+      )
+    )
   }
 
   # Check for impossible lags
@@ -489,14 +554,6 @@ prepare_data <- function(
   if (is.na(y_lags) & is.na(x_lags)) {
     warning("No lags specified for `y` or `x`. Returning original data.frame.")
     return(data)
-  }
-
-  # Check for NAs
-  if (any(is.na(data))) {
-    warning("NAs found in the data. Deleting them in a listwise fashion.")
-
-    idx <- !is.na(rowSums(data))
-    data <- data[idx, ]
   }
 
   # Change column names for easy handling
@@ -554,5 +611,16 @@ prepare_data <- function(
       `colnames<-`(cols2)
   }
 
-  return(X)
+  # Delete the remaining NAs in the dataset. 
+  #
+  # If "listwise" or "casewise" deletion was chosen, this is the first round of
+  # filtering these data get, which leads to all rows in X and y that contain at 
+  # least one NA as matched up after prepartion. If "partial" deletion was 
+  # chosen, then this is the second round of filtering where only those NAs that 
+  # were imputed by lagging the variables are still deleted.
+  idx <- !is.na(rowSums(X)) & !is.na(data$y)
+  X <- X[idx, , drop = FALSE]
+  y <- data$y[idx]
+
+  return(list("y" = y, "X" = X))
 }
