@@ -610,17 +610,6 @@ prepare_data <- function(
     X <- X2 |>
       `colnames<-`(cols2)
   }
-
-  # Delete the remaining NAs in the dataset. 
-  #
-  # If "listwise" or "casewise" deletion was chosen, this is the first round of
-  # filtering these data get, which leads to all rows in X and y that contain at 
-  # least one NA as matched up after prepartion. If "partial" deletion was 
-  # chosen, then this is the second round of filtering where only those NAs that 
-  # were imputed by lagging the variables are still deleted.
-  idx <- !is.na(rowSums(X)) & !is.na(data$y)
-  X <- X[idx, , drop = FALSE]
-  y <- data$y[idx]
-
-  return(list("y" = y, "X" = X))
+  
+  return(list("y" = data$y, "X" = X))
 }
