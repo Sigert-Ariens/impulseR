@@ -443,3 +443,43 @@ test_that(
     expect_true(all(tst))
   }
 )
+
+test_that(
+  "Estimation inside and outside `estimate` works",
+  {
+    # Generate data
+    data <- irf_generator(
+      intercept = 0,
+      ar_params = c(0.75, 0.1),
+      x_params = c(2, 1, -0.25),
+      x = rnorm(100),
+      innovations = rnorm(100)
+    )$irf
+
+    # Impose NA values in the data
+    set.seed(1)
+    idx <- sample(1:100, 10, replace = FALSE)
+    data[idx, ] <- NA
+
+    # ADL(2, 2)
+    ref <- lm(
+      data = data,
+      irf ~ dplyr::lag(irf, 1) + x + dplyr::lag(x, 1)
+    )
+
+    tst <- estimate(
+      data, 
+      cols = c("irf", "x"),
+      y_lags = 1, 
+      x_lags = 1, 
+      na_action = "listwise"
+    ) |>
+      suppressWarnings()
+
+    # Actual test
+    expect_equal(
+      ref$residuals, 
+      tst$fit$residuals
+    )
+  }
+)
