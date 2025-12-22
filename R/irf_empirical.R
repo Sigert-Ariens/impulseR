@@ -163,7 +163,7 @@ irf_empirical <- function(
       params$ar_params,
       params$x_params
     )
-    covariances <- summary(params$fit)$cov
+    covariances <- vcov(params$fit)
 
     y_lags <- length(params$ar_params)
     x_lags <- length(params$x_params) - 1
