@@ -620,7 +620,7 @@ test_that(
       innovations = rnorm(100)
     )$irf
 
-    # Use irf_empirical with confidence intervals
+    # Use irf_empirical without burnin
     results <- irf_empirical(
       data, 
       cols = c("irf", "x"),
@@ -632,13 +632,13 @@ test_that(
       burnin = FALSE
     )$irf
 
-    # Check whether there is no variation around the observed data: The observed
-    # irf is the one thing we should be sure of
+    # Check whether there is variation around the observed data, should be higher
+    # than 0
     expect_true(mean(abs(results$irf_lower - results$irf_upper)) > 0)
     expect_true(mean(abs(results$irf - results$irf_upper)) > 0)
     expect_true(mean(abs(results$irf_lower - results$irf)) > 0)
 
-    # Use irf_empirical with confidence intervals
+    # Use irf_empirical with burnin
     results <- irf_empirical(
       data, 
       cols = c("irf", "x"),
@@ -650,10 +650,155 @@ test_that(
       burnin = TRUE
     )$irf
 
-    # Check whether there is no variation around the observed data: The observed
-    # irf is the one thing we should be sure of
+    # Same test as before
     expect_true(mean(abs(results$irf_lower - results$irf_upper)) > 0)
     expect_true(mean(abs(results$irf - results$irf_upper)) > 0)
     expect_true(mean(abs(results$irf_lower - results$irf)) > 0)
+  }
+)
+
+test_that(
+  "Test of zero confidence intervals with data containing missing values",
+  {
+    # Create data
+    set.seed(1)
+    data <- irf_generator(
+      intercept = 0, 
+      ar_params = c(0.75, 0.2),
+      x_params = c(2, 1),
+      x = rnorm(100),
+      innovations = rnorm(100)
+    )$irf
+
+    # Add random missing values
+    idx <- sample(1:100, 10, replace = FALSE)
+    data[idx, ] <- NA
+
+    # Use irf_empirical with confidence intervals
+    results <- irf_empirical(
+      data, 
+      cols = c("irf", "x"),
+      y_lags = 1, 
+      x_lags = 1,
+      confidence_interval = TRUE
+    )$irf |>
+      suppressWarnings()
+
+    # Check whether there is no variation around the observed data: The observed
+    # irf is the one thing we should be sure of
+    expect_equal(
+      mean(abs(results$irf_lower - results$irf_upper)),
+      0
+    )
+    expect_equal(
+      mean(abs(results$irf - results$irf_upper)),
+      0
+    )
+    expect_equal(
+      mean(abs(results$irf_lower - results$irf)),
+      0
+    )
+  }
+)
+
+test_that(
+  "Test of nonzero confidence intervals with data containing missing values",
+  {
+    # Create data
+    set.seed(1)
+    data <- irf_generator(
+      intercept = 0, 
+      ar_params = c(0.75, 0.2),
+      x_params = c(2, 1),
+      x = rnorm(100),
+      innovations = rnorm(100)
+    )$irf
+
+    # Estimate the system responses without NAs, for burnin being FALSE or TRUE
+    ref_F <- irf_empirical(
+      data, 
+      cols = c("irf", "x"),
+      y_lags = 1, 
+      x_lags = 1,
+      confidence_interval = TRUE,
+      x = impulse(10),
+      innovations = impulse(10),
+      burnin = FALSE
+    )$irf
+
+    ref_T <- irf_empirical(
+      data, 
+      cols = c("irf", "x"),
+      y_lags = 1, 
+      x_lags = 1,
+      confidence_interval = TRUE,
+      x = impulse(10),
+      innovations = impulse(10),
+      burnin = TRUE
+    )$irf
+
+    # Add random missing values
+    idx <- sample(1:100, 10, replace = FALSE)
+    data[idx, ] <- NA
+
+    # Use irf_empirical without burnin
+    tst <- irf_empirical(
+      data, 
+      cols = c("irf", "x"),
+      y_lags = 1, 
+      x_lags = 1,
+      confidence_interval = TRUE,
+      x = impulse(10),
+      innovations = impulse(10),
+      burnin = FALSE
+    )$irf |>
+      suppressWarnings()
+
+    # Check whether the confidence intervals are roughly the same
+    expect_equal(
+      ref_F$irf_lower, 
+      tst$irf_lower,
+      tolerance = 1e-1
+    )
+    expect_equal(
+      ref_F$irf, 
+      tst$irf,
+      tolerance = 1e-1
+    )
+    expect_equal(
+      ref_F$irf_upper, 
+      tst$irf_upper,
+      tolerance = 1e-1
+    )
+    
+    # Use irf_empirical with burnin
+    tst <- irf_empirical(
+      data, 
+      cols = c("irf", "x"),
+      y_lags = 1, 
+      x_lags = 1,
+      confidence_interval = TRUE,
+      x = impulse(10),
+      innovations = impulse(10),
+      burnin = TRUE
+    )$irf |>
+      suppressWarnings()
+
+    # Same test as before
+    expect_equal(
+      ref_T$irf_lower, 
+      tst$irf_lower,
+      tolerance = 1e-1
+    )
+    expect_equal(
+      ref_T$irf, 
+      tst$irf,
+      tolerance = 1e-1
+    )
+    expect_equal(
+      ref_T$irf_upper, 
+      tst$irf_upper,
+      tolerance = 1e-1
+    )
   }
 )
