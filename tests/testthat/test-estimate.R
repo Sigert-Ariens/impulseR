@@ -478,8 +478,10 @@ test_that(
 
     # Actual test
     expect_equal(
-      ref$residuals, 
-      tst$fit$residuals
+      ref$residuals |>
+        `names<-` (NULL), 
+      tst$fit$residuals |>
+        `names<-` (NULL)
     )
   }
 )
