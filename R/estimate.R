@@ -610,6 +610,11 @@ prepare_data <- function(
     X <- X2 |>
       `colnames<-`(cols2)
   }
+
+  # Delete paired observations that contain NA in them
+  idx <- rowSums(is.na(X)) == 0
+  X <- X[idx, , drop = FALSE]
+  y <- data$y[idx]
   
-  return(list("y" = data$y, "X" = X))
+  return(list("y" = y, "X" = X))
 }
