@@ -132,11 +132,37 @@ irf_empirical <- function(
   } else {
     innovation_gen <- innovations
   }
-  if(is.null(x)) {
-    x_gen <- params$x
-  } else {
-    x_gen <- x
+  
+  
+  q <- max(y_lags, x_lags) # MIGHT NOT WORK FOR MODEL WITH  NO LAGS
+  
+  # Get correct initial values
+  
+  count <- 0
+  start <- NA
+  
+  for (i in seq_len(nrow(data))) { # This makes sure that the correct values will be chosen regardless if the first rows contain NA
+    if (!anyNA(data[i, ])) {
+      count <- count + 1
+      if (count == q) {
+        start <- i - q + 1
+        break
+      }
+    } else {
+      count <- 0
+    }
   }
+  
+  startvals <- if (!is.na(start)) data[start:nrow(data), ] else data[0, ]
+  inits <- startvals[1:q,]
+  
+  if (q != 0) {
+    y0 <- inx <- inits$y[1:y_lags]
+    x0 <- inits$x[1:x_lags]
+    }
+  
+  x_gen <- c(x0, params$x)
+
 
   # Call the irf_generator function  on the observed covariate values and
   # estimated innovations:
@@ -174,7 +200,7 @@ irf_empirical <- function(
       covariances,
       y_lags = y_lags,
       x_lags = x_lags,
-      x = x,
+      x = x_gen,
       innovations = innovations,
       data = data, 
       cols = cols,
