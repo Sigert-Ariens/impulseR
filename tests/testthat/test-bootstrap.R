@@ -140,7 +140,6 @@ test_that(
       ) |>
         suppressWarnings()
     )
-
   }
 )
 
