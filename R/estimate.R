@@ -296,6 +296,9 @@ prepare_data <- function(
   } else if(any(is.na(data)) & na_action %in% c("listwise", "casewise")) {
     warning("NAs found in the data. Deleting them in a listwise/casewise fashion")
 
+  } else if(any(is.na(data)) & na_action %in% c("none")) {
+    warning("NAs found in the data, but leaving them in.")
+
   # If the user asked something else, throw an error and ensure that they know 
   # the options we have for handling NAs
   } else if(any(is.na(data)) & !(na_action %in% c("listwise", "partial", "casewise", "pairwise"))) {
@@ -394,9 +397,14 @@ prepare_data <- function(
   }
 
   # Delete paired observations that contain NA in them
-  idx <- rowSums(is.na(X)) == 0
-  X <- X[idx, , drop = FALSE]
-  y <- data$y[idx]
+  if(!(na_action %in% c("none"))) {
+    idx <- rowSums(is.na(X)) == 0
+    X <- X[idx, , drop = FALSE]
+    y <- data$y[idx]
+
+  } else {
+    y <- data$y
+  }
 
   # Create a list of missing values depending on the na_action that was chosen
   if(na_action == "partial") {
@@ -404,8 +412,11 @@ prepare_data <- function(
       which(!missing),
       which(!idx)
     )
-  } else {
+  } else if(na_action %in% c("listwise", "casewise")) {
     missing <- list(which(!idx))
+
+  } else {
+    missing <- list()
   }
   
   return(

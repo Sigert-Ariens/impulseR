@@ -625,3 +625,50 @@ test_that(
     )
   }
 )
+
+test_that(
+  "Preparing the data with NAs works: Action is no deletion",
+  {
+    # Create an artificial dataset
+    data <- data.frame(
+      y = 1:10, 
+      x = 1:10
+    )
+    data[6, ] <- NA
+
+    # Prepare the data
+    tst <- prepare_data(
+      data, 
+      cols = c("y", "x"),
+      y_lags = 2,
+      x_lags = 2,
+      na_action = "none"
+    ) |>
+      suppressWarnings()
+
+    # Check the instances in the list
+    expect_true(all(names(tst) %in% c("y", "X", "missing")))
+
+    # Check the content of the different entries. Here, the expectation is:
+    # - Missing values at 1 and 2 imposed by the lags
+    # - Only a missing indication of 6: 5 and 7 are paired now
+    expect_equal(
+      tst$y, 
+      data$y
+    )
+    expect_equal(
+      tst$X,
+      cbind(
+        ylag_1 = c(NA, data$y[1:9]), 
+        ylag_2 = c(NA, NA, data$y[1:8]),
+        xlag_0 = data$x,
+        xlag_1 = c(NA, data$x[1:9]), 
+        xlag_2 = c(NA, NA, data$x[1:8])
+      )
+    )
+    expect_equal(
+      tst$missing, 
+      list()
+    )
+  }
+)
