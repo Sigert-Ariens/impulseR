@@ -668,7 +668,7 @@ test_that(
     )
     expect_equal(
       tst$missing, 
-      list()
+      list(6)
     )
   }
 )

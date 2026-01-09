@@ -416,7 +416,7 @@ prepare_data <- function(
     missing <- list(which(!idx))
 
   } else {
-    missing <- list()
+    missing <- list(which(rowSums(is.na(data)) != 0))
   }
   
   return(
