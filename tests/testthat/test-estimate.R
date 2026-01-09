@@ -11,9 +11,9 @@ test_that(
       )
     )
 
-    # Wrong columns in compute_innovations
+    # Wrong columns in compute_input
     expect_error(
-      compute_innovations(
+      compute_input(
         data.frame(Y = numeric(100), X = numeric(100)),
         cols = c("y", "x")
       )
@@ -48,7 +48,7 @@ test_that(
 
     # Single column specified, but only if x_lags specified in estimate
     expect_error(
-      compute_innovations(
+      compute_input(
         data.frame(Y = numeric(100)),
         cols = c("y", "x"),
         intercept = 2,
@@ -58,7 +58,7 @@ test_that(
     )
 
     expect_no_error(
-      compute_innovations(
+      compute_input(
         data.frame(Y = numeric(100)),
         cols = c("y", "x"),
         intercept = 2,
@@ -224,9 +224,9 @@ test_that(
       data$y
     )
 
-    # NAs in data in `compute_innovations`. Also testing output
+    # NAs in data in `compute_input`. Also testing output
     expect_warning(
-      compute_innovations(
+      compute_input(
         data,
         ar_params = c(0.5, 0.25),
         x_params = c(2, 2)
@@ -234,7 +234,7 @@ test_that(
     )
 
     tst <- suppressWarnings(
-      compute_innovations(
+      compute_input(
         data,
         ar_params = c(0.5, 0.25),
         x_params = c(2, 2)
@@ -424,7 +424,7 @@ test_that(
           suppressWarnings()
 
         # Create the impulse response functions
-        innovations <- compute_innovations(
+        innovations <- compute_input(
           y,
           cols = c("irf", "x"),
           intercept = results$intercept,

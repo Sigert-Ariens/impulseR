@@ -173,7 +173,7 @@ irf_generator <- function(
 
     # If found, then we extract the covariate x and compute the innovations
     x <- data[, cols[2]]
-    innovations <- compute_innovations(
+    innovations <- compute_input(
       data,
       cols = cols,
       intercept = intercept,

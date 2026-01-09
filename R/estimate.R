@@ -174,7 +174,7 @@ estimate <- function(
       "ar_params" = ar_params,
       "x_params" = x_params,
       "x" = data$x,
-      "innovations" = compute_innovations(
+      "innovations" = compute_input(
         data,
         cols = c("y", "x"),
         intercept = intercept,

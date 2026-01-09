@@ -290,13 +290,12 @@ bootstrap <- function(
       # decompose the system responses. This step is always relevant, but 
       # especially when NAs are found in the data!
       if(!is.null(data)) {
-        innovations <- compute_innovations(
+        innovations <- compute_input(
           data = data, 
           cols = cols,
           intercept = intercept, 
           ar_params = ar_params, 
           x_params = x_params,
-          innovations = innovations,
           na_action = na_action
         ) |>
           suppressWarnings()
