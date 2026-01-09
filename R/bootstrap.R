@@ -284,6 +284,9 @@ bootstrap <- function(
       intercept <- as.numeric(intercept[i])
       ar_params <- as.numeric(ar_params[i, ])
       x_params <- as.numeric(x_params[i, ])
+      
+      innovations_fixed <- compute_innovations(data = data, intercept = intercept, ar_params = ar_params, x_params = x_params,
+                                               cols = c("y", "x"))
 
       # Use irf_generator to generate the system responses according to this 
       # new set of parameters. Extract only the impulse responses
@@ -291,10 +294,9 @@ bootstrap <- function(
         intercept = intercept,
         ar_params = ar_params,
         x_params = x_params,
-        x = x,
-        innovations = innovations,
+        x = x, #MAKE XGEN
+        innovations = innovations_fixed,
         na_action = na_action,
-        data = data, 
         cols = cols,
         burnin = burnin
       ) |>

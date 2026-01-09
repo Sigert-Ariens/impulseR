@@ -347,13 +347,31 @@ compute_innovations <- function(
   # Deduce the implied first $p$ innovations. This allows our cumulative
   # responses to start from the first measurement occasion, i.e. at $t = 0$.
   # Parameters are vectorized so that you don't have to think about it too much.
-  n_inx <- N - length(innovations)
-
-  # Fixing the first $p$ innovations is only needed whenever $p \neq 0$,
-  # otherwise the innovation at t=0 will be provided by the estimation software.
-  if (n_inx != 0) {
-    y0 <- inx <- data$y[1:n_inx]
-    x0 <- data$x[1:n_inx]
+  m <- max(y_lags, x_lags) # MIGHT NOT WORK FOR MODEL WITH  NO LAGS
+  
+  # Get correct initial values
+  
+  count <- 0
+  start <- NA
+  
+  for (i in seq_len(nrow(data))) { # This makes sure that the correct values will be chosen regardless if the first rows contain NA
+    if (!anyNA(data[i, ])) {
+      count <- count + 1
+      if (count == m) {
+        start <- i - m + 1
+        break
+      }
+    } else {
+      count <- 0
+    }
+  }
+  
+  startvals <- if (!is.na(start)) data[start:nrow(data), ] else data[0, ]
+  inits <- startvals[1:m,]
+  
+  if (m != 0) {
+    y0 <- inx <- inits$y[1:m]
+    x0 <- inits$x[1:m]
 
     if (!is.na(y_lags)) {
       phi <- matrix(
