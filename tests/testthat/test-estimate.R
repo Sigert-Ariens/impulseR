@@ -485,3 +485,143 @@ test_that(
     )
   }
 )
+
+test_that(
+  "Preparing the data without NAs works",
+  {
+    # Create an artificial dataset
+    data <- data.frame(
+      y = 1:10, 
+      x = 1:10
+    )
+
+    # Prepare the data
+    tst <- prepare_data(
+      data, 
+      cols = c("y", "x"),
+      y_lags = 2,
+      x_lags = 2
+    )
+
+    # Check the instances in the list
+    expect_true(all(names(tst) %in% c("y", "X", "missing")))
+
+    # Check the content of the different entries. You should find that 
+    # there are 2 missing values imposed by the lags, namely 1 and 2. The 
+    # data and matrices should furthermore have particular values for the 
+    # dataset that we use here
+    expect_equal(
+      tst$y, 
+      3:10
+    )
+    expect_equal(
+      tst$X,
+      cbind(
+        ylag_1 = 2:9, 
+        ylag_2 = 1:8,
+        xlag_0 = 3:10,
+        xlag_1 = 2:9, 
+        xlag_2 = 1:8
+      )
+    )
+    expect_equal(
+      tst$missing, 
+      list(1:2)
+    )
+  }
+)
+
+test_that(
+  "Preparing the data with NAs works: Action is listwise deletion",
+  {
+    # Create an artificial dataset
+    data <- data.frame(
+      y = 1:10, 
+      x = 1:10
+    )
+    data[6, ] <- NA
+
+    # Prepare the data
+    tst <- prepare_data(
+      data, 
+      cols = c("y", "x"),
+      y_lags = 2,
+      x_lags = 2,
+      na_action = "listwise"
+    ) |>
+      suppressWarnings()
+
+    # Check the instances in the list
+    expect_true(all(names(tst) %in% c("y", "X", "missing")))
+
+    # Check the content of the different entries. Here, the expectation is:
+    # - Missing values at 1 and 2 imposed by the lags
+    # - Missing values at 6, 7, and 8 imposed by the missing value at 6 and 
+    #   propagated by the lags to 8
+    expect_equal(
+      tst$y, 
+      c(3, 4, 5, 9, 10)
+    )
+    expect_equal(
+      tst$X,
+      cbind(
+        ylag_1 = c(2, 3, 4, 8, 9), 
+        ylag_2 = c(1, 2, 3, 7, 8),
+        xlag_0 = c(3, 4, 5, 9, 10),
+        xlag_1 = c(2, 3, 4, 8, 9), 
+        xlag_2 = c(1, 2, 3, 7, 8)
+      )
+    )
+    expect_equal(
+      tst$missing, 
+      list(c(1:2, 6:8))
+    )
+  }
+)
+
+test_that(
+  "Preparing the data with NAs works: Action is partial deletion",
+  {
+    # Create an artificial dataset
+    data <- data.frame(
+      y = 1:10, 
+      x = 1:10
+    )
+    data[6, ] <- NA
+
+    # Prepare the data
+    tst <- prepare_data(
+      data, 
+      cols = c("y", "x"),
+      y_lags = 2,
+      x_lags = 2,
+      na_action = "partial"
+    ) |>
+      suppressWarnings()
+
+    # Check the instances in the list
+    expect_true(all(names(tst) %in% c("y", "X", "missing")))
+
+    # Check the content of the different entries. Here, the expectation is:
+    # - Missing values at 1 and 2 imposed by the lags
+    # - Only a missing indication of 6: 5 and 7 are paired now
+    expect_equal(
+      tst$y, 
+      c(3:5, 7:10)
+    )
+    expect_equal(
+      tst$X,
+      cbind(
+        ylag_1 = c(2:5, 7:9), 
+        ylag_2 = c(1:5, 7:8),
+        xlag_0 = c(3:5, 7:10),
+        xlag_1 = c(2:5, 7:9), 
+        xlag_2 = c(1:5, 7:8)
+      )
+    )
+    expect_equal(
+      tst$missing, 
+      list(6, 1:2)
+    )
+  }
+)
