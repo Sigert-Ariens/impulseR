@@ -672,3 +672,49 @@ test_that(
     )
   }
 )
+
+test_that(
+  "Preparing the data with other column names works",
+  {
+    # Create an artificial dataset. Multiply IV by 2 to make sure we can 
+    # differentiate between both variables
+    data <- data.frame(
+      DV = 1:10, 
+      IV = 1:10 * 2
+    )
+
+    # Prepare the data
+    tst <- prepare_data(
+      data, 
+      cols = c("DV", "IV"),
+      y_lags = 2,
+      x_lags = 2
+    )
+
+    # Check the instances in the list
+    expect_true(all(names(tst) %in% c("y", "X", "missing")))
+
+    # Check the content of the different entries. You should find that 
+    # there are 2 missing values imposed by the lags, namely 1 and 2. The 
+    # data and matrices should furthermore have particular values for the 
+    # dataset that we use here
+    expect_equal(
+      tst$y, 
+      3:10
+    )
+    expect_equal(
+      tst$X,
+      cbind(
+        ylag_1 = 2:9, 
+        ylag_2 = 1:8,
+        xlag_0 = 3:10 * 2,
+        xlag_1 = 2:9 * 2, 
+        xlag_2 = 1:8 * 2
+      )
+    )
+    expect_equal(
+      tst$missing, 
+      list(1:2)
+    )
+  }
+)
