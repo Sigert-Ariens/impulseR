@@ -393,8 +393,6 @@ test_that(
   }
 )
 
-
-
 test_that(
   "Check the output: System responses",
   {
