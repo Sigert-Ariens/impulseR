@@ -36,10 +36,10 @@ test_that(
   }
 )
 
-# Should be more general: How many innovations are there etc
-test_that(
-  "Compute input works when NAs are present",
-  {
+# # Should be more general: How many innovations are there etc
+# test_that(
+#   "Compute input works when NAs are present",
+#   {
     
-  }
-)
+#   }
+# )
