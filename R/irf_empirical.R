@@ -122,56 +122,18 @@ irf_empirical <- function(
     x_lags = x_lags,
     na_action = na_action
   )
-
-  # Define the covariate effects and innovations to use. We need to create a 
-  # new variable here to ensure that the bootstrap uses the correct input 
-  # (a NULL when the innovations are not defined, the actual innovations when 
-  # they are defined, and the same for the covariates)
-  if(is.null(innovations)) {
-    innovation_gen <- params$innovations
-  } else {
-    innovation_gen <- innovations
-  }
   
-  
-  q <- max(y_lags, x_lags) # MIGHT NOT WORK FOR MODEL WITH  NO LAGS
-  
-  # Get correct initial values
-  
-  count <- 0
-  start <- NA
-  
-  for (i in seq_len(nrow(data))) { # This makes sure that the correct values will be chosen regardless if the first rows contain NA
-    if (!anyNA(data[i, ])) {
-      count <- count + 1
-      if (count == q) {
-        start <- i - q + 1
-        break
-      }
-    } else {
-      count <- 0
-    }
-  }
-  
-  startvals <- if (!is.na(start)) data[start:nrow(data), ] else data[0, ]
-  inits <- startvals[1:q,]
-  
-  if (q != 0) {
-    y0 <- inx <- inits$y[1:y_lags]
-    x0 <- inits$x[1:x_lags]
-    }
-  
-  x_gen <- c(x0, params$x)
-
-
   # Call the irf_generator function  on the observed covariate values and
   # estimated innovations:
   result <- irf_generator(
     intercept = params$intercept,
     x_params = params$x_params,
     ar_params = params$ar_params,
-    x = x_gen,
-    innovations = innovation_gen,
+    x = x,
+    innovations = innovations,
+    data = data, 
+    cols = cols,
+    na_action = na_action,
     burnin = burnin
   )
   result[["fit"]] <- params$fit
@@ -200,7 +162,7 @@ irf_empirical <- function(
       covariances,
       y_lags = y_lags,
       x_lags = x_lags,
-      x = x_gen,
+      x = x,
       innovations = innovations,
       data = data, 
       cols = cols,
