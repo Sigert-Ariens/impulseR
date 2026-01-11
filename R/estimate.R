@@ -166,6 +166,18 @@ estimate <- function(
     x_params <- coefs[2:(2 + x_lags)]
   }
 
+  # Compute the input based on the model
+  input <- compute_input(
+    data,
+    cols = c("y", "x"),
+    intercept = intercept,
+    ar_params = ar_params,
+    x_params = x_params,
+    innovations = results$innovations,
+    na_action = na_action
+  ) |>
+    suppressWarnings()
+
   # Now that this has been done, return a list containing all of this information
   return(
     list(
@@ -173,17 +185,8 @@ estimate <- function(
       "intercept" = intercept,
       "ar_params" = ar_params,
       "x_params" = x_params,
-      "x" = data$x,
-      "innovations" = compute_input(
-        data,
-        cols = c("y", "x"),
-        intercept = intercept,
-        ar_params = ar_params,
-        x_params = x_params,
-        innovations = results$innovations,
-        na_action = na_action
-      ) |>
-        suppressWarnings()
+      "x" = input$x,
+      "innovations" = input$innovations
     )
   )
 }
