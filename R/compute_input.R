@@ -68,8 +68,14 @@
 #'
 #' @export
 #
-# TO DO: Make possible to already provide the prepared data. Will avoid a second 
-# time the warning is called and is a reasonably easy fix
+# TO DO: 
+#   - Make possible to already provide the prepared data. Will avoid a second 
+#     time the warning is called and is a reasonably easy fix
+#   - More pressing: Reevaluate whether you want users to provide innovations
+#     themselves, as this makes things a bit more difficult, especially when 
+#     NAs are present in the data. Ideally, we remove this argument and can then
+#     proceed computing the innovations by doing the reverse operation done in
+#     irf_generator (and would make this function less lengthy)
 compute_input <- function(
   data,
   cols = c("y", "x"),
@@ -142,13 +148,30 @@ compute_input <- function(
 
   # Based on the values of y, we can determine what values of the covariate 
   # exist and can be used as input to decompose the system responses. 
-  idx <- !(1:nrow(data) %in% contains_missing$missing)
+  idx <- !is.na(rowSums(data))
   x_fixed <- data$x[idx]
   
 
 
   ##############################################################################
   # FIX INNOVATIONS
+
+  # Prepare the data for analysis. Importantly, this only uses the information 
+  # that you provided to the estimation itself. Note that if na_action is 
+  # "none", that there will be issues here! Therefore changes to "listwise"
+  # (the default way of dealing with NAs in `lm`)
+  prepared <- prepare_data(
+    data,
+    cols = c("y", "x"),
+    x_lags = x_lags,
+    y_lags = y_lags,
+    na_action = ifelse(
+      na_action %in% c("none"),
+      "listwise",
+      na_action
+    )
+  ) |>
+    suppressWarnings()
 
   # Compute the estimated innovations ($\hat{v}_{t} = y_{t} - \hat{y}_{t})
   # Only perform this computation if innovations are not provided yet in the form
@@ -158,23 +181,6 @@ compute_input <- function(
   # the full data, that is using all information we have. When NAs are present 
   # in the data, this represents only a part of the data.
   if (is.null(innovations)) {
-    # Prepare the data for analysis. Importantly, this only uses the information 
-    # that you provided to the estimation itself. Note that if na_action is 
-    # "none", that there will be issues here! Therefore changes to "listwise"
-    # (the default way of dealing with NAs in `lm`)
-    prepared <- prepare_data(
-      data,
-      cols = c("y", "x"),
-      x_lags = x_lags,
-      y_lags = y_lags,
-      na_action = ifelse(
-        na_action %in% c("none"),
-        "listwise",
-        na_action
-      )
-    ) |>
-      suppressWarnings()
-
     # If no AR effects or covariate parameters are defined, then y_hat is simply 
     # the intercept.
     if (is.na(x_lags) & is.na(y_lags)) {
@@ -226,13 +232,6 @@ compute_input <- function(
     )
   }
 
-  # Create a placeholder that will contain the innovations. Important to note 
-  # that the only innovations that we can fix are those for which a value of 
-  # y is known, hence we indicate at which locations there are unknown values 
-  # for the dependent variable.
-  placeholder <- numeric(nrow(data))
-  placeholder[is.na(rowSums(data))] <- NA
-
   # Get the starting values for where we can start correcting/fixing the 
   # innovations. These occur at `lag` lags before the first complete pair again.
   # Here, we thus proceed as follows:
@@ -252,86 +251,144 @@ compute_input <- function(
   missing_changes <- c(0, diff(idx))
   start <- which(missing_changes == 1) - lag
 
-  # Fill the placeholder with those innovations that we already know about, 
-  # namely those that do not fall within the `start` and its lags problems. 
-  # Note that we need to correct the indices by subtracting 1. Furthermore 
-  # remove the lags that cannot be corrected
-  to_fix <- sapply(
-    start, 
-    function(idy) if(idy == 1) {
-      return(idy:(idy + lag - 1))
-    } else {
-      return((idy - 1):(idy + lag - 1))
-    }
-  ) |>
-    unlist() |>
-    as.numeric()
+  # Create a placeholder that will contain the innovations. Several things are 
+  # of note:
+  #   - Only innovations that we can fix are those for which a value of y is
+  #     known, hence we indicate at which locations there are unknown values 
+  #     for the dependent variable by imputing an NA
+  #   - Those innovations that are already known can be put in there through 
+  #     using the "missing" information from prepared, so this is also done
+  #   - The innovations that should be fixed (i.e., those for which y is not 
+  #     missing and for which the innovations have not been computed already)
+  placeholder <- numeric(nrow(data)) + Inf
 
-  idx <- which(!(1:length(placeholder) %in% to_fix))
-  placeholder[idx] <- innovations
+  placeholder[is.na(rowSums(data))] <- NA
+  if(na_action %in% c("partial")) {
+    tmp <- numeric(sum(!is.na(rowSums(data)))) + Inf
 
-  # Loop over the different starting values
-  for(i in start) {
-    # Define the indices of interest
-    to_fix <- i:(i + lag - 1)
+    idx <- !(1:length(tmp) %in% prepared$missing[[2]])
+    tmp[idx] <- innovations
 
-    # Get the initial conditions from which to start correcting within the 
-    # dataset
-    y0 <- data$y[to_fix]
-    x0 <- data$x[to_fix]
+    placeholder[!is.na(placeholder)] <- tmp
 
-    # Create matrices that can be used to compute the system responses, depending
-    # on whether x_lags and y_lags is defined
-    if (!is.na(y_lags)) {
-      phi <- matrix(
-        rep(ar_params, each = y_lags),
-        nrow = y_lags,
-        ncol = length(ar_params)
-      )
-      phi[upper.tri(phi, diag = FALSE)] <- 0
-    }
-
-    if (!is.na(x_lags)) {
-      beta <- matrix(
-        rep(x_params, each = x_lags + 1),
-        nrow = x_lags + 1,
-        ncol = length(x_params)
-      )
-      beta[upper.tri(beta, diag = FALSE)] <- 0
-    }
-
-    # Loop over the initial conditions to fix in the placeholder
-    for(j in seq_along(to_fix)) {
-      # Define the initial condition to start from
-      inx <- data$y[to_fix[j]]
-
-      # Supply the first $p$ values of the outcome variable (set as the vector
-      # y0 above), and use the estimates to fix part of the innovations
-      if (!is.na(y_lags)) {
-        if (j == 1) {
-          inx <- inx - 0
-        } else if (j <= y_lags) {
-          inx <- inx - sum(phi[j - 1, 1:(j - 1)] * y0[(j - 1):1])
-        } else {
-          inx <- inx - sum(phi[nrow(phi), ] * y0[(j - 1):(j - y_lags)])
-        }
-      }
-
-      # Supply the first $p$ values of the covariate variable (set as the vector
-      # x0 above), and use the estimates to fix another part of the innovations
-      if (!is.na(x_lags)) {
-        if (j <= x_lags) {
-          inx <- inx - sum(beta[j, 1:j] * x0[j:1])
-        } else {
-          inx <- inx - sum(beta[nrow(beta), ] * x0[j:(j - x_lags)])
-        }
-      }
-
-      # Supply the intercept parameter to fix the final part of the innovations.
-      placeholder[to_fix[j]] <- inx - intercept
-    }
+  } else {
+    placeholder[!(is.na(rowSums(contains_missing$X)))] <- innovations
   }
-  innovations_fixed <- placeholder[!is.na(placeholder)]
+
+  # Split the relevant data into several components based on the location of 
+  # the missing values. Like for irf_generator, this depends on how you want 
+  # to deal with the missing values: If "partial", then you can first delete the
+  # NAs and then create a list with only one instance. If "listwise", then we 
+  # have to split the data.frame in parts with information that can be used to
+  # compute the left-over innovations. Note that if no action is specified 
+  # ("none"), that we use the same action as the "listwise" one.
+  #
+  # Add the placeholder to these data, making the code as parsimonious as it 
+  # can be
+  data$innovations <- placeholder
+
+  if(na_action %in% "partial") {
+    data_list <- list(
+      data[!is.na(rowSums(data)), ]
+    )
+
+  } else {
+    # Define the points at which to split the data.frame
+    data$missing <- cumsum(is.na(rowSums(data)))
+    data_list <- split(
+      data,
+      data$missing
+    )
+
+    # Loop over the different data.frame's in y and remove the NA values.
+    # Additionally, if there is no data left, then we can remove the whole 
+    # instance in the list
+    data_list <- lapply(
+      data_list, 
+      function(data) {
+        return(
+          data[!is.na(rowSums(data)), ]
+        )
+      }
+    )
+    data_list[sapply(data_list, nrow) == 0] <- NULL
+  }
+
+  # Create matrices that can be used to compute the system responses, depending
+  # on whether x_lags and y_lags is defined
+  if (!is.na(y_lags)) {
+    phi <- matrix(
+      rep(ar_params, each = y_lags),
+      nrow = y_lags,
+      ncol = length(ar_params)
+    )
+    phi[upper.tri(phi, diag = FALSE)] <- 0
+  }
+
+  if (!is.na(x_lags)) {
+    beta <- matrix(
+      rep(x_params, each = x_lags + 1),
+      nrow = x_lags + 1,
+      ncol = length(x_params)
+    )
+    beta[upper.tri(beta, diag = FALSE)] <- 0
+  }
+
+  # Loop over the different parts in the data_list and compute the innovations
+  # that are left to compute
+  innovations_fixed <- lapply(
+    data_list |>
+      `names<-` (NULL), 
+    function(y) {
+      # Get the initial conditions from which to start correcting within the 
+      # dataset
+      y0 <- y$y
+      x0 <- y$x
+
+      # Get the variable itself
+      innovations <- y$innovations
+
+      # Fix the innovations based on these results
+      for(i in seq_along(y0)) {
+        # Check whether you already have a value of the innovations at this 
+        # time point. If so, then we continue
+        if(is.finite(innovations[i])) {
+          next
+        }
+
+        # Define the initial condition to start from
+        inx <- y0[i]
+
+        # Supply the first $p$ values of the outcome variable (set as the vector
+        # y0 above), and use the estimates to fix part of the innovations
+        if (!is.na(y_lags)) {
+          if (i == 1) {
+            inx <- inx - 0
+          } else if (i <= y_lags) {
+            inx <- inx - sum(phi[i - 1, 1:(i - 1)] * y0[(i - 1):1])
+          } else {
+            inx <- inx - sum(phi[nrow(phi), ] * y0[(i - 1):(i - y_lags)])
+          }
+        }
+
+        # Supply the first $p$ values of the covariate variable (set as the vector
+        # x0 above), and use the estimates to fix another part of the innovations
+        if (!is.na(x_lags)) {
+          if (i <= x_lags) {
+            inx <- inx - sum(beta[i, 1:i] * x0[i:1])
+          } else {
+            inx <- inx - sum(beta[nrow(beta), ] * x0[i:(i - x_lags)])
+          }
+        }
+
+        # Supply the intercept parameter to fix the final part of the innovations.
+        innovations[i] <- inx - intercept
+      }
+
+      return(innovations)
+    }
+  )
+  innovations_fixed <- unlist(innovations_fixed)
 
   return(
     list(
