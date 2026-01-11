@@ -651,66 +651,256 @@ test_that(
   }
 )
 
-# Currently not supported, but might be useful to put it back in at some point
-# test_that(
-#   "Testing estimation of parameters and providing own impulses",
-#   {
-#     lags <- c(NA, 1, 2, 3, 4)
-#     lags <- data.frame(
-#       y_lags = rep(lags, each = length(lags)),
-#       x_lags = rep(lags, times = length(lags))
-#     )
+test_that(
+  "Feature: Estimation of parameters and providing own impulses",
+  {
+    # Generate data
+    data <- irf_generator(
+      intercept = 5, 
+      ar_params = c(0.5, 0.25, 0.1),
+      x_params <- c(2, 1, 0.5),
+      x = rnorm(100),
+      innovations = rnorm(100)
+    )$irf
 
-#     tst_y <- tst_x <- matrix(
-#       FALSE,
-#       nrow = length(parameters),
-#       ncol = nrow(lags)
-#     )
+    # Estimate data and generate impulse responses
+    tst <- irf_empirical(
+      data, 
+      cols = c("irf", "x"),
+      x_lags = 0, 
+      y_lags = 1,
+      x = impulse(10),
+      innovations = impulse(10),
+      burnin = TRUE,
+      confidence_intervals = FALSE
+    )
 
-#     # Idea behind this test: We should be able to exactly replicate the observed
-#     # data `y` if we correctly compute the innovations in `estimate`. innovations
-#     # and other impulse response functions may deviate, however, due to nonexact
-#     # recovery of the parameters.
-#     #
-#     # To make this point even clearer, This analysis is done for different types
-#     # of models that do not necessarily correspond to the original generating
-#     # model
-#     set.seed(1)
-#     for(i in seq_along(parameters)) {
-#       # Generate data
-#       y <- irf(
-#         intercept = parameters[[i]]$intercept,
-#         x_params = parameters[[i]]$x,
-#         ar_params = parameters[[i]]$eps,
-#         x = rnorm(100),
-#         innovations = rnorm(100)
-#       )$irf
+    # Test basic features of the output
+    expect_equal(
+      tst$irf$x, 
+      impulse(10)
+    )
+    expect_equal(
+      tst$irf$x, 
+      impulse(10)
+    )
 
-#       # Loop over all possibilities of the lags
-#       for(j in seq_len(nrow(lags))) {
-#         # Create current impulses from a normal distribution. Provides a stronger
-#         # check for whether the correct information is passed on to the
-#         # correct functions.
-#         impulses <- rnorm(100)
+    # Compute what these responses should be like
+    expect_equal(
+      tst$irf$irf_v, 
+      tst$ar_params^seq(0, 9, 1)
+    )
+    expect_equal(
+      tst$irf$irf_x, 
+      tst$x_params * tst$ar_params^seq(0, 9, 1)
+    )
+  }
+)
 
-#         # Estimate the parameters and retrieve the results
-#         results <- irf(
-#           y,
-#           cols = c("irf", "x"),
-#           y_lags = lags$y_lags[j],
-#           x_lags = ifelse(is.na(lags$x_lags[j]), NA, lags$x_lags[j] - 1),
-#           x = impulses,
-#           innovations = impulses
-#         )$irf
+test_that(
+  "Feature: Estimation of parameters and decomposing the observations",
+  {
+    # Generate data
+    data <- irf_generator(
+      intercept = 5, 
+      ar_params = c(0.5, 0.25, 0.1),
+      x_params <- c(2, 1, 0.5),
+      x = rnorm(100),
+      innovations = rnorm(100)
+    )$irf
 
-#         # Check whether `x` and `innovations` are correctly passed on
-#         tst_y[i, j] <- all(results$x == impulses)
-#         tst_x[i, j] <- all(results$innovations == impulses)
-#       }
-#     }
+    # Estimate data and generate impulse responses
+    tst <- irf_empirical(
+      data, 
+      cols = c("irf", "x"),
+      x_lags = 2, 
+      y_lags = 2,
+      confidence_intervals = FALSE
+    )
 
-#     # Do the actual check
-#     expect_true(all(tst_y))
-#     expect_true(all(tst_x))
-#   }
-# )
+    # Check whether the decomposed value for the system responses is the same 
+    # as for the observed data
+    expect_equal(
+      data$irf, 
+      tst$irf$irf
+    )
+    expect_equal(
+      data$x, 
+      tst$irf$x
+    )
+  }
+)
+
+test_that(
+  "Feature: Estimation of parameters and providing own impulses, with NAs (listwise)",
+  {
+    # Generate data
+    data <- irf_generator(
+      intercept = 5, 
+      ar_params = c(0.5, 0.25, 0.1),
+      x_params <- c(2, 1, 0.5),
+      x = rnorm(100),
+      innovations = rnorm(100)
+    )$irf
+    data$irf[c(10, 11, 12, 25)] <- NA
+
+    # Estimate data and generate impulse responses
+    tst <- irf_empirical(
+      data, 
+      cols = c("irf", "x"),
+      x_lags = 0, 
+      y_lags = 1,
+      x = impulse(10),
+      innovations = impulse(10),
+      burnin = TRUE,
+      na_action = "listwise",
+      confidence_intervals = FALSE
+    ) |>
+      suppressWarnings()
+
+    # Test basic features of the output
+    expect_equal(
+      tst$irf$x, 
+      impulse(10)
+    )
+    expect_equal(
+      tst$irf$x, 
+      impulse(10)
+    )
+
+    # Compute what these responses should be like
+    expect_equal(
+      tst$irf$irf_v, 
+      tst$ar_params^seq(0, 9, 1)
+    )
+    expect_equal(
+      tst$irf$irf_x, 
+      tst$x_params * tst$ar_params^seq(0, 9, 1)
+    )
+  }
+)
+
+test_that(
+  "Feature: Estimation of parameters and decomposing the observations, with NAs (listwise)",
+  {
+    # Generate data
+    data <- irf_generator(
+      intercept = 5, 
+      ar_params = c(0.5, 0.25, 0.1),
+      x_params <- c(2, 1, 0.5),
+      x = rnorm(100),
+      innovations = rnorm(100)
+    )$irf
+    data$irf[c(10, 11, 12, 25)] <- NA
+
+    # Estimate data and generate impulse responses
+    tst <- irf_empirical(
+      data, 
+      cols = c("irf", "x"),
+      x_lags = 2, 
+      y_lags = 2,
+      na_action = "listwise",
+      confidence_intervals = FALSE
+    ) |>
+      suppressWarnings()
+
+    # Check whether the decomposed value for the system responses is the same 
+    # as for the observed data
+    idx <- !is.na(data$irf)
+    expect_equal(
+      data$irf[idx], 
+      tst$irf$irf
+    )
+    expect_equal(
+      data$x[idx], 
+      tst$irf$x
+    )
+  }
+)
+
+test_that(
+  "Feature: Estimation of parameters and providing own impulses, with NAs (partial)",
+  {
+    # Generate data
+    data <- irf_generator(
+      intercept = 5, 
+      ar_params = c(0.5, 0.25, 0.1),
+      x_params <- c(2, 1, 0.5),
+      x = rnorm(100),
+      innovations = rnorm(100)
+    )$irf
+    data$irf[c(10, 11, 12, 25)] <- NA
+
+    # Estimate data and generate impulse responses
+    tst <- irf_empirical(
+      data, 
+      cols = c("irf", "x"),
+      x_lags = 0, 
+      y_lags = 1,
+      x = impulse(10),
+      innovations = impulse(10),
+      burnin = TRUE,
+      na_action = "partial",
+      confidence_intervals = FALSE
+    ) |>
+      suppressWarnings()
+
+    # Test basic features of the output
+    expect_equal(
+      tst$irf$x, 
+      impulse(10)
+    )
+    expect_equal(
+      tst$irf$x, 
+      impulse(10)
+    )
+
+    # Compute what these responses should be like
+    expect_equal(
+      tst$irf$irf_v, 
+      tst$ar_params^seq(0, 9, 1)
+    )
+    expect_equal(
+      tst$irf$irf_x, 
+      tst$x_params * tst$ar_params^seq(0, 9, 1)
+    )
+  }
+)
+
+test_that(
+  "Feature: Estimation of parameters and decomposing the observations, with NAs (partial)",
+  {
+    # Generate data
+    data <- irf_generator(
+      intercept = 5, 
+      ar_params = c(0.5, 0.25, 0.1),
+      x_params <- c(2, 1, 0.5),
+      x = rnorm(100),
+      innovations = rnorm(100)
+    )$irf
+    data$irf[c(10, 11, 12, 25)] <- NA
+
+    # Estimate data and generate impulse responses
+    tst <- irf_empirical(
+      data, 
+      cols = c("irf", "x"),
+      x_lags = 2, 
+      y_lags = 2,
+      na_action = "partial",
+      confidence_intervals = FALSE
+    ) |>
+      suppressWarnings()
+
+    # Check whether the decomposed value for the system responses is the same 
+    # as for the observed data
+    idx <- !is.na(data$irf)
+    expect_equal(
+      data$irf[idx], 
+      tst$irf$irf
+    )
+    expect_equal(
+      data$x[idx], 
+      tst$irf$x
+    )
+  }
+)
