@@ -224,24 +224,6 @@ test_that(
       data$y
     )
 
-    # NAs in data in `compute_input`. Also testing output
-    expect_warning(
-      compute_input(
-        data,
-        ar_params = c(0.5, 0.25),
-        x_params = c(2, 2)
-      )
-    )
-
-    tst <- suppressWarnings(
-      compute_input(
-        data,
-        ar_params = c(0.5, 0.25),
-        x_params = c(2, 2)
-      )
-    )
-    expect_equal(length(tst), 100)
-
     # NAs in data in `prepare_data`. Also testing output
     expect_warning(
       prepare_data(
@@ -258,7 +240,7 @@ test_that(
         y_lags = 2
       )
     )
-    expect_equal(names(tst), c("y", "X"))
+    expect_equal(names(tst), c("y", "X", "missing"))
     expect_equal(nrow(tst$X), 92)
     expect_equal(length(tst$y), 92)
   }
@@ -308,7 +290,7 @@ test_that(
 )
 
 test_that(
-  "Testing creation of initial conditions",
+  "Testing fixing of innovations, without NAs",
   {
     lags <- c(NA, 1, 2, 3, 4)
     lags <- data.frame(
@@ -358,8 +340,8 @@ test_that(
             intercept = results$intercept,
             x_params = results$x_params,
             ar_params = results$ar_params,
-            x = results$x,
-            innovations = results$innovations,
+            data = y, 
+            cols = c("irf", "x"),
             burnin = FALSE
           )$irf
         )
@@ -368,6 +350,154 @@ test_that(
         # `x`
         tst_y[i, j] <- all(results$irf == y$y)
         tst_x[i, j] <- all(results$x == y$x)
+      }
+    }
+
+    # Do the actual check
+    expect_true(all(tst_y))
+    expect_true(all(tst_x))
+  }
+)
+
+test_that(
+  "Testing fixing of innovations, with NAs (listwise)",
+  {
+    lags <- c(NA, 1, 2, 3, 4)
+    lags <- data.frame(
+      y_lags = rep(lags, each = length(lags)),
+      x_lags = rep(lags, times = length(lags))
+    )
+
+    tst_y <- tst_x <- matrix(
+      FALSE,
+      nrow = length(parameters),
+      ncol = nrow(lags)
+    )
+
+    # Idea behind this test: We should be able to exactly replicate the observed
+    # data `y` if we correctly compute the innovations in `estimate`. innovations
+    # and other impulse response functions may deviate, however, due to nonexact
+    # recovery of the parameters.
+    #
+    # To make this point even clearer, This analysis is done for different types
+    # of models that do not necessarily correspond to the original generating
+    # model
+    for (i in seq_along(parameters)) {
+      # Generate data
+      y <- suppressWarnings(
+        irf_generator(
+          intercept = parameters[[i]]$intercept,
+          x_params = parameters[[i]]$x,
+          ar_params = parameters[[i]]$eps,
+          x = rnorm(50),
+          innovations = rnorm(50)
+        )$irf
+      )
+      y[c(10, 11, 12, 25), ] <- NA
+
+      # Loop over all possibilities of the lags
+      for (j in seq_len(nrow(lags))) {
+        # Estimate the parameters and retrieve the results
+        results <- estimate(
+          y,
+          cols = c("irf", "x"),
+          y_lags = lags$y_lags[j],
+          x_lags = ifelse(is.na(lags$x_lags[j]), NA, lags$x_lags[j] - 1),
+          na_action = "listwise"
+        ) |>
+          suppressWarnings()
+
+        # Create the impulse response functions
+        results <- suppressWarnings(
+          irf_generator(
+            intercept = results$intercept,
+            x_params = results$x_params,
+            ar_params = results$ar_params,
+            data = y, 
+            cols = c("irf", "x"),
+            na_action = "listwise",
+            burnin = FALSE
+          )$irf
+        )
+
+        # Check whether `irf` corresponds to `y`, and whether `x` corresponds to
+        # `x`
+        tst_y[i, j] <- all(results$irf == y$y[!is.na(y$y)])
+        tst_x[i, j] <- all(results$x == y$x[!is.na(y$y)])
+      }
+    }
+
+    # Do the actual check
+    expect_true(all(tst_y))
+    expect_true(all(tst_x))
+  }
+)
+
+test_that(
+  "Testing fixing of innovations, with NAs (partial)",
+  {
+    lags <- c(NA, 1, 2, 3, 4)
+    lags <- data.frame(
+      y_lags = rep(lags, each = length(lags)),
+      x_lags = rep(lags, times = length(lags))
+    )
+
+    tst_y <- tst_x <- matrix(
+      FALSE,
+      nrow = length(parameters),
+      ncol = nrow(lags)
+    )
+
+    # Idea behind this test: We should be able to exactly replicate the observed
+    # data `y` if we correctly compute the innovations in `estimate`. innovations
+    # and other impulse response functions may deviate, however, due to nonexact
+    # recovery of the parameters.
+    #
+    # To make this point even clearer, This analysis is done for different types
+    # of models that do not necessarily correspond to the original generating
+    # model
+    for (i in seq_along(parameters)) {
+      # Generate data
+      y <- suppressWarnings(
+        irf_generator(
+          intercept = parameters[[i]]$intercept,
+          x_params = parameters[[i]]$x,
+          ar_params = parameters[[i]]$eps,
+          x = rnorm(50),
+          innovations = rnorm(50)
+        )$irf
+      )
+      y[c(10, 11, 12, 25), ] <- NA
+
+      # Loop over all possibilities of the lags
+      for (j in seq_len(nrow(lags))) {
+        # Estimate the parameters and retrieve the results
+        results <- estimate(
+          y,
+          cols = c("irf", "x"),
+          y_lags = lags$y_lags[j],
+          x_lags = ifelse(is.na(lags$x_lags[j]), NA, lags$x_lags[j] - 1),
+          na_action = "partial"
+        ) |>
+          suppressWarnings()
+
+        # Create the impulse response functions
+        results <- suppressWarnings(
+          irf_generator(
+            intercept = results$intercept,
+            x_params = results$x_params,
+            ar_params = results$ar_params,
+            data = y, 
+            cols = c("irf", "x"),
+            na_action = "partial",
+            burnin = FALSE
+          )$irf
+        )
+
+        # Check whether `irf` corresponds to `y`, and whether `x` corresponds to
+        # `x`
+        tst_y[i, j] <- all(results$irf == y$y[!is.na(y$y)])
+        tst_x[i, j] <- all(results$x == y$x[!is.na(y$y)])
       }
     }
 
@@ -431,7 +561,7 @@ test_that(
           x_params = results$x_params,
           ar_params = results$ar_params,
           innovations = NULL
-        ) |>
+        )$innovations |>
           suppressWarnings()
 
         # Check whether the computed innovations are the same in both cases
