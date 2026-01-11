@@ -171,6 +171,11 @@ irf_generator <- function(
       stop("Columns specified in `cols` cannot be found in the supplied dataframe.")
     }
 
+    # Redefine the data so that it fits our internal structure
+    data <- data[, cols] |>
+      `colnames<-` (c("y", "x"))
+    cols <- c("y", "x")
+
     # Define a time-variable. Is used later on when creating the results of this
     # function
     time_variable <- 1:nrow(data)
