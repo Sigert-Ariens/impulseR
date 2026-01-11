@@ -284,23 +284,6 @@ bootstrap <- function(
       ar_params <- as.numeric(ar_params[i, ])
       x_params <- as.numeric(x_params[i, ])
       
-      # Fix the innovations for this bootstrap. If innovations are provided by 
-      # the user, then these innovations are just returned. If not, then it will
-      # compute the innovations for the data that are provided as to accurately 
-      # decompose the system responses. This step is always relevant, but 
-      # especially when NAs are found in the data!
-      if(!is.null(data)) {
-        innovations <- compute_input(
-          data = data, 
-          cols = cols,
-          intercept = intercept, 
-          ar_params = ar_params, 
-          x_params = x_params,
-          na_action = na_action
-        ) |>
-          suppressWarnings()
-      }
-
       # Use irf_generator to generate the system responses according to this 
       # new set of parameters. Extract only the impulse responses
       responses <- irf_generator(
@@ -309,6 +292,7 @@ bootstrap <- function(
         x_params = x_params,
         x = x, #MAKE XGEN
         innovations = innovations,
+        data = data,
         na_action = na_action,
         cols = cols,
         burnin = burnin
