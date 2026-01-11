@@ -227,7 +227,7 @@ compute_input <- function(
     return(
       list(
         "innovations" = innovations,
-        "x" = x
+        "x" = data$x
       )
     )
   }
