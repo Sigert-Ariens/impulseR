@@ -707,8 +707,8 @@ test_that(
       intercept = 0, 
       ar_params = c(0.75, 0.2),
       x_params = c(2, 1),
-      x = rnorm(100),
-      innovations = rnorm(100)
+      x = rnorm(250),
+      innovations = rnorm(250)
     )$irf
 
     # Estimate the system responses without NAs, for burnin being FALSE or TRUE
@@ -735,7 +735,7 @@ test_that(
     )$irf
 
     # Add random missing values
-    idx <- sample(1:100, 10, replace = FALSE)
+    idx <- sample(1:nrow(data), 10, replace = FALSE)
     data[idx, ] <- NA
 
     # Use irf_empirical without burnin
