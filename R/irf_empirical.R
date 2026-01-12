@@ -79,21 +79,21 @@
 #'
 #' colnames(data) <- c("dependent", "independent")
 #'
-#' # Fit a lag-2 ADL model to the data and calculate the cumulative responses
+#' # Fit a lag-1 ADL model to the data and calculate the cumulative responses
 #' result <- irf_empirical(
 #'   data = data,
 #'   cols = c("dependent", "independent"),
-#'   y_lags = 2,
-#'   x_lags = 2
+#'   y_lags = 1,
+#'   x_lags = 1
 #' )
 #' 
-#' # Fit an ADL(2, 2) and approximate the 99% confidence interval around the 
+#' # Fit an ADL(1, 1) and approximate the 99% confidence interval around the 
 #' # cumulative responses through a bootstrap with 1000 samples
 #' result <- irf_empirical(
 #'   data = data,
 #'   cols = c("dependent", "independent"),
-#'   y_lags = 2,
-#'   x_lags = 2,
+#'   y_lags = 1,
+#'   x_lags = 1,
 #'   confidence_interval = TRUE,
 #'   alpha = 0.01,
 #'   N = 1000
