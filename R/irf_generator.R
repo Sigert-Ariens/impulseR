@@ -171,9 +171,80 @@ irf_generator <- function(
       stop("Columns specified in `cols` cannot be found in the supplied dataframe.")
     }
 
-    # If found, then we extract the covariate x and compute the innovations
-    x <- data[, cols[2]]
-    innovations <- compute_innovations(
+    # Redefine the data so that it fits our internal structure
+    data <- data[, cols] |>
+      `colnames<-` (c("y", "x"))
+    cols <- c("y", "x")
+
+    # Define a time-variable. Is used later on when creating the results of this
+    # function
+    time_variable <- 1:nrow(data)
+    time_variable <- time_variable[!is.na(rowSums(data))]
+
+    # Define the lags in x and y based on the parameters that are provided.
+    x_lags <- ifelse(
+      (x_params[1] != 0),
+      length(x_params) - 1,
+      NA
+    )
+    y_lags <- ifelse(
+      (ar_params[1] != 0),
+      length(ar_params),
+      NA
+    )
+
+    # Divide up the data in different parts based on missing values (if present).
+    #
+    # Note that we require different approaches because of different na_actions.
+    # Specifically, when the na_action is "partial", then we bridge missing 
+    # values by coupling to non-consecutive observations to each other. In this
+    # case, irf_generator will automatically lead to the correct solution and 
+    # we can ask `prepare_data` to just delete the missing values altogether
+    # (specifying na_action = "partial").
+    #
+    # If NA deletion is done in a listwise fashion, however, then we need the 
+    # NAs to be present in the prepared values of y so that we can correctly 
+    # relate innovations and x (as coming from `compute_input`) to the values 
+    # of y in the dataset, correctly doing the decomposition. If this is the 
+    # case, then we will create a list of the data split at exactly those values
+    # that are missing, which can then be taken into account when computing the 
+    # system responses.
+    if(na_action %in% "partial") {
+      y <- list(data$y[!is.na(rowSums(data))])
+
+    } else {
+      # Define the points at which to split the data.frame
+      data$missing <- cumsum(is.na(rowSums(data)))
+      y <- split(
+        data,
+        data$missing
+      )
+
+      # Loop over the different data.frame's in y and remove the NA values.
+      # Additionally, if there is no data left, then we can remove the whole 
+      # instance in the list
+      y <- lapply(
+        y, 
+        function(data) {
+          return(
+            data$y[!is.na(rowSums(data))]
+          )
+        }
+      )
+      y[sapply(y, length) == 0] <- NULL
+    }
+
+    # Compute the indices that we need to compute the system responses. These 
+    # define which values for the covariate and for the innovations can be 
+    # used to decompose the observed values in y correctly and while keeping the
+    # preferred na_action in mind. These indices consist of a starting value and 
+    # an ending value in the first and second column resp.
+    indices <- sapply(y, length) |>
+      `names<-` (NULL)
+
+    # Compute the covariate and the innovations based on the data and the taken
+    # NA action. 
+    input <- compute_input(
       data,
       cols = cols,
       intercept = intercept,
@@ -182,6 +253,20 @@ irf_generator <- function(
       innovations = innovations,
       na_action = na_action
     )
+    x <- input$x
+    innovations <- input$innovations
+
+  # We also define the indices for the loop in case either the data are not 
+  # defined or the innovations and x are already provided by the user. This 
+  # allows us to use the same code for both cases instead of having to create 
+  # separate functions: The indices will be used in either cases to define 
+  # which innovations and/or covariates should be used for the necessary
+  # computations.
+  #
+  # Note that we do not need to know how the exact indices here, as the for-loop
+  # automatically stops whenever we reach the end. 
+  } else {
+    indices <- Inf
   }
 
   # Check whether x or innovations (or both) are provided. If not, then we have to
@@ -216,7 +301,7 @@ irf_generator <- function(
   # Check for NAs
   if (any(is.na(innovations)) | any(is.na(x))) {
     warning(
-      "NAs found in the provided `x` and/or `innovations`. Deleting them in a listwise fashion."
+      "NAs found in the provided `x` and/or `innovations`. Deleting them from the vectors."
     )
 
     idx <- !is.na(innovations) & !is.na(x)
@@ -243,68 +328,119 @@ irf_generator <- function(
   # After all these manipulations, you can proceed with the algebra.
   nt <- length(x)
 
-  # Use Equation 26 to generate the impulse response function for the innovations
-  #
-  # Create a matrix to avoid double for loops
+  # Create matrices of the parameters to avoid double for-loops. One matrix 
+  # contains the AR parameters while the other contains the covariate parameters
   p <- length(ar_params)
   phi <- rep(ar_params, each = p) |>
     matrix(nrow = p, ncol = p)
   phi[upper.tri(phi)] <- 0
 
-  # Initialize theta
-  theta <- numeric(nt)
-  theta[1] <- 1
-
-  # Loop over the datapoints and apply Equation 26 to get \theta.
-  for (k in 2:nt) {
-    if (k - p < 1) {
-      terms <- phi[(k - 1), 1:(k - 1)] %*% theta[(k - 1):1]
-    } else {
-      terms <- phi[p, ] %*% theta[(k - 1):(k - p)]
-    }
-
-    theta[k] <- sum(terms)
-  }
-
-  # Use Equations 30 and 33 to generate the impulse response function towards the
-  # covariate
-  #
-  # Create a matrix to avoid double for loops
   q <- length(x_params)
   beta <- rep(x_params, each = q) |>
     matrix(nrow = q, ncol = q)
   beta[upper.tri(beta)] <- 0
 
-  # Initialize psi and loop over the data, applying Equation 33 to get
-  # \psi
-  psi <- numeric(nt)
+  # Split the values for the innovations and covariates into separate lists, 
+  # similar to how the indices are used. This will allow a close mapping of these
+  # values to those parts that are relevant. In case there are no NAs in either
+  # the data or the provided innovations/x, then this step does not really 
+  # matter. However, in case of data with NAs, this step is crucial to get the 
+  # correct results
+  indices[is.infinite(indices)] <- nt
+  idx <- cbind(
+    c(0, cumsum(indices[2:length(indices) - 1])) + 1, 
+    cumsum(indices)
+  )
 
-  for (k in 1:nt) {
-    if (k - q < 1) {
-      terms <- beta[k, 1:k] %*% theta[k:1]
-    } else {
-      terms <- beta[q, ] %*% theta[k:(k - q + 1)]
+  x <- lapply(
+    seq_len(nrow(idx)),
+    function(i) x[idx[i, 1]:idx[i, 2]]
+  )
+  innovations <- lapply(
+    seq_len(nrow(idx)),
+    function(i) innovations[idx[i, 1]:idx[i, 2]]
+  )
+
+  # Loop over the previously defined indices. Specifically, we loop over the rows
+  # within this matrix to ensure that each part (as separated by potential NAs)
+  # is handled separately for computing the system responses.
+  responses <- lapply(
+    seq_along(indices),
+    function(i) {
+      # Define the ending index the second loop should go
+      end <- min(indices[i], nt)
+
+      # Extract the values for the innovations and the covariates which are 
+      # relevant for this part of the data (or for the response as a whole, 
+      # depending on the user's arguments)
+      x_i <- x[[i]]
+      innovations_i <- innovations[[i]]
+
+      # Based on this index, allocate memory for local definitions of theta and 
+      # psi, which will contain the system responses for the innovations and 
+      # covariates respectively
+      theta <- numeric(end)
+      psi <- numeric(end)
+
+      # Perform the second loop within which system responses will be handled.
+      for(j in seq_len(end)) {
+        # Apply Equation 26 to get \theta, that is the system responses in response
+        # to the innovations. Note that \theta is 1 for the first iteration, and
+        # only partially complete for the first few observations (as long as j is
+        # smaller than the number of lags)
+        if(j == 1) {
+          terms <- 1
+        } else if(j <= p) {
+          terms <- phi[(j - 1), 1:(j - 1)] %*% theta[(j - 1):1]
+        } else {
+          terms <- phi[p, ] %*% theta[(j - 1):(j - p)]
+        }
+        theta[j] <- sum(terms)
+
+        # Apply Equation 30 and 33 to get \psi, that is the system responses in 
+        # response to the covariate. Note that \psi is only partially complete 
+        # for the first few observations (as long j is smaller than the number of 
+        # lags)
+        if (j <= q) {
+          terms <- beta[j, 1:j] %*% theta[j:1]
+        } else {
+          terms <- beta[q, ] %*% theta[j:(j - q + 1)]
+        }
+        psi[j] <- sum(terms)
+      }
+
+      # Once defined, compute the system responses. Set up some of the output 
+      # variables and do the one-sided convolutions of \psi with the values of x 
+      # and of \theta with the values of the innovations \epsilon. We do this 
+      # based on Equation 20, where:
+      #
+      #   irf_x = \sum \psi_k L^k x_t
+      #   irf_v= \sum \theta_k L^k v_t
+      #   irf_\text{intercept} = \sum \alpha \theta_k L^k 1_t
+      #
+      # It is these sums that we are computing here. Note that this is also 
+      # equivalent to Equation 38, which makes explicit use of the impulse 
+      # response notation.
+      irf_x <- irf_v <- irf_intercept <- numeric(end)
+      for (t in seq_len(end)) {
+        irf_x[t] <- sum(psi[1:t] * x_i[t:1])
+        irf_v[t] <- sum(theta[1:t] * innovations_i[t:1])
+        irf_intercept[t] <- sum(theta[1:t] * intercept)
+      }
+
+      # Once performed, put everything in a data.frame and return
+      return(
+        data.frame(
+          "irf_intercept" = irf_intercept,
+          "irf_x" = irf_x,
+          "irf_v" = irf_v,
+          "x" = x_i,
+          "innovations" = innovations_i
+        )
+      )
     }
-
-    psi[k] <- sum(terms)
-  }
-
-  # Set up some of the output variables and do the one-sided convolutions of
-  # \psi with the values of x and of \theta with the values of the innovations
-  # \epsilon. We do this based on Equation 20, where:
-  #
-  #   irf_x = \sum \psi_k L^k x_t
-  #   irf_v= \sum \theta_k L^k v_t
-  #   irf_\text{intercept} = \sum \alpha \theta_k L^k 1_t
-  #
-  # It is these sums that we are computing here. Note that this is also equivalent
-  # to Equation 38, which makes explicit use of the impulse response notation.
-  irf_x <- irf_v <- irf_intercept <- numeric(nt)
-  for (t in 1:nt) {
-    irf_x[t] <- sum(psi[1:t] * x[t:1])
-    irf_v[t] <- sum(theta[1:t] * innovations[t:1])
-    irf_intercept[t] <- sum(theta[1:t] * intercept)
-  }
+  )
+  responses <- do.call("rbind", responses)
 
   # Use these sums to generate y_t, following Equation 38. First, decide what
   # to do with the intercept based on the argument `burnin`. If `burnin = TRUE`,
@@ -315,22 +451,21 @@ irf_generator <- function(
   #
   # Otherwise, you keep the sum as defined above.
   if (burnin) {
-    irf_intercept[] <- intercept / (1 - sum(ar_params))
+    responses$irf_intercept[] <- intercept / (1 - sum(ar_params))
   }
 
-  y <- irf_x + irf_v + irf_intercept
+  responses$irf <- responses$irf_x + responses$irf_v + responses$irf_intercept
 
-  # Prepare the output data: Add the time index, the individual impulse
-  # response functions cumulative responses, and the total output y_{t}
-  irf <- data.frame(
-    "time" = 1:nt - 1,
-    "irf" = y,
-    "irf_intercept" = irf_intercept,
-    "irf_x" = irf_x,
-    "irf_v" = irf_v,
-    "x" = x,
-    "innovations" = innovations
-  )
+  # Add the time variable to this data.frame
+  if(exists("time_variable")) {
+    responses$time <- time_variable
+  } else {
+    responses$time <- 1:nrow(responses) - 1
+  }
+
+  # Rearrange the columns of the data.frame
+  cols <- c("time", "irf", "irf_intercept", "irf_x", "irf_v", "x", "innovations")
+  responses <- responses[, cols]
 
   return(
     list(
@@ -338,7 +473,7 @@ irf_generator <- function(
       "intercept" = intercept,
       "x_params" = x_params,
       "ar_params" = ar_params,
-      "irf" = irf
+      "irf" = responses
     )
   )
 }
