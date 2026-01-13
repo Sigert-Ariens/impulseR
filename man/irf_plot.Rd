@@ -31,7 +31,7 @@ irf_plot(
   intercept.color = "gray",
   intercept.linetype = "solid",
   intercept.linewidth = 1,
-  intercept.label = "h[1] \%*\% 1",
+  intercept.label = "(h[1] ~ symbol('*') ~ 1)[t]",
   impulse.size = 2,
   impulse.shape = 19,
   impulse.x.shape = impulse.shape,
