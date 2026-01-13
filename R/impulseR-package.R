@@ -7,5 +7,7 @@
 
 ## usethis namespace: start
 #' @importFrom rlang .data
+#' @import graphics
+#' @import stats
 ## usethis namespace: end
 NULL
