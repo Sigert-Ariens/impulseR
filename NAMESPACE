@@ -2,6 +2,7 @@
 
 export(bootstrap)
 export(compute_input)
+export(diag_plot)
 export(estimate)
 export(impulse)
 export(irf_empirical)
