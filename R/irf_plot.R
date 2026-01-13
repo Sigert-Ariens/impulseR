@@ -126,7 +126,7 @@ irf_plot <- function(
   intercept.color = "gray",
   intercept.linetype = "solid",
   intercept.linewidth = 1,
-  intercept.label = "h[1] %*% 1",
+  intercept.label = "(h[1] ~ symbol('*') ~ 1)[t]",
   impulse.size = 2,
   impulse.shape = 19,
   impulse.x.shape = impulse.shape,
@@ -289,7 +289,7 @@ irf_plot <- function(
         "h[v](s)",
         "h[v](s)*v[0]"
       ),
-      "(h[v] ~ symbol('*') ~ v)"
+      "(h[v] ~ symbol('*') ~ v)[t]"
     )
   }
 

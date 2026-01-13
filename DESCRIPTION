@@ -60,6 +60,7 @@ Collate:
     'irf_empirical.R'
     'impulse.R'
     'bootstrap.R'
+    'diag_plot.R'
     'irf_plot.R'
 Suggests: 
     fs,
