@@ -474,8 +474,65 @@ test_that(
   }
 )
 
+test_that(
+  "Testing whether denoting the innovation type works",
+  {
+    # Define some lags for which to provide a test with `irf_empirical`
+    x_lags <- c(NA, 1, 2, 3)
+    y_lags <- c(NA, 1, 2, 3)
 
-# TEST MISSING VALUES: LISTWISE VS PARTIAL AND GETTING BACK THE VALUES NEEDED
+    combinations <- cbind(
+      rep(x_lags, each = length(y_lags)),
+      rep(y_lags, times = length(x_lags))
+    )
+
+    # Generate a dataset
+    data <- irf_generator(
+      intercept = 0, 
+      x_params = c(1, 0.2, -0.1, 0.05),
+      ar_params = c(0.3, -0.1, 0.2, 0.05),
+      x = rnorm(100),
+      innovations = rnorm(100)
+    )$irf
+
+    # Perform the test
+    tst <- logical(nrow(combinations))
+    for(i in seq_len(nrow(combinations))) {
+      # Generate system responses through irf_generator
+      result <- irf_empirical(
+        data, 
+        cols = c("irf", "x"),
+        x_lags = combinations[i, 1],
+        y_lags = combinations[i, 2]
+      )$irf
+
+      # Check which ones are initial conditions and which ones are residuals
+      n <- max(c(0, combinations[i, ]), na.rm = TRUE)
+      ref <- c(rep("initial", n), rep("residual", 100 - n))
+
+      tst[i] <- all(result$innovation_type == ref)
+    }
+
+    # Do the test itself
+    expect_true(all(tst))
+
+    # When providing the innovations yourselves, you should not have the column
+    # in the output
+    tst <- irf_empirical(
+      data, 
+      cols = c("irf", "x"),
+      x_lags = combinations[i, 1],
+      y_lags = combinations[i, 2],
+      x = rnorm(10),
+      innovations = rnorm(10)
+    )
+    expect_true(!("innovation_type" %in% colnames(tst$irf)))
+  }
+)
+
+
+
+# Tests for missing values
 test_that(
   "Computing system responses for data with NA works: Listwise deletion",
   {
@@ -611,5 +668,134 @@ test_that(
       tst$irf$irf, 
       data$y[!is.na(data$y)]
     )
+  }
+)
+
+test_that(
+  "Testing whether denoting the innovation type works with missing values: listwise",
+  {
+    # Define some lags for which to provide a test with `irf_empirical`
+    x_lags <- c(NA, 1, 2, 3)
+    y_lags <- c(NA, 1, 2, 3)
+
+    combinations <- cbind(
+      rep(x_lags, each = length(y_lags)),
+      rep(y_lags, times = length(x_lags))
+    )
+
+    # Generate a dataset
+    data <- irf_generator(
+      intercept = 0, 
+      x_params = c(1, 0.2, -0.1, 0.05),
+      ar_params = c(0.3, -0.1, 0.2, 0.05),
+      x = rnorm(100),
+      innovations = rnorm(100)
+    )$irf
+
+    # Add a missing datapoint in there
+    data[50, ] <- NA
+
+    # Perform the test
+    tst <- logical(nrow(combinations))
+    for(i in seq_len(nrow(combinations))) {
+      # Generate system responses through irf_generator
+      result <- irf_empirical(
+        data, 
+        cols = c("irf", "x"),
+        x_lags = combinations[i, 1],
+        y_lags = combinations[i, 2],
+        na_action = "listwise"
+      )$irf |>
+        suppressWarnings()
+
+      # Check which ones are initial conditions and which ones are residuals
+      n <- max(c(0, combinations[i, ]), na.rm = TRUE)
+      ref <- c(
+        rep("initial", n), 
+        rep("residual", 49 - n),
+        rep("initial", n),
+        rep("residual", 50 - n)
+      )
+
+      tst[i] <- all(result$innovation_type == ref)
+    }
+
+    # Do the test itself
+    expect_true(all(tst))
+
+    # When providing the innovations yourselves, you should not have the column
+    # in the output
+    tst <- irf_empirical(
+      data, 
+      cols = c("irf", "x"),
+      x_lags = combinations[i, 1],
+      y_lags = combinations[i, 2],
+      x = rnorm(10),
+      innovations = rnorm(10)
+    ) |>
+      suppressWarnings()
+    expect_true(!("innovation_type" %in% colnames(tst$irf)))
+  }
+)
+
+test_that(
+  "Testing whether denoting the innovation type works with missing values: partial",
+  {
+    # Define some lags for which to provide a test with `irf_empirical`
+    x_lags <- c(NA, 1, 2, 3)
+    y_lags <- c(NA, 1, 2, 3)
+
+    combinations <- cbind(
+      rep(x_lags, each = length(y_lags)),
+      rep(y_lags, times = length(x_lags))
+    )
+
+    # Generate a dataset
+    data <- irf_generator(
+      intercept = 0, 
+      x_params = c(1, 0.2, -0.1, 0.05),
+      ar_params = c(0.3, -0.1, 0.2, 0.05),
+      x = rnorm(100),
+      innovations = rnorm(100)
+    )$irf
+
+    # Add a missing datapoint in there
+    data[50, ] <- NA
+
+    # Perform the test
+    tst <- logical(nrow(combinations))
+    for(i in seq_len(nrow(combinations))) {
+      # Generate system responses through irf_generator
+      result <- irf_empirical(
+        data, 
+        cols = c("irf", "x"),
+        x_lags = combinations[i, 1],
+        y_lags = combinations[i, 2],
+        na_action = "partial"
+      )$irf |>
+        suppressWarnings()
+
+      # Check which ones are initial conditions and which ones are residuals
+      n <- max(c(0, combinations[i, ]), na.rm = TRUE)
+      ref <- c(rep("initial", n), rep("residual", 99 - n))
+
+      tst[i] <- all(result$innovation_type == ref)
+    }
+
+    # Do the test itself
+    expect_true(all(tst))
+
+    # When providing the innovations yourselves, you should not have the column
+    # in the output
+    tst <- irf_empirical(
+      data, 
+      cols = c("irf", "x"),
+      x_lags = combinations[i, 1],
+      y_lags = combinations[i, 2],
+      x = rnorm(10),
+      innovations = rnorm(10)
+    ) |>
+      suppressWarnings()
+    expect_true(!("innovation_type" %in% colnames(tst$irf)))
   }
 )

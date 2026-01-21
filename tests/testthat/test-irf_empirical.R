@@ -61,7 +61,11 @@ test_that(
     expect_true(is.data.frame(irf))
     expect_equal(
       colnames(irf),
-      c("time", "irf", "irf_intercept", "irf_x", "irf_v", "x", "innovations")
+      c(
+        "time", 
+        "irf", "irf_intercept", "irf_x", "irf_v", 
+        "x", "innovations", "innovation_type"
+      )
     )
     expect_equal(nrow(irf), 100)
 

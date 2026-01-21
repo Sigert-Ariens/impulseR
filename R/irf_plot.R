@@ -81,6 +81,12 @@
 #' plot. Defaults to `"white"`.
 #' @param breaks Integer denoting the number of breaks to allow in the time-axis.
 #' Defaults to `10`.
+#' @param estimated Logical denoting whether the provided \code{data} are system
+#' responses estimated through data. When \code{TRUE}, it will change the labels
+#' of the decomposed responses to denote their estimated nature. Defaults to 
+#' \code{TRUE} when \code{data} contains information on the innovation type, 
+#' an internal column only created when estimating system responses based on 
+#' data. Otherwise defaults to \code{FALSE}.
 #'
 #' @return Plot visualizing the impulse response for the predefined model.
 #'
@@ -126,7 +132,7 @@ irf_plot <- function(
   intercept.color = "gray",
   intercept.linetype = "solid",
   intercept.linewidth = 1,
-  intercept.label = "(h[1] ~ symbol('*') ~ 1)[t]",
+  intercept.label = NULL,
   impulse.size = 2,
   impulse.shape = 19,
   impulse.x.shape = impulse.shape,
@@ -142,13 +148,22 @@ irf_plot <- function(
   background.fill = "white",
   confidence_interval = TRUE,
   interval.alpha = 0.20,
-  breaks = 10
+  breaks = 10,
+  estimated = FALSE
 ) {
   # Determine which IRFs to plot, based on the `cols` argument. If NULL, then
   # it will use the default of all columns.
   if (is.null(cols)) {
     cols <- c("irf_intercept", "irf_x", "irf_v", "irf")
   }
+
+  # Check whether innovation_type is part of the data.frame. If not, then we 
+  # need to add it. In the meantime, this defines whether `estimated` remains
+  # FALSE
+  estimated <- "innovation_type" %in% colnames(data)
+  if(!("innovation_type" %in% colnames(data))) {
+    data$innovation_type <- "residual"
+  } 
 
   # Convert dataframe to long format, making the call to ggplot2 somewhat
   # easier. Keep a copy of the original to ensure correct labeling of the
@@ -157,7 +172,7 @@ irf_plot <- function(
     data,
     cols = tidyr::all_of(cols)
   ) |>
-    dplyr::select(time, x, innovations, name, value)
+    dplyr::select(time, x, innovations, innovation_type, name, value)
 
   # If confidence intervals should be plotted as well (and are available), use 
   # a similar trick on the confidence intervals and merge them with the pivotted
@@ -182,11 +197,11 @@ irf_plot <- function(
     data_long <- data_long |>
       dplyr::full_join(
         lower, 
-        by = c("time", "x", "innovations", "name")
+        by = c("time", "x", "innovations", "innovation_type", "name")
       ) |>
       dplyr::full_join(
         upper, 
-        by = c("time", "x", "innovations", "name")
+        by = c("time", "x", "innovations", "innovation_type", "name")
       )
   } else {
     # If no confidence interval is specified or recoverable, add lower and upper
@@ -269,6 +284,14 @@ irf_plot <- function(
   }
 
   # Legend labels
+  if (is.null(intercept.label)) {
+    intercept.label <- ifelse(
+      estimated,
+      "(hat(h)[1] ~ symbol('*') ~ 1)[t]",
+      "(h[1] ~ symbol('*') ~ 1)[t]"
+    )
+  }
+  
   if (is.null(x.label)) {
     x.label <- ifelse(
       all(data$x[-1] == 0) & all(data$innovations[-1] == 0),
@@ -277,7 +300,11 @@ irf_plot <- function(
         "h[x](s)",
         "h[x](s)*x[0]"
       ),
-      "(h[x] ~ symbol('*') ~ x)[t]"
+      ifelse(
+        estimated, 
+        "(hat(h)[x] ~ symbol('*') ~ x)[t]",
+        "(h[x] ~ symbol('*') ~ x)[t]"
+      )
     )
   }
 
@@ -289,7 +316,11 @@ irf_plot <- function(
         "h[v](s)",
         "h[v](s)*v[0]"
       ),
-      "(h[v] ~ symbol('*') ~ v)[t]"
+      ifelse(
+        estimated, 
+        "(hat(h)[v] ~ symbol('*') ~ hat(v))[t]",
+        "(h[v] ~ symbol('*') ~ v)[t]"
+      )
     )
   }
 
@@ -300,7 +331,7 @@ irf_plot <- function(
     "irf" = parse(text = irf.label)
   )
 
-  impulses <- data_long[, c("time", "x", "innovations")]
+  impulses <- data_long[, c("time", "x", "innovations", "innovation_type")]
 
   # Create the actual plot.
   data_long$name <- factor(
@@ -374,7 +405,15 @@ irf_plot <- function(
       fill = v.color,
       color = v.color,
       size = impulse.size,
-      shape = impulse.v.shape,
+      shape = ifelse(
+        v_impulse$innovation_type == "residual",
+        impulse.v.shape,
+        ifelse(
+          impulse.v.shape == 13,
+          4,
+          13
+        )
+      ),
       alpha = impulse.alpha
     ) +
 

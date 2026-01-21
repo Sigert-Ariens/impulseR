@@ -56,6 +56,11 @@
 #' \code{"partial"} (see \code{\link[impulseR]{estimate}} for more information).
 #' Ignored whenever innovations do not need to be computed. Defaults to 
 #' \code{"listwise"}.
+#' @param estimated Logical denoting whether to provide the types of the 
+#' innovations in a separate column of the resulting \code{data.frame}. Defaults
+#' to \code{TRUE} when \code{x} and \code{innovations} are left unspecified, and 
+#' to \code{FALSE} otherwise. It is recommended to not change this argument for 
+#' the sake of interpretation of the output. 
 #'
 #' @returns List containing the parameters that were used for the generation of
 #' the system responses (under `"intercept"`, `"x_params"`, and
@@ -65,9 +70,13 @@
 #' columns `"irf_intercept"`, `"irf_x"`, and `"irf_v"` contain
 #' the cumulative responses towards the unit vector, covariate, and innovations
 #' respectively. These partial responses sum up to the total response \eqn{y_{t}},
-#' which is provided in the `"irf"` column. Finally, the columns `"x"`
+#' which is provided in the `"irf"` column. The columns `"x"`
 #' and `"innovations"` contain the values of the covariate and the
-#' innovations.
+#' innovations. Finally, the column `"innovation_type"` denotes whether the 
+#' values in `"innovations"` represent initial conditions or residuals of an 
+#' estimation procedure. Note that this column is only present when you do not
+#' provide the values for `innovations` yourself, as in this case the
+#' `innovations` are taken as known. 
 #'
 #' @examples
 #' # Create parameters of an ADL(2, 1), meaning having two lags in the residuals
@@ -155,13 +164,30 @@ irf_generator <- function(
   data = NULL,
   cols = c("y", "x"),
   burnin = TRUE,
-  na_action = "listwise"
+  na_action = "listwise",
+  estimated = FALSE
 ) {
+
   # Check whether only a single intercept is provided.
   if (length(intercept) > 1) {
     warning("More than one intercept provided. Using the first value in this vector.")
     intercept <- intercept[1]
   }
+
+  # Define the lags in x and y based on the parameters that are provided.
+  x_lags <- ifelse(
+    (x_params[1] != 0),
+    length(x_params) - 1,
+    NA
+  )
+  y_lags <- ifelse(
+    (ar_params[1] != 0),
+    length(ar_params),
+    NA
+  )
+
+  # Define the value of `estimated`
+  estimated <- is.null(x) & is.null(innovations)
 
   # Check whether the data are specified. If so, then we will recompute x and
   # the innovations
@@ -180,18 +206,6 @@ irf_generator <- function(
     # function
     time_variable <- 1:nrow(data)
     time_variable <- time_variable[!is.na(rowSums(data))]
-
-    # Define the lags in x and y based on the parameters that are provided.
-    x_lags <- ifelse(
-      (x_params[1] != 0),
-      length(x_params) - 1,
-      NA
-    )
-    y_lags <- ifelse(
-      (ar_params[1] != 0),
-      length(ar_params),
-      NA
-    )
 
     # Divide up the data in different parts based on missing values (if present).
     #
@@ -376,6 +390,12 @@ irf_generator <- function(
       x_i <- x[[i]]
       innovations_i <- innovations[[i]]
 
+      # Define a placeholder that will keep tabs on whether innovations have 
+      # been estimated as initial innovations (i.e., fixed through impulse 
+      # response functions) or represent the residuals of the estimation 
+      # process
+      residual <- logical(length(innovations_i))
+
       # Based on this index, allocate memory for local definitions of theta and 
       # psi, which will contain the system responses for the innovations and 
       # covariates respectively
@@ -407,6 +427,9 @@ irf_generator <- function(
           terms <- beta[q, ] %*% theta[j:(j - q + 1)]
         }
         psi[j] <- sum(terms)
+
+        # Define whether the innovation represents a residual or not
+        residual[j] <- j > max(c(0, x_lags, y_lags), na.rm = TRUE)
       }
 
       # Once defined, compute the system responses. Set up some of the output 
@@ -435,7 +458,8 @@ irf_generator <- function(
           "irf_x" = irf_x,
           "irf_v" = irf_v,
           "x" = x_i,
-          "innovations" = innovations_i
+          "innovations" = innovations_i,
+          "innovation_type" = ifelse(residual, "residual", "initial")
         )
       )
     }
@@ -464,8 +488,17 @@ irf_generator <- function(
   }
 
   # Rearrange the columns of the data.frame
-  cols <- c("time", "irf", "irf_intercept", "irf_x", "irf_v", "x", "innovations")
+  cols <- c(
+    "time", 
+    "irf", "irf_intercept", "irf_x", "irf_v", 
+    "x", "innovations", "innovation_type"
+  )
   responses <- responses[, cols]
+
+  # Remove the innovation_type if the innovations are not estimate, but a given
+  if(!estimated) {
+    responses$innovation_type <- NULL
+  }
 
   return(
     list(
