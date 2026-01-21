@@ -482,7 +482,7 @@ irf_generator <- function(
 
   # Add the time variable to this data.frame
   if(exists("time_variable")) {
-    responses$time <- time_variable
+    responses$time <- time_variable - 1
   } else {
     responses$time <- 1:nrow(responses) - 1
   }
