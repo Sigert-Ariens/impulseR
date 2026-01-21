@@ -31,7 +31,7 @@ irf_plot(
   intercept.color = "gray",
   intercept.linetype = "solid",
   intercept.linewidth = 1,
-  intercept.label = "(h[1] ~ symbol('*') ~ 1)[t]",
+  intercept.label = NULL,
   impulse.size = 2,
   impulse.shape = 19,
   impulse.x.shape = impulse.shape,
@@ -47,7 +47,8 @@ irf_plot(
   background.fill = "white",
   confidence_interval = TRUE,
   interval.alpha = 0.2,
-  breaks = 10
+  breaks = 10,
+  estimated = FALSE
 )
 }
 \arguments{
@@ -155,6 +156,11 @@ confidence interval. Defaults to \code{0.20}.}
 
 \item{breaks}{Integer denoting the number of breaks to allow in the time-axis.
 Defaults to \code{10}.}
+
+\item{estimated}{Logical denoting whether the provided \code{data} are system
+responses estimated through data. When \code{TRUE}, it will change the labels
+of the decomposed responses to denote their estimated nature. Defaults to
+\code{FALSE}.}
 }
 \value{
 Plot visualizing the impulse response for the predefined model.
