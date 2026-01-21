@@ -58,7 +58,7 @@
 #' \code{"listwise"}.
 #' @param estimated Logical denoting whether to provide the types of the 
 #' innovations in a separate column of the resulting \code{data.frame}. Defaults
-#' to \code{TRUE} when \code{x} and \{innovations} are left unspecified, and 
+#' to \code{TRUE} when \code{x} and \code{innovations} are left unspecified, and 
 #' to \code{FALSE} otherwise. It is recommended to not change this argument for 
 #' the sake of interpretation of the output. 
 #'

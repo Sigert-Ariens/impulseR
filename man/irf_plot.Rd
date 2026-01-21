@@ -160,7 +160,9 @@ Defaults to \code{10}.}
 \item{estimated}{Logical denoting whether the provided \code{data} are system
 responses estimated through data. When \code{TRUE}, it will change the labels
 of the decomposed responses to denote their estimated nature. Defaults to
-\code{FALSE}.}
+\code{TRUE} when \code{data} contains information on the innovation type,
+an internal column only created when estimating system responses based on
+data. Otherwise defaults to \code{FALSE}.}
 }
 \value{
 Plot visualizing the impulse response for the predefined model.

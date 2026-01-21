@@ -13,7 +13,8 @@ irf_generator(
   data = NULL,
   cols = c("y", "x"),
   burnin = TRUE,
-  na_action = "listwise"
+  na_action = "listwise",
+  estimated = FALSE
 )
 }
 \arguments{
@@ -58,6 +59,12 @@ data. Either \code{"listwise"}, \code{"casewise"}, \code{"pairwise"}, or
 \code{"partial"} (see \code{\link[impulseR]{estimate}} for more information).
 Ignored whenever innovations do not need to be computed. Defaults to
 \code{"listwise"}.}
+
+\item{estimated}{Logical denoting whether to provide the types of the
+innovations in a separate column of the resulting \code{data.frame}. Defaults
+to \code{TRUE} when \code{x} and \code{innovations} are left unspecified, and
+to \code{FALSE} otherwise. It is recommended to not change this argument for
+the sake of interpretation of the output.}
 }
 \value{
 List containing the parameters that were used for the generation of
@@ -68,9 +75,13 @@ data.frame, column \code{"time"} contains the time index starting at 0. The
 columns \code{"irf_intercept"}, \code{"irf_x"}, and \code{"irf_v"} contain
 the cumulative responses towards the unit vector, covariate, and innovations
 respectively. These partial responses sum up to the total response \eqn{y_{t}},
-which is provided in the \code{"irf"} column. Finally, the columns \code{"x"}
+which is provided in the \code{"irf"} column. The columns \code{"x"}
 and \code{"innovations"} contain the values of the covariate and the
-innovations.
+innovations. Finally, the column \code{"innovation_type"} denotes whether the
+values in \code{"innovations"} represent initial conditions or residuals of an
+estimation procedure. Note that this column is only present when you do not
+provide the values for \code{innovations} yourself, as in this case the
+\code{innovations} are taken as known.
 }
 \description{
 Compute system responses based on a particular set of parameters of the general
