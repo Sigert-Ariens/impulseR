@@ -81,6 +81,10 @@
 #' plot. Defaults to `"white"`.
 #' @param breaks Integer denoting the number of breaks to allow in the time-axis.
 #' Defaults to `10`.
+#' @param estimated Logical denoting whether the provided \code{data} are system
+#' responses estimated through data. When \code{TRUE}, it will change the labels
+#' of the decomposed responses to denote their estimated nature. Defaults to 
+#' \code{FALSE}.
 #'
 #' @return Plot visualizing the impulse response for the predefined model.
 #'
@@ -126,7 +130,7 @@ irf_plot <- function(
   intercept.color = "gray",
   intercept.linetype = "solid",
   intercept.linewidth = 1,
-  intercept.label = "(h[1] ~ symbol('*') ~ 1)[t]",
+  intercept.label = NULL,
   impulse.size = 2,
   impulse.shape = 19,
   impulse.x.shape = impulse.shape,
@@ -142,7 +146,8 @@ irf_plot <- function(
   background.fill = "white",
   confidence_interval = TRUE,
   interval.alpha = 0.20,
-  breaks = 10
+  breaks = 10,
+  estimated = FALSE
 ) {
   # Determine which IRFs to plot, based on the `cols` argument. If NULL, then
   # it will use the default of all columns.
@@ -269,6 +274,14 @@ irf_plot <- function(
   }
 
   # Legend labels
+  if (is.null(intercept.label)) {
+    intercept.label <- ifelse(
+      estimated,
+      "(hat(h)[1] ~ symbol('*') ~ 1)[t]",
+      "(h[1] ~ symbol('*') ~ 1)[t]"
+    )
+  }
+  
   if (is.null(x.label)) {
     x.label <- ifelse(
       all(data$x[-1] == 0) & all(data$innovations[-1] == 0),
@@ -277,7 +290,11 @@ irf_plot <- function(
         "h[x](s)",
         "h[x](s)*x[0]"
       ),
-      "(h[x] ~ symbol('*') ~ x)[t]"
+      ifelse(
+        estimated, 
+        "(hat(h)[x] ~ symbol('*') ~ x)[t]",
+        "(h[x] ~ symbol('*') ~ x)[t]"
+      )
     )
   }
 
@@ -289,7 +306,11 @@ irf_plot <- function(
         "h[v](s)",
         "h[v](s)*v[0]"
       ),
-      "(h[v] ~ symbol('*') ~ v)[t]"
+      ifelse(
+        estimated, 
+        "(hat(h)[v] ~ symbol('*') ~ hat(v))[t]",
+        "(h[v] ~ symbol('*') ~ v)[t]"
+      )
     )
   }
 
