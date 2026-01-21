@@ -84,7 +84,9 @@
 #' @param estimated Logical denoting whether the provided \code{data} are system
 #' responses estimated through data. When \code{TRUE}, it will change the labels
 #' of the decomposed responses to denote their estimated nature. Defaults to 
-#' \code{FALSE}.
+#' \code{TRUE} when \code{data} contains information on the innovation type, 
+#' an internal column only created when estimating system responses based on 
+#' data. Otherwise defaults to \code{FALSE}.
 #'
 #' @return Plot visualizing the impulse response for the predefined model.
 #'
@@ -155,6 +157,14 @@ irf_plot <- function(
     cols <- c("irf_intercept", "irf_x", "irf_v", "irf")
   }
 
+  # Check whether innovation_type is part of the data.frame. If not, then we 
+  # need to add it. In the meantime, this defines whether `estimated` remains
+  # FALSE
+  estimated <- "innovation_type" %in% colnames(data)
+  if(!("innovation_type" %in% colnames(data))) {
+    data$innovation_type <- "residual"
+  } 
+
   # Convert dataframe to long format, making the call to ggplot2 somewhat
   # easier. Keep a copy of the original to ensure correct labeling of the
   # system responses
@@ -162,7 +172,7 @@ irf_plot <- function(
     data,
     cols = tidyr::all_of(cols)
   ) |>
-    dplyr::select(time, x, innovations, name, value)
+    dplyr::select(time, x, innovations, innovation_type, name, value)
 
   # If confidence intervals should be plotted as well (and are available), use 
   # a similar trick on the confidence intervals and merge them with the pivotted
@@ -187,11 +197,11 @@ irf_plot <- function(
     data_long <- data_long |>
       dplyr::full_join(
         lower, 
-        by = c("time", "x", "innovations", "name")
+        by = c("time", "x", "innovations", "innovation_type", "name")
       ) |>
       dplyr::full_join(
         upper, 
-        by = c("time", "x", "innovations", "name")
+        by = c("time", "x", "innovations", "innovation_type", "name")
       )
   } else {
     # If no confidence interval is specified or recoverable, add lower and upper
@@ -321,7 +331,7 @@ irf_plot <- function(
     "irf" = parse(text = irf.label)
   )
 
-  impulses <- data_long[, c("time", "x", "innovations")]
+  impulses <- data_long[, c("time", "x", "innovations", "innovation_type")]
 
   # Create the actual plot.
   data_long$name <- factor(
@@ -395,7 +405,15 @@ irf_plot <- function(
       fill = v.color,
       color = v.color,
       size = impulse.size,
-      shape = impulse.v.shape,
+      shape = ifelse(
+        v_impulse$innovation_type == "residual",
+        impulse.v.shape,
+        ifelse(
+          impulse.v.shape == 13,
+          4,
+          13
+        )
+      ),
       alpha = impulse.alpha
     ) +
 
