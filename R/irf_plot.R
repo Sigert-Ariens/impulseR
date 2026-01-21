@@ -151,6 +151,11 @@ irf_plot <- function(
   breaks = 10,
   estimated = FALSE
 ) {
+  # Ensure that users should have ggplot2 installed
+  if (!requireNamespace("ggplot2", quietly = TRUE)){
+    stop("Package \"ggplot2\" must be installed to plot system responses.")
+  }
+  
   # Determine which IRFs to plot, based on the `cols` argument. If NULL, then
   # it will use the default of all columns.
   if (is.null(cols)) {
