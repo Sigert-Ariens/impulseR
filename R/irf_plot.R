@@ -184,7 +184,7 @@ irf_plot <- function(
     ) |>
       dplyr::mutate(name = gsub("_lower", "", name, fixed = TRUE)) |>
       dplyr::rename(lower = value) |>
-      dplyr::select(time, x, innovations, name, lower)
+      dplyr::select(time, x, innovations, innovation_type, name, lower)
 
     upper <- tidyr::pivot_longer(
       data, 
@@ -192,7 +192,7 @@ irf_plot <- function(
     ) |>
       dplyr::mutate(name = gsub("_upper", "", name, fixed = TRUE)) |>
       dplyr::rename(upper = value) |>
-      dplyr::select(time, x, innovations, name, upper)
+      dplyr::select(time, x, innovations, innovation_type, name, upper)
 
     data_long <- data_long |>
       dplyr::full_join(
