@@ -125,8 +125,14 @@ irf_empirical <- function(
     )
 
     # Create impulses for innovation and x
-    innovations <- impulse(max(y_lags, x_lags) * 10)
-    x <- impulse(max(y_lags, x_lags) * 10)
+    max_lag <- ifelse(
+      is.na(x_lags) & is.na(y_lags),
+      1,
+      max(c(y_lags, x_lags), na.rm = TRUE)
+    )
+    
+    innovations <- impulse(max_lag * 10)
+    x <- impulse(max_lag * 10)
 
     # Also change the burnin argument: Ensures it's a logical plot
     burnin <- TRUE
