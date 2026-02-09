@@ -496,9 +496,10 @@ irf_generator <- function(
   responses <- responses[, cols]
 
   # Remove the innovation_type if the innovations are not estimate, but a given
-  if(!estimated) {
-    responses$innovation_type <- NULL
-  }
+  # if(!estimated) {
+  #   responses$innovation_type <- NULL
+  # }
+  responses$innovation_type <- NULL
 
   return(
     list(

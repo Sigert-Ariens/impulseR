@@ -12,3 +12,6 @@ convolution.png
 *depr
 .Rproj.user
 ^.*\.Rproj$
+issues*
+*.log
+*install*

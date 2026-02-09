@@ -113,6 +113,31 @@ irf_empirical <- function(
   na_action = "listwise",
   ...
 ) {
+  # If there are missing values in the data, then we automatically fix the 
+  # innovations and covariates to be impulse responses. Only an issue if the 
+  # user wants to compute system responses based on the data
+  if(any(is.na(data[, cols])) & is.null(innovations) & is.null(x)) {
+    warning(
+      paste(
+        "Cannot compute the system responses based on the data due to missing data.",
+        "Computing impulse responses instead."
+      )
+    )
+
+    # Create impulses for innovation and x
+    max_lag <- ifelse(
+      is.na(x_lags) & is.na(y_lags),
+      1,
+      max(c(y_lags, x_lags), na.rm = TRUE)
+    )
+    
+    innovations <- impulse(max_lag * 10)
+    x <- impulse(max_lag * 10)
+
+    # Also change the burnin argument: Ensures it's a logical plot
+    burnin <- TRUE
+  }
+
   # Call the estimate function. The parameters are estimated and initial
   # innovations are fixed appropriately.
   params <- estimate(

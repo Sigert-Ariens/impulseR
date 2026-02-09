@@ -654,49 +654,49 @@ test_that(
   }
 )
 
-test_that(
-  "Test of zero confidence intervals with data containing missing values",
-  {
-    # Create data
-    set.seed(1)
-    data <- irf_generator(
-      intercept = 0, 
-      ar_params = c(0.75, 0.2),
-      x_params = c(2, 1),
-      x = rnorm(100),
-      innovations = rnorm(100)
-    )$irf
+# test_that(
+#   "Test of zero confidence intervals with data containing missing values",
+#   {
+#     # Create data
+#     set.seed(1)
+#     data <- irf_generator(
+#       intercept = 0, 
+#       ar_params = c(0.75, 0.2),
+#       x_params = c(2, 1),
+#       x = rnorm(100),
+#       innovations = rnorm(100)
+#     )$irf
 
-    # Add random missing values
-    idx <- sample(1:100, 10, replace = FALSE)
-    data[idx, ] <- NA
+#     # Add random missing values
+#     idx <- sample(1:100, 10, replace = FALSE)
+#     data[idx, ] <- NA
 
-    # Use irf_empirical with confidence intervals
-    results <- irf_empirical(
-      data, 
-      cols = c("irf", "x"),
-      y_lags = 1, 
-      x_lags = 1,
-      confidence_interval = TRUE
-    )$irf |>
-      suppressWarnings()
+#     # Use irf_empirical with confidence intervals
+#     results <- irf_empirical(
+#       data, 
+#       cols = c("irf", "x"),
+#       y_lags = 1, 
+#       x_lags = 1,
+#       confidence_interval = TRUE
+#     )$irf |>
+#       suppressWarnings()
 
-    # Check whether there is no variation around the observed data: The observed
-    # irf is the one thing we should be sure of
-    expect_equal(
-      mean(abs(results$irf_lower - results$irf_upper)),
-      0
-    )
-    expect_equal(
-      mean(abs(results$irf - results$irf_upper)),
-      0
-    )
-    expect_equal(
-      mean(abs(results$irf_lower - results$irf)),
-      0
-    )
-  }
-)
+#     # Check whether there is no variation around the observed data: The observed
+#     # irf is the one thing we should be sure of
+#     expect_equal(
+#       mean(abs(results$irf_lower - results$irf_upper)),
+#       0
+#     )
+#     expect_equal(
+#       mean(abs(results$irf - results$irf_upper)),
+#       0
+#     )
+#     expect_equal(
+#       mean(abs(results$irf_lower - results$irf)),
+#       0
+#     )
+#   }
+# )
 
 test_that(
   "Test of nonzero confidence intervals with data containing missing values (partial)",
