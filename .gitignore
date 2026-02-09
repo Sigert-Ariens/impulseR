@@ -13,3 +13,4 @@ convolution.png
 .Rproj.user
 ^.*\.Rproj$
 issues*
+*.log
