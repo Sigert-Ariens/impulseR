@@ -141,11 +141,13 @@ irf_plot(result$irf)
 
 ### Missing values
 
-The `irf_empirical` function handles missing values through listwise deletion. If other methods of estimation are used, the parameter estimates and estimated innovations can be supplied to the `irf_generator` function to produce empirical trajectory plots (see Ariens et al., submitted). 
+The `irf_empirical` function handles missing values through listwise deletion. If missing data are present in the dataframe, `irf_empirical` will currently default to returning estimated impulse responses rather than estimated trajectories. If estimated trajectories are nevertheless desired, one can download the development branch of impulseR. Here,`irf_empirical` will reset the calculation of the cumulative responses whenever missing values are present. This is the same as calculating the estimated trajectories for each block of missing data separately. Future versions of impulseR will provide more flexibility with respect to missing data handling in the `irf_empirical` function. 
+
+If custom methods of estimation are used where missing data are imputed, the parameter estimates and estimated innovations can be supplied to the `irf_generator` function directly to produce estimated trajectory plots.
 
 ## The `burnin` argument
 
-The `irf_empirical` first fits the specified model to data and only afterwards does it calculate the system responses. When proceeding from the estimation to the calculation step, the `irf_empirical` function sets the `burnin` argument to `FALSE`. Otherwise, there will be slight discrepancies between $y_{t}^{obs}$ (the observed values of the dependent variable in the data) and $y_{t}$ (the model-implied total response). This section illustrates why the `burnin` argument is set to `FALSE` by default when empirical trajectory plots are desired.
+The `irf_empirical` first fits the specified model to data and only afterwards does it calculate the system responses. When proceeding from the estimation to the calculation step, the `irf_empirical` function sets the `burnin` argument to `FALSE`. Otherwise, there will be slight discrepancies between $y_{t}^{obs}$ (the observed values of the dependent variable in the data) and $y_{t}$ (the model-implied total response). This section illustrates why the `burnin` argument is set to `FALSE` by default when estimated trajectory plots are desired.
 
 We call the `irf_empirical` function to our empirical data twice, once with the default value of the argument `burnin = FALSE`, and one with the default overridden. 
 
@@ -179,4 +181,4 @@ head(est_burned$irf, n = 10)
 
 The column `Y` in the data.frame `observed_data` contains the observed values for the criterion variable, $y_{t}^{obs}$. The column `irf` in `est_raw` contains the model implied values $y_{t}$ if the intercept response is not burned in. The column `irf` in `est_burned` contains the model implied values $y_{t}$ if the intercept response is burned in. 
 
-Even though in reality the data were generated with the intercept response burned in, there are slight discrepancies between the model implied values $y_{t}$ and the values observed in the data, $y_{t}^{obs}$, when the `burnin` argument is set to `TRUE`, though only for the first few time points. In comparison, the default `burnin = FALSE` option provides a truthful representation of the observed data into estimated latent system responses.
+Even though in reality the data were generated with the intercept response burned in, there are slight discrepancies between the model implied values $y_{t}$ and the values observed in the data, $y_{t}^{obs}$, when the `burnin` argument is set to `TRUE`, though only for the first few time points. In comparison, the default `burnin = FALSE` option provides a truthful decomposition of the observed data into the estimated system responses.
