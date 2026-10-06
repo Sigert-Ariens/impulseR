@@ -26,4 +26,4 @@ If you encounter a bug or need help getting a function to run, please file an is
 
 ## License
 
-This project is distributed under a GNU GPL-3 license. For details, please see the [License](https://Sigert-Ariens.github.io/impulseR/-/blob/main/LICENSE.md)
+This project is distributed under a GNU GPL-3 license. For details, please see the [License](https://Sigert-Ariens.github.io/impulseR/main/LICENSE.md)

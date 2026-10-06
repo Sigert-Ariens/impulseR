@@ -39,7 +39,7 @@ Authors@R: c(
         role = c("cph", "fnd")
     ))
 URL: https://sigert-ariens.github.io/impulseR/
-BugReports: https://gitlab.kuleuven.be/u0133721/impulseR/-/issues
+BugReports: https://github.com/Sigert-Ariens/impulseR/issues
 License: GPL-3
 Encoding: UTF-8
 Depends: R (>= 4.1.0)

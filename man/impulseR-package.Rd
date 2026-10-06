@@ -13,7 +13,7 @@ based on autoregressive models.
 Useful links:
 \itemize{
   \item \url{https://sigert-ariens.github.io/impulseR/}
-  \item Report bugs at \url{https://gitlab.kuleuven.be/u0133721/impulseR/-/issues}
+  \item Report bugs at \url{https://github.com/Sigert-Ariens/impulseR/issues}
 }
 
 }
