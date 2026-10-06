@@ -1,16 +1,14 @@
-url: https://gitlab.kuleuven.be/u0133721/impulseR
-
+url: https://Sigert-Ariens.github.io/impulseR/
 template:
   bootstrap: 5
-  light-switch: true 
+  light-switch: yes
   theme: github-light
   theme-dark: github-dark
   includes:
     in_header: |
       <script type="text/javascript" async="" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-MML-AM_CHTML"></script>
-
 navbar:
-  structure:
+  structure: ~
   components:
     articles:
       text: Usage
@@ -23,3 +21,4 @@ navbar:
         href: articles/irf_empirical.html
       - text: Plotting
         href: articles/plotting.html
+

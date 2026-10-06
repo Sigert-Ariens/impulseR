@@ -6,3 +6,6 @@
 ^[.]?air[.]toml$
 ^\.vscode$
 ^cran-comments\.md$
+^docs$
+^pkgdown$
+^\.github$

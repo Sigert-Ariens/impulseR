@@ -38,7 +38,7 @@ Authors@R: c(
         "KU Leuven",
         role = c("cph", "fnd")
     ))
-URL: https://gitlab.kuleuven.be/u0133721/impulseR
+URL: https://sigert-ariens.github.io/impulseR/
 BugReports: https://gitlab.kuleuven.be/u0133721/impulseR/-/issues
 License: GPL-3
 Encoding: UTF-8

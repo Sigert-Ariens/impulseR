@@ -7,7 +7,7 @@ A user friendly R package for the calculation and visualization of system respon
 To install the package, you can use the `remotes` package:
 
 ```
-remotes::install_gitlab("u0133721/impulseR", host = "gitlab.kuleuven.be")
+remotes::install_github("Sigert-Ariens/impulseR")
 ```
 
 To use the package, use `library` 
@@ -18,12 +18,12 @@ library(impulseR)
 
 ## Functionality
 
-This package allows users to compute and visualize the model-implied response to a given time series of inputs. For a detailed explanation on how to use the package, we refer the reader to the [Documentation](https://impulser-5cae6f.pages.gitlab.kuleuven.be/reference/index.html). In the documentation, one can find a [Getting started page](https://impulser-5cae6f.pages.gitlab.kuleuven.be/articles/getting_started.html) for the package, as well as detailed documentation on its functionality, specifically about the way in which [impulse responses should be computed](https://impulser-5cae6f.pages.gitlab.kuleuven.be/articles/irf_generator.html), about how one [can estimate parameters and compute the impulse responses in one go](https://impulser-5cae6f.pages.gitlab.kuleuven.be/articles/irf_empirical.html), and how [one can visualize these system responses](https://impulser-5cae6f.pages.gitlab.kuleuven.be/articles/plotting.html).
+This package allows users to compute and visualize the model-implied response to a given time series of inputs. For a detailed explanation on how to use the package, we refer the reader to the [Documentation](https://Sigert-Ariens.github.io/impulseR/reference/index.html). In the documentation, one can find a [Getting started page](https://Sigert-Ariens.github.io/impulseR/articles/getting_started.html) for the package, as well as detailed documentation on its functionality, specifically about the way in which [impulse responses should be computed](https://Sigert-Ariens.github.io/impulseR/articles/irf_generator.html), about how one [can estimate parameters and compute the impulse responses in one go](https://Sigert-Ariens.github.io/impulseR/articles/irf_empirical.html), and how [one can visualize these system responses](https://Sigert-Ariens.github.io/impulseR/articles/plotting.html).
 
 ## Getting help
 
-If you encounter a bug or need help getting a function to run, please file an issue with a minimal reproducible example on [Gitlab](https://gitlab.kuleuven.be/u0133721/impulseR/-/issues).
+If you encounter a bug or need help getting a function to run, please file an issue with a minimal reproducible example on [Github](https://github.com/Sigert-Ariens/impulseR/issues).
 
 ## License
 
-This project is distributed under a GNU GPL-3 license. For details, please see the [License](https://gitlab.kuleuven.be/u0133721/impulseR/-/blob/main/LICENSE.md)
+This project is distributed under a GNU GPL-3 license. For details, please see the [License](https://Sigert-Ariens.github.io/impulseR/-/blob/main/LICENSE.md)
