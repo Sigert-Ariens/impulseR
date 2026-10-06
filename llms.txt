@@ -1,0 +1,79 @@
+# impulseR
+
+A user friendly R package for the calculation and visualization of
+system response functions for one-dimensional dynamic regression models.
+
+## Installation
+
+To install the package, you can use the `remotes` package:
+
+    remotes::install_github("Sigert-Ariens/impulseR")
+
+To use the package, use `library`
+
+    library(impulseR)
+
+## Functionality
+
+This package allows users to compute and visualize the model-implied
+response to a given time series of inputs. For a detailed explanation on
+how to use the package, we refer the reader to the
+[Documentation](https://Sigert-Ariens.github.io/impulseR/reference/index.html).
+In the documentation, one can find a [Getting started
+page](https://Sigert-Ariens.github.io/impulseR/articles/getting_started.html)
+for the package, as well as detailed documentation on its functionality,
+specifically about the way in which [impulse responses should be
+computed](https://Sigert-Ariens.github.io/impulseR/articles/irf_generator.html),
+about how one [can estimate parameters and compute the impulse responses
+in one
+go](https://Sigert-Ariens.github.io/impulseR/articles/irf_empirical.html),
+and how [one can visualize these system
+responses](https://Sigert-Ariens.github.io/impulseR/articles/plotting.html).
+
+## Getting help
+
+If you encounter a bug or need help getting a function to run, please
+file an issue with a minimal reproducible example on
+[Github](https://github.com/Sigert-Ariens/impulseR/issues).
+
+## License
+
+This project is distributed under a GNU GPL-3 license. For details,
+please see the
+[License](https://Sigert-Ariens.github.io/impulseR/-/blob/main/LICENSE.md)
+
+# Package index
+
+## All functions
+
+- [`bootstrap()`](https://Sigert-Ariens.github.io/impulseR/reference/bootstrap.md)
+  : Bootstrap system responses
+- [`compute_input()`](https://Sigert-Ariens.github.io/impulseR/reference/compute_input.md)
+  : Compute estimated innovations of an \\ADL(p,q)\\ model
+- [`diag_plot()`](https://Sigert-Ariens.github.io/impulseR/reference/diag_plot.md)
+  : Diagnostic plots for \\ADL(p, q)\\
+- [`estimate()`](https://Sigert-Ariens.github.io/impulseR/reference/estimate.md)
+  : Estimate the parameters of an \\ADL(p, q)\\ model
+- [`impulse()`](https://Sigert-Ariens.github.io/impulseR/reference/impulse.md)
+  : Create single unit impulse
+- [`irf_empirical()`](https://Sigert-Ariens.github.io/impulseR/reference/irf_empirical.md)
+  : Estimate and compute system responses for an \\ADL(p, q)\\
+- [`irf_generator()`](https://Sigert-Ariens.github.io/impulseR/reference/irf_generator.md)
+  : Calculate system responses
+- [`irf_plot()`](https://Sigert-Ariens.github.io/impulseR/reference/irf_plot.md)
+  : Plot system responses
+- [`prepare_data()`](https://Sigert-Ariens.github.io/impulseR/reference/prepare_data.md)
+  : Prepare data for analysis
+- [`scaled_impulse()`](https://Sigert-Ariens.github.io/impulseR/reference/scaled_impulse.md)
+  : Create single scaled impulse
+
+# Articles
+
+### All vignettes
+
+- [Getting
+  started](https://Sigert-Ariens.github.io/impulseR/articles/getting_started.md):
+- [Empirical
+  data](https://Sigert-Ariens.github.io/impulseR/articles/irf_empirical.md):
+- [Analysis](https://Sigert-Ariens.github.io/impulseR/articles/irf_generator.md):
+- [Plotting](https://Sigert-Ariens.github.io/impulseR/articles/plotting.md):

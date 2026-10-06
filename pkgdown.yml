@@ -1,0 +1,12 @@
+pandoc: 3.8.3
+pkgdown: 2.2.1
+pkgdown_sha: ~
+articles:
+  getting_started: getting_started.html
+  irf_empirical: irf_empirical.html
+  irf_generator: irf_generator.html
+  plotting: plotting.html
+last_built: 2026-10-06T12:43Z
+urls:
+  reference: https://Sigert-Ariens.github.io/impulseR/reference
+  article: https://Sigert-Ariens.github.io/impulseR/articles

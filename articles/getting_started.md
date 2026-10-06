@@ -1,0 +1,68 @@
+# Getting started
+
+## Installing and using the package
+
+To install the package, you can use the `remotes` package:
+
+``` r
+
+remotes::install_gitlab("u0133721/impulseR", host = "gitlab.kuleuven.be/")
+```
+
+To load the package, use `library`
+
+``` r
+
+library(impulseR)
+```
+
+## Overview of the package
+
+The `impulseR` package is designed to provide researchers with a user
+friendly way of visualizing and understanding the behavior implied by a
+dynamic regression model, by serving as a tool for the calculation and
+visualization of the system responses implied by the model. The
+`impulseR` package can be used to study the behavior of any dynamic
+regression model of the form:
+
+``` math
+\begin{equation}
+y_{t} = \alpha + \sum_{i=1}^{p}\phi_{i}y_{t-i} + \beta_{x}x_{t} + \sum_{j=1}^{q}\beta_{L^{j}x}x_{t-j} + v_{t} ,
+\end{equation}
+```
+
+where $`\alpha`$ is an intercept parameter, $`\phi_{i}`$ is the $`i`$th
+autoregressive effect, and $`\beta_{L^j x}`$ is the $`j`$th lagged
+covariate effect. $`p`$ and $`q`$ are the number of AR parameters and
+lagged covariate parameters respectively. $`v_{t}`$ is an innovation
+term.
+
+The package allows one to calculate different types of *system
+responses* (impulse responses, scaled impulse responses, cumulative
+responses, and total responses). In each case, parameter values
+(hypothetical or estimated) are supplied to the package functions.
+Depending on which input vectors one supplies, one of these system
+responses will be returned. The different types of system responses all
+rely on the derivation of the *impulse response function* of the model.
+The core function – namely `irf_generator` – derives the impulse
+response functions for a dynamic regression model using the analytic
+techniques discussed in Appendix A of Ariens, Vanhasbroeck, Lafit, &
+Ceulemans (submitted). The function will return different types of
+system responses depending on the input vectors supplied, as explained
+in detail in the vignette on
+[Analysis](https://impulser-5cae6f.pages.gitlab.kuleuven.be/articles/irf_generator.html).
+
+Additionally, the package allows for the construction of empirical
+trajectory plots (see manuscript, Figure 6). By calculating cumulative
+responses towards observed covariate values and estimated innovations,
+we can decompose the empirical data into latent system responses. The
+`irf_empirical` function performs estimation and processing steps
+necessary to construct empirical trajectory plots, as detailed in the
+vignette on [Empirical
+data](https://impulser-5cae6f.pages.gitlab.kuleuven.be/articles/irf_empirical.html).
+A plotting function `irf_plot` can furthermore be used for
+visualization, as detailed in the vignette on
+[Plotting](https://impulser-5cae6f.pages.gitlab.kuleuven.be/articles/plotting.html).
+
+Currently the package only supports models with a single time varying
+covariate.
