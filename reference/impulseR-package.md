@@ -7,7 +7,7 @@ responses based on autoregressive models.
 
 Useful links:
 
-- <https://gitlab.kuleuven.be/u0133721/impulseR>
+- <https://sigert-ariens.github.io/impulseR/>
 
 - Report bugs at <https://gitlab.kuleuven.be/u0133721/impulseR/-/issues>
 
@@ -17,6 +17,9 @@ Useful links:
 ([ORCID](https://orcid.org/0000-0002-7423-0090))
 
 Authors:
+
+- Sigert Ariens <sigert.ariens@kuleuven.be>
+  ([ORCID](https://orcid.org/0000-0002-7423-0090))
 
 - Niels Vanhasbroeck <niels.vanhasbroeck@gmail.com>
   ([ORCID](https://orcid.org/0000-0002-1235-8902))
