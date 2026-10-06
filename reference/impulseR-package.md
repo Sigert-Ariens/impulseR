@@ -9,7 +9,7 @@ Useful links:
 
 - <https://sigert-ariens.github.io/impulseR/>
 
-- Report bugs at <https://gitlab.kuleuven.be/u0133721/impulseR/-/issues>
+- Report bugs at <https://github.com/Sigert-Ariens/impulseR/issues>
 
 ## Author
 

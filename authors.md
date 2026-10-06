@@ -18,7 +18,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://gitlab.kuleuven.be/u0133721/impulseR/blob/main/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/Sigert-Ariens/impulseR/blob/main/DESCRIPTION)
 
 Ariens S, Vanhasbroeck N, Ceulemans E (2026). *impulseR: Impulse
 Response Functions*. R package version 1.2.0,

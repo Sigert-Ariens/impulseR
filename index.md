@@ -40,4 +40,4 @@ file an issue with a minimal reproducible example on
 
 This project is distributed under a GNU GPL-3 license. For details,
 please see the
-[License](https://Sigert-Ariens.github.io/impulseR/-/blob/main/LICENSE.md)
+[License](https://Sigert-Ariens.github.io/impulseR/main/LICENSE.md)
