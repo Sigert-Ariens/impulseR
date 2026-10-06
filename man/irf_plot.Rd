@@ -71,16 +71,16 @@ for multiple inputs.}
 \code{NULL}, that is no such label.}
 
 \item{title.size}{Integer denoting the size of the title. Defaults to a
-relative size of \code{1} as defined by the \code{\link[ggplot2:element]{ggplot2::rel()}} function.}
+relative size of \code{1} as defined by the \code{\link[ggplot2:rel]{ggplot2::rel()}} function.}
 
 \item{title.hjust}{Numeric denoting the justification of the title. Defaults
 to \code{0.5}, or centered justification}
 
 \item{label.size}{Integer denoting the size of the axis labels. Defaults to a
-relative size of \code{1} as defined by the \code{\link[ggplot2:element]{ggplot2::rel()}} function.}
+relative size of \code{1} as defined by the \code{\link[ggplot2:rel]{ggplot2::rel()}} function.}
 
 \item{axis.text.size}{Integer denoting the size of the axis text. Defaults to
-a relative size of \code{0.75} as defined by the \code{\link[ggplot2:element]{ggplot2::rel()}} function.}
+a relative size of \code{0.75} as defined by the \code{\link[ggplot2:rel]{ggplot2::rel()}} function.}
 
 \item{legend.title.size}{Integer denoting the size of the legend title.
 Defaults to a relative size of \code{1.25} as defined by the

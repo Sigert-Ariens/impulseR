@@ -12,7 +12,7 @@ based on autoregressive models.
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://gitlab.kuleuven.be/u0133721/impulseR}
+  \item \url{https://sigert-ariens.github.io/impulseR/}
   \item Report bugs at \url{https://gitlab.kuleuven.be/u0133721/impulseR/-/issues}
 }
 
@@ -22,6 +22,7 @@ Useful links:
 
 Authors:
 \itemize{
+  \item Sigert Ariens \email{sigert.ariens@kuleuven.be} (\href{https://orcid.org/0000-0002-7423-0090}{ORCID})
   \item Niels Vanhasbroeck \email{niels.vanhasbroeck@gmail.com} (\href{https://orcid.org/0000-0002-1235-8902}{ORCID})
   \item Eva Ceulemans \email{eva.ceulemans@kuleuven.be} (\href{https://orcid.org/0000-0002-7611-4683}{ORCID})
 }
